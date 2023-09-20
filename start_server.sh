@@ -1,6 +1,17 @@
 #!/bin/bash
+env | grep _ >> /etc/environment;
+if [ ! -f /root/hasbooted ]
+then
+    pip install flask
+    mkdir /home/workspace
+    cd /home/workspace
+    git clone https://github.com/vast-ai/vast-pyworker;
+    touch ~/.no_auto_tmux
+    touch /root/hasbooted
+fi
+cd /home/workspace/vast-pyworker
 
-export SERVER_DIR="/home/workspace/host-server"
+export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
 export REPORT_ADDR="" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
 
