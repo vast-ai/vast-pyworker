@@ -1,7 +1,6 @@
 import sys
 import re
 import requests
-import argparse
 import json
 import time
 import os
@@ -25,7 +24,7 @@ class LogWatch:
         self.control_server_url = control_server_url
         self.master_token = master_token
         # self.auth_server_url = self.get_url()
-        self.auth_server_url = "http://0.0.0.0:3000"
+        self.auth_server_url = f"http://0.0.0.0:{os.environ['AUTH_PORT']}"
         self.start_time = time.time() #this could be made more precise
         self.metric_names = metric_names
         self.batch_pattern = batch_pattern
