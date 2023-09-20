@@ -15,10 +15,10 @@ export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
 export REPORT_ADDR="" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
 
-if ! ([-z "$REPORT_ADDR" ] && [-z "$MODEL_NAME" ] && [-z "$AUTH_PORT" ])
+if ! ([-z "$REPORT_ADDR" ] && [-z "$MODEL_CMD" ] && [-z "$AUTH_PORT" ])
 then
-  echo "REPORT_ADDR, MODEL_NAME, AUTH_PORT env variables must be set!"
-  #example: https://idea-catalogue-cleaner-lg.trycloudflare.com meta-llama/Llama-2-70b-chat-hf 3000
+  echo "REPORT_ADDR, MODEL_CMD, AUTH_PORT env variables must be set!"
+  #example: https://idea-catalogue-cleaner-lg.trycloudflare.com "--model-id meta-llama/Llama-2-70b-chat-hf --json-output --port 5001 --hostname \"127.0.0.1\"" 3000
   exit 1
 fi
 
