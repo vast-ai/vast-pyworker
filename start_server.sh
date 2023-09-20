@@ -2,6 +2,7 @@
 
 export SERVER_DIR="/home/workspace/host-server"
 export PATH="/opt/conda/bin:$PATH"
+export REPORT_ADDR="" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
 
 if ! ([-z "$REPORT_ADDR" ] && [-z "$MODEL_NAME" ] && [-z "$AUTH_PORT" ])
 then
