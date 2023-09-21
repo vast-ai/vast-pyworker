@@ -62,7 +62,7 @@ class LogWatch:
         data = {"id" : self.id}
         data["max_batch_prefill_tokens"] = self.max_batch_prefill_tokens
         data["max_batch_tokens"] = self.max_batch_tokens
-        self.send_data(data, self.auth_server_url, "/report_capacity")
+        self.send_data(data, self.auth_server_url, "/worker_status")
 
     def forward_server_data(self, line_metrics):
         data = {"id" : self.id}
