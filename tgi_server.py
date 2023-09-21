@@ -29,7 +29,8 @@ def get_tokens():
 def generate():
     global backend
     if not backend.check_auth_token(request.json['token']):
-        abort(401)
+        pass
+        #abort(401)
     
     code, content = backend.generate(request.json['inputs'], request.json["parameters"])
     if code == 200:
@@ -41,7 +42,8 @@ def generate():
 def generate_stream():
     global backend
     if not backend.check_auth_token(request.json['token']):
-        abort(401)
+        pass
+        #abort(401)
 
     return backend.generate_streaming(request.json['inputs'], request.json["parameters"])
     
