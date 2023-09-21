@@ -28,7 +28,6 @@ class LogWatch:
         self.start_time = time.time() #this could be made more precise
         self.metric_names = metric_names
         self.batch_pattern = batch_pattern
-        self.url = self.auth_server_url
 
         self.max_batch_tokens = None
         self.max_batch_prefill_tokens = None
@@ -77,14 +76,14 @@ class LogWatch:
                 found = True
 
         if found:
-            self.send_data(data, self.auth_server_url, "/report_done/")
+            self.send_data(data, self.auth_server_url, "/report_done")
 
     def notify_server_ready(self):
         end_time = time.time()
         data = {"id" : self.id}
         data["loaded"] = True
         data["loadtime"] = end_time - self.start_time
-        data["url"] = self.url
+        data["url"] = self.get_url()
 
         self.send_data(data, self.control_server_url, "/worker_status/")
         with open("/root/onstart.sh", "w") as f:
