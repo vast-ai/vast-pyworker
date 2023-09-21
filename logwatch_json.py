@@ -99,7 +99,7 @@ def main():
                 tgi_args = line_json["fields"]["message"][4:]
                 print(f"[logwatch] tgi_args: {tgi_args}")
                 tgi_args = tgi_args.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some(', '').replace(')', '').replace(': None', ': null')
-                watch.read_config(json.loads(tgi_args))
+                # watch.read_config(json.loads(tgi_args)) # brittle/broken and unused
         if "message" in line_json.keys():
             if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
                 watch.notify_server_ready()
