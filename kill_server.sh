@@ -9,7 +9,7 @@ fi
 # Define the target command
 WATCH_CMD="python3 $SERVER_DIR/logwatch_json.py"
 MODEL_LAUNCH_CMD="text-generation-launcher"
-AUTH_CMD="$SERVER_DIR/auth_server_hf_tgi.py" 
+AUTH_CMD="$SERVER_DIR/tgi_server.py" 
 
 
 # Get the process IDs (PIDs) of processes matching the target command
