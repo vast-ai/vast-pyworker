@@ -69,7 +69,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
 
         #data["curr_queue_time"] = self.curr_queue_time
 
-    #calculate "work ratio" in terms of tokens and report this when a new request starts, and when a request finishes
+    #calculate "work ratio" in terms of tokens
     def calc_work_ratio(self):
         if self.batch_capacity is not None:
             return self.num_tokens_working / self.batch_capacity
@@ -84,10 +84,9 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         self.total_prompt_tokens += num_prompt_tokens
         self.avg_prompt_tokens = self.total_prompt_tokens / self.num_requests_recieved
-        self.num_tokens_working += (self.avg_prompt_tokens + parameters["max_new_tokens"] // 2) 
-        work_ratio = self.calc_work_ratio()
+        self.num_tokens_working += (self.avg_prompt_tokens + parameters["max_new_tokens"]) 
 
-        data = {"id" : self.id, "message" : "started req", "busy_ratio" : work_ratio}
+        data = {"id" : self.id, "message" : "started req"}
         self.fill_data(data)
         self.send_data(data, self.control_server_url, "/worker_status/")
     
@@ -104,15 +103,14 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
        
         print(f"tokens_generated: {tokens_generated}, tokens_processed: {tokens_processed}")
         self.num_tokens_finished += tokens_generated
-        self.num_tokens_working -= tokens_processed
-        work_ratio = self.calc_work_ratio()
+        self.num_tokens_working -= (self.avg_prompt_tokens + log_data["max_new_tokens"])
 
         if (log_data["queue_time"] > log_data["inference_time"]):
             self.overloaded = True
         else:
             self.overloaded = False
 
-        data = {"id" : self.id, "message" : "finished req", "busy_ratio" : work_ratio}
+        data = {"id" : self.id, "message" : "finished req"}
         self.fill_data(data)
         self.send_data(data, self.control_server_url, "/worker_status/")
 

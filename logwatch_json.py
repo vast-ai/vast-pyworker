@@ -91,7 +91,7 @@ class LogWatch:
             f.write(json.dumps(data))
 
 def main():
-    metric_names = ["time_per_token", "inference_time", "queue_time"]
+    metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
     batch_pattern = re.compile(r'Setting max batch total tokens to (\d+)')
 
     watch = LogWatch(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
