@@ -84,7 +84,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         self.total_prompt_tokens += num_prompt_tokens
         self.avg_prompt_tokens = self.total_prompt_tokens / self.num_requests_recieved
-        self.num_tokens_working += (self.avg_prompt_tokens + parameters["max_new_tokens"]) 
+        self.num_tokens_working += (self.avg_prompt_tokens + parameters["max_new_tokens"] // 2) 
         work_ratio = self.calc_work_ratio()
 
         data = {"id" : self.id, "message" : "started req", "busy_ratio" : work_ratio}

@@ -87,6 +87,8 @@ class LogWatch:
         data["url"] = self.url
 
         self.send_data(data, self.control_server_url, "/worker_status/")
+        with open("/root/onstart.sh", "w") as f:
+            f.write(json.dumps(data))
 
 def main():
     metric_names = ["time_per_token", "inference_time", "queue_time"]
