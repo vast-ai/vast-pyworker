@@ -14,7 +14,7 @@ class LLMBackend(Backend):
         pass
 
     @abstractmethod
-    def generate_streaming(self, inputs, parameters):
+    def generate_stream(self, inputs, parameters):
         pass
     
 

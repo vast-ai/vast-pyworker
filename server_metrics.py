@@ -11,7 +11,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         
         self.batch_capacity = None
         self.total_prompt_tokens = 0.0
-        self.avg_prompt_tokens = None #needs to be set by a start_req call
         self.overloaded = False
 
         self.num_requests_recieved = 0
@@ -53,10 +52,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.avg_perf = 0.75 * self.avg_perf + 0.25 * self.curr_perf
         self.num_tokens_finished = 0
 
-    
     def fill_data(self, data):
-        # data["num_requests_recieved"] = self.num_requests_recieved
-        # data["num_requests_finished"] = self.num_requests_finished
         data["num_requests_working"] = self.num_requests_working
         
         data["cur_capacity"] = self.num_tokens_working
@@ -82,43 +78,40 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         sys.stdout.flush()
         
         num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
+        num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
+        self.num_tokens_working += num_req_tokens_started
+
         self.total_prompt_tokens += num_prompt_tokens
-        self.avg_prompt_tokens = self.total_prompt_tokens / self.num_requests_recieved
-        self.num_tokens_working += (self.avg_prompt_tokens + parameters["max_new_tokens"]) 
 
         data = {"id" : self.id, "message" : "started req"}
         self.fill_data(data)
         self.send_data(data, self.control_server_url, "/worker_status/")
     
-    def finish_req(self, log_data):
-        print(log_data)
-        self.curr_queue_time = log_data["queue_time"]
+    def finish_req(self, text_prompt, parameters):
         self.num_requests_finished += 1
         self.num_requests_working -= 1
 
-        tokens_per_second = 1 / log_data["time_per_token"]
-        self.curr_tokens_per_second = tokens_per_second #could use a moving average system
-        tokens_generated = int(log_data["inference_time"] * tokens_per_second)
-        tokens_processed = tokens_generated + self.avg_prompt_tokens
-       
-        print(f"tokens_generated: {tokens_generated}, tokens_processed: {tokens_processed}")
-        self.num_tokens_finished += tokens_generated
-        self.num_tokens_working -= (self.avg_prompt_tokens + log_data["max_new_tokens"])
-
-        if (log_data["queue_time"] > log_data["inference_time"]):
-            self.overloaded = True
-        else:
-            self.overloaded = False
+        num_prompt_tokens = len(text_prompt.split())
+        num_req_tokens_finished = num_prompt_tokens + parameters["max_new_tokens"]
+        self.num_tokens_working -= num_req_tokens_finished
+        self.num_tokens_finished += num_req_tokens_finished
 
         data = {"id" : self.id, "message" : "finished req"}
         self.fill_data(data)
         self.send_data(data, self.control_server_url, "/worker_status/")
 
+    def report_req_stats(self, log_data):
+        self.curr_queue_time = log_data["queue_time"]
 
+        tokens_per_second = 1 / log_data["time_per_token"]
+        self.curr_tokens_per_second = tokens_per_second
+        real_tokens_generated = int(log_data["inference_time"] * tokens_per_second)
+        
+        print(f"real_tokens_generated: {real_tokens_generated}")
 
-
-
-
-
+        if (log_data["queue_time"] > log_data["inference_time"]):
+            self.overloaded = True
+        else:
+            self.overloaded = False
 
 

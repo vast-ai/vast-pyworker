@@ -33,6 +33,7 @@ def generate():
         #abort(401)
     
     code, content = backend.generate(request.json['inputs'], request.json["parameters"])
+
     if code == 200:
         return content
     else:
@@ -45,7 +46,7 @@ def generate_stream():
         pass
         #abort(401)
 
-    return backend.generate_streaming(request.json['inputs'], request.json["parameters"])
+    return backend.generate_stream(request.json['inputs'], request.json["parameters"])
     
 @app.route('/report_capacity', methods=['POST'])
 def report_capacity():
@@ -60,7 +61,7 @@ def report_done():
     global backend
     if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
         abort(401)
-    backend.metrics.finish_req(request.json)
+    backend.metrics.report_req_stats(request.json)
     return "Updated Metrics"
 
 if __name__ == '__main__':

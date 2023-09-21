@@ -66,9 +66,10 @@ class LogWatch:
         data["max_capacity"] = self.max_batch_tokens
         self.send_data(data, self.control_server_url, "/worker_status/")
 
-    def forward_server_data(self, line_metrics):
+    def forward_server_data(self, line_metrics, generate_params):
         data = {"id" : self.id}
 
+        data["max_new_tokens"] = generate_params["max_new_tokens"]
         found = False 
         for metric_name in self.metric_names:
             if metric_name in line_metrics.keys():
@@ -89,6 +90,10 @@ class LogWatch:
         with open("/root/onstart.sh", "w") as f:
             f.write(json.dumps(data))
 
+def parse_config(config):
+    config = config.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some("', '"').replace('")', '"').replace('Some(', '"').replace(')', '"').replace(': None', ': null')
+    return json.loads(config)
+
 def main():
     metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
     batch_pattern = re.compile(r'Setting max batch total tokens to (\d+)')
@@ -106,13 +111,15 @@ def main():
             if line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
                 print(f"[logwatch] tgi_args: {tgi_args}")
-                tgi_args = tgi_args.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some(', '').replace(')', '').replace(': None', ': null')
-                # watch.read_config(json.loads(tgi_args)) # brittle/broken and unused
+                config = parse_config(tgi_args)
+                print(config)
+                watch.read_config(config) # brittle/broken and unused
         if "message" in line_json.keys():
             if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
                 watch.notify_server_ready()
             elif line_json["message"] == "Success" and line_json["target"] == "text_generation_router::server":
-                watch.forward_server_data(line_json["span"])
+                generate_params = parse_config(line_json["span"]["parameters"][18:])
+                watch.forward_server_data(line_json["span"], generate_params)
             else:
                 found = watch.read_batch_capacity(line_json["message"])
                 if found:
