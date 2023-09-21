@@ -62,7 +62,7 @@ class LogWatch:
         data = {"id" : self.id}
         data["max_batch_prefill_tokens"] = self.max_batch_prefill_tokens
         data["max_batch_tokens"] = self.max_batch_tokens
-        self.send_data(data, self.auth_server_url, "/worker_status")
+        self.send_data(data, self.auth_server_url, "/worker_status/")
 
     def forward_server_data(self, line_metrics):
         data = {"id" : self.id}
@@ -74,7 +74,7 @@ class LogWatch:
                 found = True
 
         if found:
-            self.send_data(data, self.auth_server_url, "/report_done")
+            self.send_data(data, self.auth_server_url, "/report_done/")
 
     def notify_server_ready(self):
         end_time = time.time()
