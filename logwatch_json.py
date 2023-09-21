@@ -96,7 +96,11 @@ def main():
 
     print("[logwatch] ready and waiting for input\n")
     for line in sys.stdin:
-        line_json = json.loads(line)
+        try:
+            line_json = json.loads(line)
+        except Exception as e:
+            print(f"exception: {str(e)} parsing {line} ")
+            continue
         if "fields" in line_json.keys():
             if line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
