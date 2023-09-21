@@ -95,8 +95,9 @@ def main():
     for line in sys.stdin:
         line_json = json.loads(line)
         if "fields" in line_json.keys():
-            if line_json["fields"]["message"][:4] == "Args":
+            if line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
+                print(f"[logwatch] tgi_args: {tgi_args}")
                 tgi_args = tgi_args.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some(', '').replace(')', '').replace(': None', ': null')
                 watch.read_config(json.loads(tgi_args))
         if "message" in line_json.keys():
