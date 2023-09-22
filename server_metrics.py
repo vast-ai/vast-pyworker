@@ -74,9 +74,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
     def start_req(self, text_prompt, parameters):
         self.num_requests_recieved += 1
         self.num_requests_working += 1
-
-        print(f"prompt: {text_prompt}")
-        sys.stdout.flush()
         
         num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
@@ -104,7 +101,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
         self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
         self.perf                    = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
-        print(f"perf  {self.perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
+        # print(f"perf  {self.perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
 
 
         # data = {"id" : self.id, "message" : "finished req"}

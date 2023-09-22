@@ -5,6 +5,8 @@ import json
 import time
 import os
 
+from test_model import ModelPerfTest
+
 def format_metric_value(metric_str):
     if metric_str[-2:] == "ms":
         return (float(metric_str[:-2]) / 1.0e3)
@@ -29,7 +31,7 @@ class LogWatch:
         self.metric_names = metric_names
         self.batch_pattern = batch_pattern
 
-        self.max_batch_tokens = None
+        self.max_batch_total_tokens = None
         self.max_batch_prefill_tokens = None
 
     def get_url(self):
@@ -48,11 +50,12 @@ class LogWatch:
 
     def read_config(self, config_info_line):
         self.max_batch_prefill_tokens = config_info_line['max_batch_prefill_tokens']
+        self.max_total_tokens = config_info_line['max_total_tokens']
 
     def read_batch_capacity(self, batch_info_line):
         match = self.batch_pattern.search(batch_info_line)
         if match:
-            self.max_batch_tokens = int(match.group(1))
+            self.max_batch_total_tokens = int(match.group(1))
             return True
         
         return False
@@ -60,10 +63,10 @@ class LogWatch:
     def send_capacity(self):
         data = {"id" : self.id}
         data["max_batch_prefill_tokens"] = self.max_batch_prefill_tokens
-        data["max_batch_tokens"] = self.max_batch_tokens
+        data["max_batch_tokens"] = self.max_batch_total_tokens
         self.send_data(data, self.auth_server_url, "/report_capacity")
 
-        data["max_capacity"] = self.max_batch_tokens
+        data["max_capacity"] = self.max_batch_total_tokens
         self.send_data(data, self.control_server_url, "/worker_status/")
 
     def forward_server_data(self, line_metrics, generate_params):
@@ -86,10 +89,18 @@ class LogWatch:
         data["loadtime"] = end_time - self.start_time
         data["url"] = self.get_url()
 
+        perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
+        print(f"[logwatch] starting model perf test")
+        sys.stdout.flush()
+        throughput, avg_latency = perf_test.run(3)
+
+        data["perf_avg"] = throughput
+        data["avg_latency"] = avg_latency
+
         self.send_data(data, self.control_server_url, "/worker_status/")
-        # ahh wtf?
-        # with open("/root/onstart.sh", "w") as f:
-        #    f.write(json.dumps(data))
+
+        with open("/root/onstart.log", "a") as f:
+           f.write(json.dumps(data))
 
 def parse_config(config):
     config = config.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some("', '"').replace('")', '"').replace('Some(', '"').replace(')', '"').replace(': None', ': null')

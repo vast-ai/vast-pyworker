@@ -1,5 +1,7 @@
 import requests
 from flask import Response
+import time
+
 from llm_backend import LLMBackend
 
 class TGIBackend(LLMBackend):
@@ -10,13 +12,15 @@ class TGIBackend(LLMBackend):
     def generate(self, inputs, parameters):
         self.metrics.start_req(text_prompt=inputs, parameters=parameters)
         hf_prompt = {"inputs" : inputs, "parameters" : parameters}
+        t1 = time.time()
         response = requests.post(f"http://{self.tgi_server_addr}/generate", json=hf_prompt)
+        t2 = time.time()
         self.metrics.finish_req(text_prompt=inputs, parameters=parameters)
         
         if response.status_code == 200:
-            return 200, response.text
+            return 200, response.text, t2 - t1
         else:
-            return response.status_code, None
+            return response.status_code, None, None
 
     def hf_tgi_wrapper(self, inputs, parameters):
         hf_prompt = {"inputs" : inputs, "parameters" : parameters}

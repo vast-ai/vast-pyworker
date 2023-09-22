@@ -9,7 +9,7 @@ app = Flask(__name__)
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.DEBUG)
 
-HF_SERVER = '127.0.0.1:5001'
+HF_SERVER = '127.0.0.1:5001' #could make this an environment variable in the future
 
 print(f"tgi_server.py")
 
@@ -34,7 +34,7 @@ def generate():
         pass
         #abort(401)
     
-    code, content = backend.generate(request.json['inputs'], request.json["parameters"])
+    code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
 
     if code == 200:
         return content
