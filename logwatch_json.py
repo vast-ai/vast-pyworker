@@ -87,8 +87,9 @@ class LogWatch:
         data["url"] = self.get_url()
 
         self.send_data(data, self.control_server_url, "/worker_status/")
-        with open("/root/onstart.sh", "w") as f:
-            f.write(json.dumps(data))
+        # ahh wtf?
+        # with open("/root/onstart.sh", "w") as f:
+        #    f.write(json.dumps(data))
 
 def parse_config(config):
     config = config.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some("', '"').replace('")', '"').replace('Some(', '"').replace(')', '"').replace(': None', ': null')
