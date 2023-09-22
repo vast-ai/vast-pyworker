@@ -106,12 +106,13 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         alpha = 0.95       
         self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
         self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
-        self.avg_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
-        print(f"perf  {self.avg_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
+        perf                    = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
+        print(f"perf  {perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
 
 
         data = {"id" : self.id, "message" : "finished req"}
         self.fill_data(data)
+        data["perf_avg"] = perf
         self.send_data(data, self.control_server_url, "/worker_status/")
 
     def report_req_stats(self, log_data):
