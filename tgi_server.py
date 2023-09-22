@@ -11,6 +11,8 @@ log.setLevel(logging.DEBUG)
 
 HF_SERVER = '127.0.0.1:5001'
 
+print(f"tgi_server.py")
+
 master_token = os.environ['MASTER_TOKEN']
 container_id = os.environ['CONTAINER_ID']
 control_server_url = os.environ['REPORT_ADDR']
