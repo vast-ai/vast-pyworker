@@ -28,7 +28,8 @@ class ModelPerfTest:
         self.backend = TGIBackend(container_id=os.environ['CONTAINER_ID'], 
                                   master_token=os.environ['MASTER_TOKEN'], 
                                   control_server_url=os.environ['REPORT_ADDR'],
-                                  tgi_server_addr=HF_SERVER)
+                                  tgi_server_addr=HF_SERVER,
+                                  send_data=False)
         
         self.data = [] # data[i] = (prompt_tokens, output_tokens, output_time)
 

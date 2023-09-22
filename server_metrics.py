@@ -4,7 +4,7 @@ import time
 from threading import Thread
 
 class LLMServerMetrics: #could inherit from a more generic Metrics
-    def __init__(self, id, control_server_url, master_token):
+    def __init__(self, id, control_server_url, master_token, send_data):
         self.id = int(id)
         self.control_server_url = control_server_url
         self.master_token = master_token #could get rid of this
@@ -25,11 +25,14 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
 
+        self.model_loaded = False
+
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
 
         self.update_interval = 10.0
-        self.t1 = Thread(target=self.send_data_loop)
-        self.t1.start()
+        if send_data:
+            self.t1 = Thread(target=self.send_data_loop)
+            self.t1.start()
 
     def report_batch_capacity(self, json_data):
         # self.batch_capacity = min(json_data["max_batch_prefill_tokens"], json_data["max_batch_tokens"])
@@ -45,10 +48,11 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
     
     def send_data_loop(self): #how often should this be updated?
         while True:
-            print("[server-metrics] sending data")
-            data = {"id" : self.id, "message" : "data update"}
-            self.fill_data(data)
-            self.send_data(data, self.control_server_url, "/worker_status/")
+            if self.model_loaded:
+                print("[server-metrics] sending data")
+                data = {"id" : self.id, "message" : "data update"}
+                self.fill_data(data)
+                self.send_data(data, self.control_server_url, "/worker_status/")
             time.sleep(self.update_interval)
     
     def fill_data(self, data):
@@ -95,6 +99,9 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         # self.perf                    = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
         # print(f"perf  {self.perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
 
+    def report_loaded(self):
+        self.model_loaded = True
+    
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
 

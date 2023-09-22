@@ -69,19 +69,6 @@ class LogWatch:
         data["max_capacity"] = self.max_batch_total_tokens
         self.send_data(data, self.control_server_url, "/worker_status/")
 
-    def forward_server_data(self, line_metrics, generate_params):
-        data = {"id" : self.id}
-
-        data["max_new_tokens"] = generate_params["max_new_tokens"]
-        found = False 
-        for metric_name in self.metric_names:
-            if metric_name in line_metrics.keys():
-                data[metric_name] = format_metric_value(line_metrics[metric_name])
-                found = True
-
-        if found:
-            self.send_data(data, self.auth_server_url, "/report_done")
-
     def notify_server_ready(self):
         end_time = time.time()
         data = {"id" : self.id}
@@ -96,11 +83,26 @@ class LogWatch:
 
         data["perf_avg"] = throughput
         data["avg_latency"] = avg_latency
+        del perf_test
 
         self.send_data(data, self.control_server_url, "/worker_status/")
+        self.send_data(data, self.auth_server_url, "/report_loaded")
 
         with open("/root/onstart.log", "a") as f:
            f.write(json.dumps(data))
+    
+    def forward_server_data(self, line_metrics, generate_params):
+        data = {"id" : self.id}
+
+        data["max_new_tokens"] = generate_params["max_new_tokens"]
+        found = False 
+        for metric_name in self.metric_names:
+            if metric_name in line_metrics.keys():
+                data[metric_name] = format_metric_value(line_metrics[metric_name])
+                found = True
+
+        if found:
+            self.send_data(data, self.auth_server_url, "/report_done")
 
 def parse_config(config):
     config = config.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some("', '"').replace('")', '"').replace('Some(', '"').replace(')', '"').replace(': None', ': null')

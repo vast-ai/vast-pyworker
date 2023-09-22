@@ -5,8 +5,8 @@ import time
 from llm_backend import LLMBackend
 
 class TGIBackend(LLMBackend):
-    def __init__(self, container_id, control_server_url, master_token, tgi_server_addr):
-        super().__init__(container_id=container_id, control_server_url=control_server_url, master_token=master_token)
+    def __init__(self, container_id, control_server_url, master_token, tgi_server_addr, send_data=True):
+        super().__init__(container_id=container_id, control_server_url=control_server_url, master_token=master_token, send_data=send_data)
         self.tgi_server_addr = tgi_server_addr
 
     def generate(self, inputs, parameters):
