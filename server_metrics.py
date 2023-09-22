@@ -3,8 +3,6 @@ import requests
 import time
 from threading import Thread
 
-PERF_STARTER = 25.0
-
 class LLMServerMetrics: #could inherit from a more generic Metrics
     def __init__(self, id, control_server_url, master_token):
         self.id = int(id)
@@ -26,7 +24,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.request_ltime = time.time()
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
-        self.perf = PERF_STARTER
 
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
 
@@ -59,7 +56,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         
         data["cur_capacity"] = self.num_tokens_working
         data["max_capacity"] = self.batch_capacity
-        data["perf_avg"] = self.perf
 
         data["curr_tokens_per_second"] = self.curr_tokens_per_second
         data["overloaded"] = self.overloaded
@@ -80,10 +76,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.num_tokens_working += num_req_tokens_started
 
         self.total_prompt_tokens += num_prompt_tokens
-
-        # data = {"id" : self.id, "message" : "started req"}
-        # self.fill_data(data)
-        # self.send_data(data, self.control_server_url, "/worker_status/")
     
     def finish_req(self, text_prompt, parameters):
         self.num_requests_finished += 1
@@ -97,16 +89,11 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         elapsed = time.time() - self.request_ltime
         self.request_ltime = time.time()
 
-        alpha = 0.95       
-        self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
-        self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
-        self.perf                    = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
+        # alpha = 0.95       
+        # self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
+        # self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
+        # self.perf                    = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
         # print(f"perf  {self.perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
-
-
-        # data = {"id" : self.id, "message" : "finished req"}
-        # self.fill_data(data)
-        # self.send_data(data, self.control_server_url, "/worker_status/")
 
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
