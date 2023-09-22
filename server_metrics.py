@@ -30,6 +30,8 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
 
+        print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
+
         self.t1 = Thread(target=self.update_perf_loop)
         self.t1.start()
 
