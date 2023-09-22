@@ -26,6 +26,10 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.avg_perf = 0.0
         self.num_intervals = 0
 
+        self.request_ltime = time.time()
+        self.elapsed_avg = 1.0
+        self.tokens_per_req_avg = 1024.0
+
         self.t1 = Thread(target=self.update_perf_loop)
         self.t1.start()
 
@@ -95,6 +99,16 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         num_req_tokens_finished = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working -= num_req_tokens_finished
         self.num_tokens_finished += num_req_tokens_finished
+
+        elapsed = time.time() - self.request_ltime
+        self.request_ltime = time.time()
+
+        alpha = 0.95       
+        self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
+        self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
+        self.avg_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
+        print(f"perf  {self.avg_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
+
 
         data = {"id" : self.id, "message" : "finished req"}
         self.fill_data(data)
