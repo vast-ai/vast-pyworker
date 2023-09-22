@@ -11,7 +11,7 @@ MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 
 if [ -z "$MODEL_PID" ]
 then
-    text-generation-launcher $MODEL_CMD --json-output --port 5001 --hostname "127.0.0.1" > $SERVER_DIR/infer.log 2>&1 &
+    text-generation-launcher $MODEL_CMD --json-output --port 5001 --hostname "127.0.0.1" > $SERVER_DIR/infer.log 2> /usr/src/onstart.log &
     echo "launched model"
 else
     echo "model already running"
