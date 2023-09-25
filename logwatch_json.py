@@ -106,6 +106,10 @@ class LogWatch:
         if found:
             self.send_data(data, self.auth_server_url, "/report_done")
 
+    def send_error(self, error_msg):
+        data = {"id" : self.id, "error_msg" : error_msg}
+        self.send_data(data, self.control_server_url, "/worker_status/")
+
 def parse_config(config):
     config = config.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some("', '"').replace('")', '"').replace('Some(', '"').replace(')', '"').replace(': None', ': null')
     return json.loads(config)
@@ -124,6 +128,9 @@ def main():
         except Exception as e:
             print(f"exception: {str(e)} parsing {line} ")
             continue
+        if line_json["level"] == "ERROR":
+            watch.send_error(line_json["fields"]["message"])
+            
         if "fields" in line_json.keys():
             if line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
