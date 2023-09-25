@@ -70,6 +70,8 @@ class LogWatch:
         self.send_data(data, self.control_server_url, "/worker_status/")
 
     def notify_server_ready(self):
+        print("[logwatch] starting notify_server_ready")
+        sys.stdout.flush()
         end_time = time.time()
         data = {"id" : self.id}
         data["loaded"] = True
@@ -115,6 +117,7 @@ def main():
     watch = LogWatch(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
 
     print("[logwatch] ready and waiting for input\n")
+    sys.stdout.flush()
     for line in sys.stdin:
         try:
             line_json = json.loads(line)
@@ -127,7 +130,8 @@ def main():
                 print(f"[logwatch] tgi_args: {tgi_args}")
                 config = parse_config(tgi_args)
                 print(config)
-                watch.read_config(config) # brittle/broken and unused
+                sys.stdout.flush()
+                watch.read_config(config)
         if "message" in line_json.keys():
             if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
                 watch.notify_server_ready()

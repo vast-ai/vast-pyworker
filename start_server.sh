@@ -5,6 +5,7 @@ env | grep _ >> /etc/environment;
 if [ ! -f /root/hasbooted ]
 then
     pip install flask
+    pip install nltk
     mkdir /home/workspace
     cd /home/workspace
     git clone https://github.com/vast-ai/vast-pyworker;
