@@ -101,6 +101,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
 
     def report_loaded(self):
         self.model_loaded = True
+        self.overloaded = False
     
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
