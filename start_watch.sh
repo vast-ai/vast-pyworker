@@ -18,5 +18,5 @@ do
 done
 
 touch $SERVER_DIR/infer.log
-tail -f -n +1 $SERVER_DIR/infer.log | python3 $SERVER_DIR/logwatch_json.py > $SERVER_DIR/watch.log 2>> /usr/src/onstart.log &
+tail -f -n +1 $SERVER_DIR/infer.log | python3 $SERVER_DIR/logwatch_json.py 2>&1 | tee $SERVER_DIR/watch.log &
 echo "started logwatch"
