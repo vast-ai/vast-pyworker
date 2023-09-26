@@ -25,6 +25,9 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
 
+        self.cur_perf = 0.0
+        self.cur_capacity_lastreport = 0.1234
+
         self.model_loaded = False
 
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
@@ -48,7 +51,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
     
     def send_data_loop(self): #how often should this be updated?
         while True:
-            if self.model_loaded:
+            if (self.cur_capacity_lastreport != self.num_tokens_working) and self.model_loaded:
                 print("[server-metrics] sending data")
                 data = {"id" : self.id, "message" : "data update"}
                 self.fill_data(data)
@@ -60,6 +63,8 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         
         data["cur_capacity"] = self.num_tokens_working
         data["max_capacity"] = self.batch_capacity
+        data["cur_perf"]     = self.cur_perf
+        self.cur_capacity_lastreport = self.num_tokens_working
 
         data["curr_tokens_per_second"] = self.curr_tokens_per_second
         data["overloaded"] = self.overloaded
@@ -93,11 +98,11 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         elapsed = time.time() - self.request_ltime
         self.request_ltime = time.time()
 
-        # alpha = 0.95       
-        # self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
-        # self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
-        # self.perf                    = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
-        # print(f"perf  {self.perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
+        alpha = 0.95       
+        self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
+        self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
+        self.cur_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
+        print(f"cur_perf  {self.cur_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
 
     def report_loaded(self):
         self.model_loaded = True
