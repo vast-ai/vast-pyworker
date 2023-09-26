@@ -25,7 +25,6 @@ class LogWatch:
         self.id = int(id)
         self.control_server_url = control_server_url
         self.master_token = master_token
-        # self.auth_server_url = self.get_url()
         self.auth_server_url = f"http://0.0.0.0:{os.environ['AUTH_PORT']}"
         self.start_time = time.time() #this could be made more precise
         self.metric_names = metric_names
@@ -33,6 +32,8 @@ class LogWatch:
 
         self.max_batch_total_tokens = None
         self.max_batch_prefill_tokens = None
+
+        self.perf_file = "perf_results.json"
 
     def get_url(self):
         internal_port = os.environ['AUTH_PORT']
@@ -78,15 +79,24 @@ class LogWatch:
         data["loadtime"] = end_time - self.start_time
         data["url"] = self.get_url()
 
-        perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
-        print(f"[logwatch] starting model perf test")
-        sys.stdout.flush()
-        throughput, avg_latency = perf_test.run(3)
+        if os.file.exists(self.perf_file):
+            with open (self.perf_file, "r") as f:
+                print(f"[logwatch] loading model perf test results")
+                sys.stdout.flush()
+                results = json.load(f)
+                throughput, avg_latency = results["throughput"], results["avg_latency"]
+        else:
+            perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
+            print(f"[logwatch] starting model perf test")
+            sys.stdout.flush()
+            throughput, avg_latency = perf_test.run(3)
+            with open(self.perf_file, "w") as f:
+                json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
+            del perf_test
 
         data["perf_avg"] = throughput
         data["avg_latency"] = avg_latency
-        del perf_test
-
+        
         self.send_data(data, self.control_server_url, "/worker_status/")
         self.send_data(data, self.auth_server_url, "/report_loaded")
 
