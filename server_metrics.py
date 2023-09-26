@@ -26,13 +26,14 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.tokens_per_req_avg = 1024.0
 
         self.cur_perf = 0.0
+        self.max_perf = 1.0
         self.cur_capacity_lastreport = 0.1234
 
         self.model_loaded = False
 
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
 
-        self.update_interval = 10.0
+        self.update_interval = 1.0
         if send_data:
             self.t1 = Thread(target=self.send_data_loop)
             self.t1.start()
@@ -83,8 +84,8 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working += num_req_tokens_started
-
         self.total_prompt_tokens += num_prompt_tokens
+        self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
     
     def finish_req(self, text_prompt, parameters):
         self.num_requests_finished += 1
@@ -101,21 +102,24 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         alpha = 0.95       
         self.elapsed_avg        = alpha*self.elapsed_avg + (1-alpha)*elapsed
         self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
-        self.cur_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
-        print(f"cur_perf  {self.cur_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
+        #self.cur_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
+        #print(f"cur_perf  {self.cur_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
 
-    def report_loaded(self):
+    def report_loaded(self, log_data):
         self.model_loaded = True
         self.overloaded = False
+        self.max_perf   = log_data["max_perf"]
     
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
 
         tokens_per_second = 1 / log_data["time_per_token"]
-        self.curr_tokens_per_second = tokens_per_second
         real_tokens_generated = int(log_data["inference_time"] * tokens_per_second)
-        
-        print(f"real_tokens_generated: {real_tokens_generated}")
+
+        alpha = pow(0.5, real_tokens_generated / (4*1024))
+        self.curr_tokens_per_second = alpha*self.curr_tokens_per_second + (1.0-alpha)*tokens_per_second
+      
+        print(f"real_tokens_generated: {real_tokens_generated}   curr_tokens_per_second  {self.curr_tokens_per_second} = {alpha}*{elf.curr_tokens_per_second} + {1.0-alpha}*{tokens_per_second}")
 
         if (log_data["queue_time"] > log_data["inference_time"]):
             self.overloaded = True
