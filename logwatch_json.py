@@ -94,7 +94,8 @@ class LogWatch:
                 json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
             del perf_test
 
-        data["perf_avg"] = throughput
+        data["max_perf"] = throughput
+        data["cur_perf"] = 0.0
         data["avg_latency"] = avg_latency
         
         self.send_data(data, self.control_server_url, "/worker_status/")
