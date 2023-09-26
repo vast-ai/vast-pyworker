@@ -44,11 +44,11 @@ class LogWatch:
     def send_data(self, data, url, path):
         data["mtoken"] = self.master_token
         full_path = url + path
-        if data["loaded"]:
+        if "loaded" in data.keys() and data["loaded"]:
             print(f'[logwatch] sending data to url: {full_path}, data: {data}')
             sys.stdout.flush()
         response = requests.post(full_path, json = data)
-        if data["loaded"]:
+        if "loaded" in data.keys() and data["loaded"]:
             print(f"[logwatch] Notification sent. Response: {response.status_code}")
             sys.stdout.flush()
 
