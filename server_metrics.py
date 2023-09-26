@@ -67,9 +67,10 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         data["max_capacity"] = self.batch_capacity
         data["cur_perf"]     = self.cur_perf
         self.cur_capacity_lastreport = self.num_tokens_working
-
+        
         data["curr_tokens_per_second"] = self.curr_tokens_per_second
         data["overloaded"] = self.overloaded
+        data["num_requests_recieved"] = self.num_requests_recieved
 
         #data["curr_queue_time"] = self.curr_queue_time
 
