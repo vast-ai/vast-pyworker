@@ -79,8 +79,8 @@ class LogWatch:
         data["loadtime"] = end_time - self.start_time
         data["url"] = self.get_url()
 
-        if os.file.exists(self.perf_file):
-            with open (self.perf_file, "r") as f:
+        if os.path.exists(self.perf_file):
+            with open(self.perf_file, "r") as f:
                 print(f"[logwatch] loading model perf test results")
                 sys.stdout.flush()
                 results = json.load(f)
