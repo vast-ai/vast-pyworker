@@ -32,7 +32,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
 
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
 
-        self.update_interval = 10.0
+        self.update_interval = 1.0
         if send_data:
             self.t1 = Thread(target=self.send_data_loop)
             self.t1.start()
