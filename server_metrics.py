@@ -46,15 +46,15 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
     def send_data(self, data, url, path):
         # data["mtoken"] = self.master_token
         full_path = url + path
-        print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
+        # print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
         response = requests.post(full_path, json = data)
-        print(f"[server_metrics] Notification sent. Response: {response.status_code}")
+        # print(f"[server_metrics] Notification sent. Response: {response.status_code}")
         sys.stdout.flush()
     
     def send_data_loop(self):
         while True:
             if (self.cur_capacity_lastreport != self.num_tokens_working) and self.model_loaded:
-                print("[server-metrics] sending data")
+                # print("[server-metrics] sending data")
                 data = {"id" : self.id, "message" : "data update"}
                 self.fill_data(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
@@ -121,7 +121,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         alpha = pow(0.5, real_tokens_generated / (4*1024))
         self.curr_tokens_per_second = alpha*self.curr_tokens_per_second + (1.0-alpha)*tokens_per_second
       
-        print(f"real_tokens_generated: {real_tokens_generated}   curr_tokens_per_second  {self.curr_tokens_per_second} = {alpha}*{self.curr_tokens_per_second} + {1.0-alpha}*{tokens_per_second}")
+        # print(f"real_tokens_generated: {real_tokens_generated}   curr_tokens_per_second  {self.curr_tokens_per_second} = {alpha}*{self.curr_tokens_per_second} + {1.0-alpha}*{tokens_per_second}")
 
         if (log_data["queue_time"] > log_data["inference_time"]):
             self.overloaded = True

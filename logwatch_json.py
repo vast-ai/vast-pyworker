@@ -44,11 +44,13 @@ class LogWatch:
     def send_data(self, data, url, path):
         data["mtoken"] = self.master_token
         full_path = url + path
-        print(f'[logwatch] sending data to url: {full_path}, data: {data}')
-        sys.stdout.flush()
+        if data["loaded"]:
+            print(f'[logwatch] sending data to url: {full_path}, data: {data}')
+            sys.stdout.flush()
         response = requests.post(full_path, json = data)
-        print(f"[logwatch] Notification sent. Response: {response.status_code}")
-        sys.stdout.flush()
+        if data["loaded"]:
+            print(f"[logwatch] Notification sent. Response: {response.status_code}")
+            sys.stdout.flush()
 
     def read_config(self, config_info_line):
         self.max_batch_prefill_tokens = config_info_line['max_batch_prefill_tokens']
