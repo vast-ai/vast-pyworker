@@ -26,6 +26,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.tokens_per_req_avg = 1024.0
 
         self.cur_perf = 0.0
+        self.max_perf = 1.0
         self.cur_capacity_lastreport = 0.1234
 
         self.model_loaded = False
@@ -104,9 +105,10 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.cur_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
         print(f"cur_perf  {self.cur_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
 
-    def report_loaded(self):
+    def report_loaded(self, log_data):
         self.model_loaded = True
         self.overloaded = False
+        self.max_perf   = log_data["max_perf"]
     
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
