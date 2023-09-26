@@ -116,7 +116,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         tokens_per_second = 1 / log_data["time_per_token"]
         real_tokens_generated = int(log_data["inference_time"] * tokens_per_second)
 
-        alpha = pow(0.5, real_tokens_generated / (32*1024))
+        alpha = pow(0.5, real_tokens_generated / (4*1024))
         self.curr_tokens_per_second = alpha*self.curr_tokens_per_second + (1.0-alpha)*tokens_per_second
       
         print(f"real_tokens_generated: {real_tokens_generated}   curr_tokens_per_second  {self.curr_tokens_per_second} = {alpha}*{elf.curr_tokens_per_second} + {1.0-alpha}*{tokens_per_second}")
