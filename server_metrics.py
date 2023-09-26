@@ -95,6 +95,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         num_req_tokens_finished = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working -= num_req_tokens_finished
         self.num_tokens_finished += num_req_tokens_finished
+        self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
 
         elapsed = time.time() - self.request_ltime
         self.request_ltime = time.time()
