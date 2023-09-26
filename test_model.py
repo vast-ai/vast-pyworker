@@ -76,11 +76,3 @@ class ModelPerfTest:
             print(f"only {num_reqs_completed} reqs completed out of {num_reqs} reqs started")
 
         return throughput, avg_latency
-
-def main():
-    test = ModelPerfTest(2048, 10000) #73456 find a way to get these automatically 
-    result = test.run(3)
-    print(result)
-
-if __name__ == "__main__":
-    main()
