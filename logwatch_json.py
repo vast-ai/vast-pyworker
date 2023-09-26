@@ -40,6 +40,7 @@ class LogWatch:
         port_var = f"VAST_TCP_PORT_{internal_port}"
         return f"http://{os.environ['PUBLIC_IPADDR']}:{os.environ[port_var]}"
         
+    #maybe we should catch request timeout/error here?
     def send_data(self, data, url, path):
         data["mtoken"] = self.master_token
         full_path = url + path
@@ -100,9 +101,6 @@ class LogWatch:
         
         self.send_data(data, self.control_server_url, "/worker_status/")
         self.send_data(data, self.auth_server_url, "/report_loaded")
-
-        # with open("/root/onstart.log", "a") as f:
-        #    f.write(json.dumps(data))
     
     def forward_server_data(self, line_metrics, generate_params):
         data = {"id" : self.id}
