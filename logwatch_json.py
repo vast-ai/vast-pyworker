@@ -139,13 +139,12 @@ def main():
         except Exception as e:
             print(f"exception: {str(e)} parsing {line} ")
             continue
-        if line_json["level"] == "ERROR":
-            watch.send_error(line_json["fields"]["message"])
             
         if "fields" in line_json.keys():
-            if line_json["fields"]["message"][:4] == "Args":               
+            if line_json["level"] == "ERROR":
+                watch.send_error(line_json["fields"]["message"])
+            elif line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
-                print(f"[logwatch] tgi_args: {tgi_args}")
                 config = parse_config(tgi_args)
                 print(config)
                 sys.stdout.flush()
