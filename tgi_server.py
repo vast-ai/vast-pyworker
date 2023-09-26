@@ -63,7 +63,7 @@ def report_loaded():
     global backend
     if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
         abort(401)
-    backend.metrics.report_loaded()
+    backend.metrics.report_loaded(request.json)
     return "Reported loaded"
 
 @app.route('/report_done', methods=['POST'])
