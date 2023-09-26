@@ -83,7 +83,8 @@ class LogWatch:
         sys.stdout.flush()
         throughput, avg_latency = perf_test.run(3)
 
-        data["perf_avg"] = throughput
+        data["max_perf"] = throughput
+        data["cur_perf"] = 0.0
         data["avg_latency"] = avg_latency
         del perf_test
 
