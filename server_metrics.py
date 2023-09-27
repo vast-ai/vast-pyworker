@@ -30,6 +30,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.cur_capacity_lastreport = 0.1234
 
         self.model_loaded = False
+        self.loadtime = 0.0
 
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
 
@@ -71,6 +72,10 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         data["curr_tokens_per_second"] = self.curr_tokens_per_second
         data["overloaded"] = self.overloaded
         data["num_requests_recieved"] = self.num_requests_recieved
+        
+        if self.model_loaded:
+            data["loadtime"] = self.loadtime
+            data["max_perf"] = self.max_perf
 
         #data["curr_queue_time"] = self.curr_queue_time
 
@@ -112,6 +117,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.model_loaded = True
         self.overloaded = False
         self.max_perf   = log_data["max_perf"]
+        self.loadtime   = log_data["loadtime"]
     
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
