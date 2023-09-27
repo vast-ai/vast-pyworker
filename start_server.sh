@@ -16,7 +16,7 @@ cd /home/workspace/vast-pyworker
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
-export REPORT_ADDR="https://over-miller-frequencies-moisture.trycloudflare.com" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
+export REPORT_ADDR="https://ricky-continues-lifestyle-cartridges.trycloudflare.com" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$MODEL_CMD" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, MODEL_CMD, AUTH_PORT env variables must be set!"
