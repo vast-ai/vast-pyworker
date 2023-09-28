@@ -31,7 +31,12 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
 
         self.model_loaded = False
         self.loadtime = 0.0
+        
+        self.cur_load = 0.0
+        self.fill_data_lut = 0.0
+        self.num_tokens_incoming = 0.0
 
+        
         print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
 
         self.update_interval = 1.0
@@ -72,6 +77,15 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         data["curr_tokens_per_second"] = self.curr_tokens_per_second
         data["overloaded"] = self.overloaded
         data["num_requests_recieved"] = self.num_requests_recieved
+
+        ntime = time.time()
+        elapsed = ntime - self.fill_data_lut
+        if (self.fill_data_lut == 0.0):
+            elapsed = 1.0
+        self.cur_load = self.num_tokens_incoming / elapsed
+        data["cur_load"] = self.cur_load
+        self.fill_data_lut = ntime
+        self.num_tokens_incoming = 0
         
         if self.model_loaded:
             data["loadtime"] = self.loadtime
@@ -91,6 +105,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working += num_req_tokens_started
+        self.num_tokens_incoming += num_req_tokens_started
         self.total_prompt_tokens += num_prompt_tokens
         self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
     
