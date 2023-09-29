@@ -9,7 +9,9 @@ def format_public_key():
     key_contents = os.environ["PUBLIC_KEY_CONTENTS"]
     with open(PUBLIC_KEY_FILENAME, "w") as f:
         f.write("-----BEGIN PUBLIC KEY-----")
+        f.write("\n")
         f.write(key_contents)
+        f.write("\n")
         f.write("-----END PUBLIC KEY-----")
 
 # def load_public_key():
