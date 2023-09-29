@@ -17,7 +17,7 @@ def format_public_key():
 
 def load_public_key():
     with open(PUBLIC_KEY_FILENAME, "r") as f:
-        return RSA.import_key_from_PEM(f.read())
+        return RSA.import_key(f.read())
 
 def verify_signature(public_key, message, signature):
     h = SHA256.new(message.encode())
