@@ -1,6 +1,7 @@
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
+import base64
 import os
 
 PUBLIC_KEY_FILENAME = "public_key.pem"
@@ -24,7 +25,7 @@ def load_public_key():
 def verify_signature(public_key, message, signature):
     h = SHA256.new(message.encode())
     try:
-        pkcs1_15.new(public_key).verify(h, signature)
+        pkcs1_15.new(public_key).verify(h, base64.b64decode(signature))
         return True
     except (ValueError, TypeError):
         return False
