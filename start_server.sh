@@ -6,6 +6,7 @@ if [ ! -f /root/hasbooted ]
 then
     pip install flask
     pip install nltk
+    pip install pycryptodome
     mkdir /home/workspace
     cd /home/workspace
     git clone -b authentication https://github.com/vast-ai/vast-pyworker;
