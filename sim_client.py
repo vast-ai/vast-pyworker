@@ -145,10 +145,10 @@ class ClientMetrics:
 		# self.lock.release()
 
 class Client:
-	def __init__(self, streaming, backend, api_key):
+	def __init__(self, streaming, backend, api_key, server_addr):
 		self.metrics = ClientMetrics(streaming=streaming, backend=backend)
 		self.api_key = api_key
-		self.lb_server_addr = '127.0.0.1:8081'
+		self.lb_server_addr = server_addr #'127.0.0.1:8081'
 		self.error_fd = os.open("error.txt", os.O_WRONLY | os.O_CREAT)
 		os.write(self.error_fd, f"ERRORS: \n".encode("utf-8"))
 		self.error_lock = Lock()
@@ -209,8 +209,9 @@ class Client:
 		# print(f"{request_str} got addr")
 		if addr is not None:
 			self.send_prompt(addr, token, text_prompt, num_tokens)
-		else:
-			print(f"[sim] failed communication with autoscaler server to get next address")
+		else:	parser.add_argument("--api_key", type=str)
+
+		print(f"[sim] failed communication with autoscaler server to get next address")
 
 	def deconstruct(self):
 		os.close(self.error_fd)
