@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import resource
 import os
 import psutil
+import argparse
 
 from sim_client import Client
 
@@ -157,7 +158,10 @@ class Sim:
 
 
 def main():
-	sim = Sim(num_seconds=60 * 3, base_num_users=250, streaming=True, load_schedule=[1, 5, 1], api_key="")
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--api_key", type=str)
+	args = parser.parse_args()
+	sim = Sim(num_seconds=60 * 0.1, base_num_users=50, streaming=False, load_schedule=[1, 1, 1], api_key=args.api_key)
 	sim.run()
 
 if __name__ == "__main__":
