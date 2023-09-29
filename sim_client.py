@@ -145,10 +145,11 @@ class ClientMetrics:
 		# self.lock.release()
 
 class Client:
-	def __init__(self, streaming, backend):
+	def __init__(self, streaming, backend, api_key):
 		self.metrics = ClientMetrics(streaming=streaming, backend=backend)
+		self.api_key = api_key
 		self.lb_server_addr = '127.0.0.1:8081'
-		self.error_fd = os.open("logs/error.txt", os.O_WRONLY | os.O_CREAT)
+		self.error_fd = os.open("error.txt", os.O_WRONLY | os.O_CREAT)
 		os.write(self.error_fd, f"ERRORS: \n".encode("utf-8"))
 		self.error_lock = Lock()
 
@@ -180,8 +181,8 @@ class Client:
 
 		# self.metrics.lock.release()
 
-	def get_addr(self, label="test", cost=0, api_key=""):
-		request_dict = {"endpoint" : label, "cost" : cost, "api_key" : api_key}
+	def get_addr(self, label="test", cost=0):
+		request_dict = {"endpoint" : label, "cost" : cost, "api_key" : self.api_key}
 		URI = f'http://{self.lb_server_addr}/queue_task/'
 		self.metrics.num_serverless_server_started += 1
 		# print(f"sending to URI: {URI} with dict: {request_dict}")
@@ -213,9 +214,3 @@ class Client:
 
 	def deconstruct(self):
 		os.close(self.error_fd)
-
-def main():
-	pass
-
-if __name__ == "__main__":
-	main()
