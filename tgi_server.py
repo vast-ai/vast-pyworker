@@ -1,7 +1,6 @@
 from flask import Flask, request, abort
 import os
 import logging
-from Crypto.PublicKey import RSA
 
 
 from tgi_backend import TGIBackend
@@ -32,9 +31,10 @@ def get_tokens():
 @app.route('/generate', methods=['POST'])
 def generate():
     global backend
-    if not backend.check_auth_token(request.json['token']):
-        pass
-        #abort(401)
+    # if not backend.check_auth_token(request.json['token']):
+    #     abort(401)
+    if not backend.check_signature(request.json["message"], request.json["signature"]):
+        abort(401)
     
     code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
 
@@ -46,9 +46,10 @@ def generate():
 @app.route('/generate_stream', methods=['POST'])
 def generate_stream():
     global backend
-    if not backend.check_auth_token(request.json['token']):
-        pass
-        #abort(401)
+    # if not backend.check_auth_token(request.json['token']):
+    #     abort(401)
+    if not backend.check_signature(request.json["message"], request.json["signature"]):
+        abort(401)
 
     return backend.generate_stream(request.json['inputs'], request.json["parameters"])
     

@@ -1,5 +1,6 @@
 import secrets
 from abc import ABC, abstractmethod
+from auth import load_public_key, verify_signature
 
 NUM_AUTH_TOKENS = 1000
 
@@ -10,6 +11,7 @@ class Backend(ABC):
         self.container_id = container_id
         self.control_server_url = control_server_url
         self.master_token = master_token
+        self.public_key = load_public_key()
 
     def get_auth_tokens(self):
         new_token_batch = []
@@ -31,6 +33,9 @@ class Backend(ABC):
             return True
         else:
             return False
+        
+    def check_signature(self, message, signature):
+        return verify_signature(self.public_key, message, signature)
         
     @abstractmethod
     def generate(self, inputs, parameters):
