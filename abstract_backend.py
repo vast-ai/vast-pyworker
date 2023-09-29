@@ -1,6 +1,6 @@
 import secrets
 from abc import ABC, abstractmethod
-from auth import load_public_key, verify_signature
+from auth import format_public_key, load_public_key, verify_signature
 
 NUM_AUTH_TOKENS = 1000
 
@@ -11,6 +11,8 @@ class Backend(ABC):
         self.container_id = container_id
         self.control_server_url = control_server_url
         self.master_token = master_token
+
+        format_public_key()
         self.public_key = load_public_key()
 
     def get_auth_tokens(self):
