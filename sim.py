@@ -6,6 +6,7 @@ from concurrent.futures import ThreadPoolExecutor, wait, ALL_COMPLETED
 import resource
 import os
 import psutil
+import argparse
 
 from sim_client import Client
 
@@ -30,7 +31,7 @@ class User:
 		self.lock = Lock()
 
 class Sim:
-	def __init__(self, num_seconds, base_num_users, load_schedule, streaming):
+	def __init__(self, num_seconds, base_num_users, load_schedule, streaming, api_key):
 		self.users = []
 
 		self.num_seconds = num_seconds
@@ -42,7 +43,7 @@ class Sim:
 		self.num_users = 0
 		
 		self.streaming = streaming
-		self.client = Client(streaming=streaming, backend="tgi")
+		self.client = Client(streaming=streaming, backend="tgi", api_key=api_key)
 		self.req_num = 0
 		self.proc = psutil.Process(os.getpid())
 
@@ -157,7 +158,10 @@ class Sim:
 
 
 def main():
-	sim = Sim(num_seconds=60 * 3, base_num_users=250, streaming=True, load_schedule=[1, 5, 1])
+	parser = argparse.ArgumentParser()
+	parser.add_argument("--api_key", type=str)
+	args = parser.parse_args()
+	sim = Sim(num_seconds=60 * 1, base_num_users=250, streaming=False, load_schedule=[1, 1, 1], api_key=args.api_key)
 	sim.run()
 
 if __name__ == "__main__":

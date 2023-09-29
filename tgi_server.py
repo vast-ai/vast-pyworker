@@ -31,13 +31,9 @@ def get_tokens():
 @app.route('/generate', methods=['POST'])
 def generate():
     global backend
-    # if not backend.check_auth_token(request.json['token']):
-    #     abort(401)
     if not backend.check_signature(request.json["message"], request.json["signature"]):
-        print("auth failed!")
         abort(401)
     
-    print("auth completed!")
     code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
 
     if code == 200:

@@ -3,6 +3,7 @@ from threading import Lock
 import requests
 from collections import defaultdict
 import os
+import json
 
 from prompt_model import send_tgi_prompt
 from utils import get_curr_instances, get_model_address
@@ -145,10 +146,11 @@ class ClientMetrics:
 		# self.lock.release()
 
 class Client:
-	def __init__(self, streaming, backend):
+	def __init__(self, streaming, backend, api_key):
 		self.metrics = ClientMetrics(streaming=streaming, backend=backend)
+		self.api_key = api_key
 		self.lb_server_addr = '127.0.0.1:8081'
-		self.error_fd = os.open("logs/error.txt", os.O_WRONLY | os.O_CREAT)
+		self.error_fd = os.open("error.txt", os.O_WRONLY | os.O_CREAT)
 		os.write(self.error_fd, f"ERRORS: \n".encode("utf-8"))
 		self.error_lock = Lock()
 
@@ -180,15 +182,15 @@ class Client:
 
 		# self.metrics.lock.release()
 
-	def get_addr(self, label="test", cost=0, api_key="00e5e8e430c4f8d3dbe57100b4aececafc6e5fd037963b3e7621a06fd31fef41"):
-		request_dict = {"endpoint" : label, "cost" : cost, "api_key" : api_key}
+	def get_addr(self, label="test", cost=0):
+		request_dict = {"endpoint" : label, "cost" : cost, "api_key" : self.api_key}
 		URI = f'http://{self.lb_server_addr}/queue_task/'
 		self.metrics.num_serverless_server_started += 1
 		# print(f"sending to URI: {URI} with dict: {request_dict}")
 		response = requests.post(URI, json=request_dict)
 		self.metrics.num_serverless_server_finished += 1
 		if response.status_code == 200:
-			return response.json
+			return json.loads(response.text)
 	
 	def send_prompt(self, addr, message, signature, text_prompt, max_new_tokens):
 		self.update_metrics_started(addr)
@@ -198,19 +200,15 @@ class Client:
 		end_time = time.time()
 
 		time_elapsed = end_time - start_time
+		print(worker_response["reply"])
 		success = (worker_response["reply"] is not None)
 		self.update_metrics(addr, success, worker_response["num_tokens"], time_elapsed, worker_response["first_msg_wait"])
 
 	def complete_request(self, text_prompt, request_str, num_tokens=100):
-		# print(f"{request_str} getting addr")
 		autoscaler_resp = self.get_addr(cost=num_tokens)
-		print(autoscaler_resp)
 		addr = autoscaler_resp["url"]
 		message = autoscaler_resp["message"]
 		signature = autoscaler_resp["signature"]
-
-		# token = "d22bd4a60ac70b1bb20873dcd345abe8824f2fb9260df84e2e1320a207d0d247" #hardcoded for testing
-		# print(f"{request_str} got addr")
 		if addr is not None:
 			self.send_prompt(addr, message, signature, text_prompt, num_tokens)
 		else:
@@ -218,9 +216,3 @@ class Client:
 
 	def deconstruct(self):
 		os.close(self.error_fd)
-
-def main():
-	pass
-
-if __name__ == "__main__":
-	main()
