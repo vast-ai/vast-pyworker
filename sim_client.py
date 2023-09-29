@@ -180,7 +180,7 @@ class Client:
 
 		# self.metrics.lock.release()
 
-	def get_addr(self, label="test", cost=0, api_key="00e5e8e430c4f8d3dbe57100b4aececafc6e5fd037963b3e7621a06fd31fef41"):
+	def get_addr(self, label="test", cost=0, api_key=""):
 		request_dict = {"endpoint" : label, "cost" : cost, "api_key" : api_key}
 		URI = f'http://{self.lb_server_addr}/queue_task/'
 		self.metrics.num_serverless_server_started += 1
