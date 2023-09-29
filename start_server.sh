@@ -8,7 +8,7 @@ then
     pip install nltk
     mkdir /home/workspace
     cd /home/workspace
-    git clone https://github.com/vast-ai/vast-pyworker;
+    git clone -b authentication https://github.com/vast-ai/vast-pyworker;
     touch ~/.no_auto_tmux
     touch /root/hasbooted
 fi
