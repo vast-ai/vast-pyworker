@@ -6,44 +6,6 @@ import json
 
 MSG_END = "$$$"
 
-ooba_dict = {
-	'auto_max_new_tokens': False,
-
-	# Generation params. If 'preset' is set to different than 'None', the values
-	# in presets/preset-name.yaml are used instead of the individual numbers.
-	'preset': 'None',
-	'do_sample': True,
-	'temperature': 0.7,
-	'top_p': 0.1,
-	'typical_p': 1,
-	'epsilon_cutoff': 0,  # In units of 1e-4
-	'eta_cutoff': 0,  # In units of 1e-4
-	'tfs': 1,
-	'top_a': 0,
-	'repetition_penalty': 1.18,
-	'repetition_penalty_range': 0,
-	'top_k': 40,
-	'min_length': 0,
-	'no_repeat_ngram_size': 0,
-	'num_beams': 1,
-	'penalty_alpha': 0,
-	'length_penalty': 1,
-	'early_stopping': False,
-	'mirostat_mode': 0,
-	'mirostat_tau': 5,
-	'mirostat_eta': 0.1,
-	'guidance_scale': 1,
-	'negative_prompt': '',
-
-	'seed': -1,
-	'add_bos_token': True,
-	'truncation_length': 2048,
-	'ban_eos_token': False,
-	'skip_special_tokens': True,
-	'stopping_strings': []
-	}
-
-
 def send_vllm_request_auth(gpu_server_addr, id_token, text_prompt):
 	URI = f'http://{gpu_server_addr}/auth'
 	model_dict = {"prompt" : text_prompt}
@@ -110,12 +72,10 @@ def send_vllm_request_streaming_test_auth(gpu_server_addr, mtoken):
 	else:
 		return False
 
-def send_tgi_prompt(addr, token, text_prompt, max_new_tokens):
+def send_tgi_prompt(addr, message, signature, text_prompt, max_new_tokens):
 	parameters = {"max_new_tokens" : max_new_tokens}
-	request_dict = {"token" : token, "inputs" : text_prompt, "parameters" : parameters}
+	request_dict = {"message" : message, "signature" : signature, "inputs" : text_prompt, "parameters" : parameters}
 	URI = f'{addr}/generate'
-	# print(f"sending to URI: {URI}")
-	# num_tokens = 0
 	response = ""
 	resp = requests.post(URI, json=request_dict, stream=True)
 	error = None
@@ -138,7 +98,7 @@ def decode_line(line):
 def send_tgi_prompt_streaming(addr, token, text_prompt, max_new_tokens):
 	parameters = {"max_new_tokens" : max_new_tokens}
 	request_dict = {"token" : token, "inputs" : text_prompt, "parameters" : parameters}
-	URI = f'http://{gpu_server_addr}/generate_stream'
+	URI = f'{addr}/generate_stream'
 	
 	num_tokens = 0
 	first_msg_wait = 0.0

@@ -188,13 +188,13 @@ class Client:
 		response = requests.post(URI, json=request_dict)
 		self.metrics.num_serverless_server_finished += 1
 		if response.status_code == 200:
-			return response.content.decode('utf-8')
+			return response.json
 	
-	def send_prompt(self, addr, token, text_prompt, max_new_tokens):
+	def send_prompt(self, addr, message, signature, text_prompt, max_new_tokens):
 		self.update_metrics_started(addr)
 		
 		start_time = time.time()
-		worker_response = send_tgi_prompt(addr, token, text_prompt, max_new_tokens)
+		worker_response = send_tgi_prompt(addr, message, signature, text_prompt, max_new_tokens)
 		end_time = time.time()
 
 		time_elapsed = end_time - start_time
@@ -203,11 +203,16 @@ class Client:
 
 	def complete_request(self, text_prompt, request_str, num_tokens=100):
 		# print(f"{request_str} getting addr")
-		addr = self.get_addr(cost=num_tokens)
-		token = "d22bd4a60ac70b1bb20873dcd345abe8824f2fb9260df84e2e1320a207d0d247" #hardcoded for testing
+		autoscaler_resp = self.get_addr(cost=num_tokens)
+		print(autoscaler_resp)
+		addr = autoscaler_resp["url"]
+		message = autoscaler_resp["message"]
+		signature = autoscaler_resp["signature"]
+
+		# token = "d22bd4a60ac70b1bb20873dcd345abe8824f2fb9260df84e2e1320a207d0d247" #hardcoded for testing
 		# print(f"{request_str} got addr")
 		if addr is not None:
-			self.send_prompt(addr, token, text_prompt, num_tokens)
+			self.send_prompt(addr, message, signature, text_prompt, num_tokens)
 		else:
 			print(f"[sim] failed communication with autoscaler server to get next address")
 
