@@ -9,9 +9,9 @@ import requests
 def post_request(full_path, data):
     try:
         response = requests.post(full_path, json=data, timeout=1)
-        print(f"[server_metrics] Notification sent. Response: {response.status_code}")
+        print(f"[server_metrics] {time.time()} Notification sent. Response: {response.status_code}")
     except requests.Timeout:
-        print("[server_metrics] Request timed out")
+        print("[server_metrics] {time.time()} Request timed out")
     except Exception as e:
         print(f"[server_metrics] Error: {e}")
 
