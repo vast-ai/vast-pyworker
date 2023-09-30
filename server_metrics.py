@@ -3,6 +3,21 @@ import requests
 import time
 import random
 from threading import Thread
+import threading
+import requests
+
+def post_request(full_path, data):
+    try:
+        response = requests.post(full_path, json=data, timeout=1)
+        print(f"[server_metrics] Notification sent. Response: {response.status_code}")
+    except requests.Timeout:
+        print("[server_metrics] Request timed out")
+    except Exception as e:
+        print(f"[server_metrics] Error: {e}")
+
+
+# Your main thread will continue running here
+
 
 class LLMServerMetrics: #could inherit from a more generic Metrics
     def __init__(self, id, control_server_url, master_token, send_data):
@@ -54,8 +69,10 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         # data["mtoken"] = self.master_token
         full_path = url + path
         print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
-        response = requests.post(full_path, json = data)
-        print(f"[server_metrics] Notification sent. Response: {response.status_code}")
+        #response = requests.post(full_path, json = data)
+        #print(f"[server_metrics] Notification sent. Response: {response.status_code}")
+        thread = threading.Thread(target=post_request, args=(full_path,data))
+        thread.start()
         sys.stdout.flush()
     
     def send_data_loop(self):
