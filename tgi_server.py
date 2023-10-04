@@ -39,6 +39,7 @@ def generate():
     if code == 200:
         return content
     else:
+        print(f"generate failed with code {code}")
         abort(code)
 
 @app.route('/generate_stream', methods=['POST'])

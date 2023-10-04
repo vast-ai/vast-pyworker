@@ -146,10 +146,10 @@ class ClientMetrics:
 		# self.lock.release()
 
 class Client:
-	def __init__(self, streaming, backend, api_key):
+	def __init__(self, streaming, backend, api_key, server_addr):
 		self.metrics = ClientMetrics(streaming=streaming, backend=backend)
 		self.api_key = api_key
-		self.lb_server_addr = '127.0.0.1:8081'
+		self.lb_server_addr = server_addr #'127.0.0.1:8081'
 		self.error_fd = os.open("error.txt", os.O_WRONLY | os.O_CREAT)
 		os.write(self.error_fd, f"ERRORS: \n".encode("utf-8"))
 		self.error_lock = Lock()
@@ -191,10 +191,10 @@ class Client:
 		self.metrics.num_serverless_server_finished += 1
 		if response.status_code == 200:
 			return json.loads(response.text)
-	
+
 	def send_prompt(self, addr, message, signature, text_prompt, max_new_tokens):
 		self.update_metrics_started(addr)
-		
+
 		start_time = time.time()
 		worker_response = send_tgi_prompt(addr, message, signature, text_prompt, max_new_tokens)
 		end_time = time.time()
