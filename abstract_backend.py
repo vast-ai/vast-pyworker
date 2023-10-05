@@ -15,8 +15,9 @@ class Backend(ABC):
         self.req_num = 0
         self.msg_history = []
 
-        format_public_key()
-        self.public_key = load_public_key()
+        self.crypto = format_public_key()
+        if self.crypto:
+            self.public_key = load_public_key()
 
     def get_auth_tokens(self):
         new_token_batch = []
@@ -40,6 +41,8 @@ class Backend(ABC):
             return False
 
     def check_signature(self, req_num, message, signature):
+        if not self.crypto:
+            return True
         if req_num < (self.req_num - MSG_HISTORY_LEN):
             return False
         elif message in self.msg_history:

@@ -2,11 +2,14 @@
 echo "onstart_TGI_test_nick.sh"
 date;
 env | grep _ >> /etc/environment;
+
 if [ ! -f /root/hasbooted ]
 then
     pip install flask
     pip install nltk
-    pip install pycryptodome
+    if [ ! -z "$PUBLIC_KEY_CONTENTS" ]; then
+        pip install pycryptodome
+    fi
     mkdir /home/workspace
     cd /home/workspace
     git clone -b dev https://github.com/vast-ai/vast-pyworker;
@@ -17,7 +20,7 @@ cd /home/workspace/vast-pyworker
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
-export REPORT_ADDR="https://acknowledged-prominent-emails-alot.trycloudflare.com" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
+export REPORT_ADDR="https://regulation-decor-brain-however.trycloudflare.com" #needs to be changed manually in the version at the path https://s3.amazonaws.com/vast.ai/start_server.sh
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$MODEL_CMD" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, MODEL_CMD, AUTH_PORT env variables must be set!"
