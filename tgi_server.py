@@ -31,7 +31,7 @@ def get_tokens():
 @app.route('/generate', methods=['POST'])
 def generate():
     global backend
-    if not backend.check_signature(request.json["message"], request.json["signature"]):
+    if not backend.check_signature(request.json["req_num"], request.json["message"], request.json["signature"]):
         abort(401)
 
     code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
