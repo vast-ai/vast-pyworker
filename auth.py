@@ -4,7 +4,8 @@ from Crypto.Hash import SHA256
 import base64
 import os
 
-PUBLIC_KEY_FILENAME = "public_key.pem"
+# PUBLIC_KEY_FILENAME = "public_key.pem"
+PUBLIC_KEY_FILENAME = "public_key_override.pem"
 
 def format_public_key():
     if "PUBLIC_KEY_CONTENTS" in os.environ:

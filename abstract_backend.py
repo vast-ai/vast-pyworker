@@ -15,7 +15,8 @@ class Backend(ABC):
         self.req_num = 0
         self.msg_history = []
 
-        self.crypto = format_public_key()
+        # self.crypto = format_public_key()
+        self.crypto = True
         if self.crypto:
             self.public_key = load_public_key()
 
