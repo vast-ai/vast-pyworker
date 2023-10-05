@@ -206,9 +206,11 @@ class Client:
 
 	def complete_request(self, text_prompt, request_str, num_tokens=100):
 		autoscaler_resp = self.get_addr(cost=num_tokens)
-		addr = autoscaler_resp["url"]
-		message = autoscaler_resp["message"]
 		signature = autoscaler_resp["signature"]
+		addr = autoscaler_resp["url"]
+		del autoscaler_resp["signature"]
+		message = json.dumps(autoscaler_resp)
+
 		if addr is not None:
 			self.send_prompt(addr, message, signature, text_prompt, num_tokens)
 		else:
