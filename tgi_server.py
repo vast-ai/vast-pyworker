@@ -33,7 +33,7 @@ def generate():
     global backend
     if not backend.check_signature(request.json["message"], request.json["signature"]):
         abort(401)
-    
+
     code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
 
     if code == 200:
@@ -45,13 +45,11 @@ def generate():
 @app.route('/generate_stream', methods=['POST'])
 def generate_stream():
     global backend
-    # if not backend.check_auth_token(request.json['token']):
-    #     abort(401)
     if not backend.check_signature(request.json["message"], request.json["signature"]):
         abort(401)
 
     return backend.generate_stream(request.json['inputs'], request.json["parameters"])
-    
+
 @app.route('/report_capacity', methods=['POST'])
 def report_capacity():
     global backend
