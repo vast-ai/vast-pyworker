@@ -65,16 +65,16 @@ def send_vllm_request_streaming_test_auth(gpu_server_addr, mtoken):
 				response += message
 	except TimeoutError:
 		pass
-	
+
 	# print(response)
 	if response != "":
 		return True
 	else:
 		return False
 
-def send_tgi_prompt(addr, message, signature, text_prompt, max_new_tokens):
+def send_tgi_prompt(addr, message, signature, req_num, text_prompt, max_new_tokens):
 	parameters = {"max_new_tokens" : max_new_tokens}
-	request_dict = {"message" : message, "signature" : signature, "inputs" : text_prompt, "parameters" : parameters}
+	request_dict = {"message" : message, "signature" : signature, "inputs" : text_prompt, "parameters" : parameters, "req_num" : req_num}
 	URI = f'{addr}/generate'
 	response = ""
 	resp = requests.post(URI, json=request_dict, stream=True)
@@ -99,7 +99,7 @@ def send_tgi_prompt_streaming(addr, token, text_prompt, max_new_tokens):
 	parameters = {"max_new_tokens" : max_new_tokens}
 	request_dict = {"token" : token, "inputs" : text_prompt, "parameters" : parameters}
 	URI = f'{addr}/generate_stream'
-	
+
 	num_tokens = 0
 	first_msg_wait = 0.0
 	first = True
@@ -119,7 +119,7 @@ def send_tgi_prompt_streaming(addr, token, text_prompt, max_new_tokens):
 				first = False
 
 			line_token = decode_line(line)
-			
+
 			if line_token:
 				response += line_token
 				num_tokens += 1
