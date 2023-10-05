@@ -7,8 +7,8 @@ from tgi_backend import TGIBackend
 
 app = Flask(__name__)
 
-log = logging.getLogger('werkzeug')
-log.setLevel(logging.WARNING)
+# log = logging.getLogger('werkzeug')
+# log.setLevel(logging.WARNING)
 
 HF_SERVER = '127.0.0.1:5001' #could make this an environment variable in the future
 

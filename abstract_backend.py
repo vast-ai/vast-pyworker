@@ -42,6 +42,7 @@ class Backend(ABC):
             return False
 
     def check_signature(self, req_num, message, signature):
+        print(f"[checking signature] req_num: {req_num} message: {message}, signature: {signature}")
         if not self.crypto:
             return True
         if req_num < (self.req_num - MSG_HISTORY_LEN):
@@ -49,12 +50,14 @@ class Backend(ABC):
         elif message in self.msg_history:
             return False
         elif verify_signature(self.public_key, message, signature):
+            print("[checking signature] SUCCESS")
             self.req_num = req_num
             self.msg_history.append(message)
             if len(self.msg_history) > MSG_HISTORY_LEN:
                 self.msg_history = self.msg_history[len(self.msg_history) - MSG_HISTORY_LEN: ]
             return True
         else:
+            print("[checking signature] FAILED")
             return False
 
     @abstractmethod
