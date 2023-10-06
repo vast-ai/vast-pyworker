@@ -27,6 +27,7 @@ import subprocess
 def fetch_public_key():
     command = ["curl", "-X", "GET", "https://run.vast.ai/pubkey/"]
     result = subprocess.check_output(command, universal_newlines=True)
+    print("public key:")
     print(result)
 
     return RSA.import_key(result)

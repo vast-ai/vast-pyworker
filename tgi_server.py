@@ -33,10 +33,12 @@ def generate():
     global backend
     print(f"recieved request: {request.json}")
     sys.stdout.flush()
-    if not backend.check_signature(request.json["req_num"], request.json["message"], request.json["signature"]):
+
+    auth_dict, model_dict = backend.format_request(request.json)
+    if not backend.check_signature(**auth_dict):
         abort(401)
 
-    code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
+    code, content, _ = backend.generate(**model_dict)
 
     if code == 200:
         return content
@@ -47,10 +49,14 @@ def generate():
 @app.route('/generate_stream', methods=['POST'])
 def generate_stream():
     global backend
-    if not backend.check_signature(request.json["message"], request.json["signature"]):
+    print(f"recieved request: {request.json}")
+    sys.stdout.flush()
+
+    auth_dict, model_dict = backend.format_request(request.json)
+    if not backend.check_signature(**auth_dict):
         abort(401)
 
-    return backend.generate_stream(request.json['inputs'], request.json["parameters"])
+    return backend.generate_stream(**model_dict)
 
 @app.route('/report_capacity', methods=['POST'])
 def report_capacity():
