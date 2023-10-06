@@ -1,6 +1,7 @@
 import secrets
 from abc import ABC, abstractmethod
-from auth import format_public_key, load_public_key, verify_signature
+from auth import fetch_public_key, verify_signature
+import sys
 
 NUM_AUTH_TOKENS = 1000
 MSG_HISTORY_LEN = 10
@@ -18,7 +19,7 @@ class Backend(ABC):
         # self.crypto = format_public_key()
         self.crypto = True
         if self.crypto:
-            self.public_key = load_public_key()
+            self.public_key = fetch_public_key()
 
     def get_auth_tokens(self):
         new_token_batch = []
@@ -43,14 +44,16 @@ class Backend(ABC):
 
     def check_signature(self, req_num, message, signature):
         print(f"[checking signature] req_num: {req_num} message: {message}, signature: {signature}")
+        sys.stdout.flush()
         if not self.crypto:
             return True
-        if req_num < (self.req_num - MSG_HISTORY_LEN):
-            return False
-        elif message in self.msg_history:
-            return False
+        # if req_num < (self.req_num - MSG_HISTORY_LEN):
+        #     return False
+        # elif message in self.msg_history:
+        #     return False
         elif verify_signature(self.public_key, message, signature):
             print("[checking signature] SUCCESS")
+            sys.stdout.flush()
             self.req_num = req_num
             self.msg_history.append(message)
             if len(self.msg_history) > MSG_HISTORY_LEN:
@@ -58,6 +61,7 @@ class Backend(ABC):
             return True
         else:
             print("[checking signature] FAILED")
+            sys.stdout.flush()
             return False
 
     @abstractmethod

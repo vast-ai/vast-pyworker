@@ -1,7 +1,7 @@
 from flask import Flask, request, abort
 import os
 import logging
-
+import sys
 
 from tgi_backend import TGIBackend
 
@@ -31,6 +31,8 @@ def get_tokens():
 @app.route('/generate', methods=['POST'])
 def generate():
     global backend
+    print(f"recieved request: {request.json}")
+    sys.stdout.flush()
     if not backend.check_signature(request.json["req_num"], request.json["message"], request.json["signature"]):
         abort(401)
 
