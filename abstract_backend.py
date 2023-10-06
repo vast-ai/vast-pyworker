@@ -5,7 +5,7 @@ import sys
 import json
 
 NUM_AUTH_TOKENS = 1000
-MSG_HISTORY_LEN = 10
+MSG_HISTORY_LEN = 100
 
 class Backend(ABC):
     def __init__(self, container_id, control_server_url, master_token):
@@ -17,9 +17,7 @@ class Backend(ABC):
         self.reqnum = 0
         self.msg_history = []
 
-        self.crypto = True
-        if self.crypto:
-            self.public_key = fetch_public_key()
+        self.public_key = fetch_public_key()
 
     def get_auth_tokens(self):
         new_token_batch = []
@@ -43,35 +41,27 @@ class Backend(ABC):
             return False
 
     def format_request(self, request):
-        original_dict = {"url" : request["url"], "endpoint" : request["endpoint"], "cost" : request["cost"], "reqnum" : request["reqnum"]}
-        print(f"original_dict : {original_dict}")
-        message = json.dumps(original_dict, indent=4)
-        print(f"message: {message}")
-        auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
+        if "signature" in request.keys():
+            original_dict = {"cost" : request["cost"], "endpoint" : request["endpoint"], "reqnum" : request["reqnum"], "url" : request["url"]}
+            message = json.dumps(original_dict, indent=4)
+            auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
+        else:
+            auth_dict = None
         model_dict = {"inputs" : request["inputs"], "parameters" : request["parameters"]}
         return auth_dict, model_dict
 
     def check_signature(self, reqnum, message, signature):
-        print(f"[checking signature] reqnum: {reqnum} message: {message}, signature: {signature}")
-        print(f"type(message) : {type(message)}")
-        sys.stdout.flush()
-        if not self.crypto:
-            return True
-        # if reqnum < (self.reqnum - MSG_HISTORY_LEN):
-        #     return False
-        # elif message in self.msg_history:
-        #     return False
+        if reqnum < (self.reqnum - MSG_HISTORY_LEN):
+            return False
+        elif message in self.msg_history:
+            return False
         elif verify_signature(self.public_key, message, signature):
-            print("[checking signature] SUCCESS")
-            sys.stdout.flush()
-            self.reqnum = reqnum
+            self.reqnum = max(reqnum, self.reqnum)
             self.msg_history.append(message)
             if len(self.msg_history) > MSG_HISTORY_LEN:
                 self.msg_history = self.msg_history[len(self.msg_history) - MSG_HISTORY_LEN: ]
             return True
         else:
-            print("[checking signature] FAILED")
-            sys.stdout.flush()
             return False
 
     @abstractmethod
