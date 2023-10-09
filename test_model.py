@@ -44,6 +44,9 @@ class ModelPerfTest:
 
     def run(self, num_batches):
         # not 100% guaranteed that all these reqs will be completed in one model batch
+        if num_batches < 1:
+            raise ValueError("can't run with less than one perf benchmark iteration!")
+
         batches = []
         for batch_num in range(num_batches):
             batch_total_tokens = int(np.random.normal(loc=self.avg_batch_total_tokens, scale=5.0, size=1))
@@ -69,7 +72,8 @@ class ModelPerfTest:
             # all reqs have finished by this point
             t2 = time.time()
             throughput = batch_total_tokens / (t2 - t1)
-            avg_latency = total_latency / num_reqs_completed
+
+            avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
             print(f"batch: {batch_num} took: {t2 - t1} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
             sys.stdout.flush()
             batches.append((throughput, avg_latency, num_reqs, num_reqs_completed))
