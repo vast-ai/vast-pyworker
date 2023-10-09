@@ -7,9 +7,7 @@ if [ ! -f /root/hasbooted ]
 then
     pip install flask
     pip install nltk
-    if [ ! -z "$PUBLIC_KEY_CONTENTS" ]; then
-        pip install pycryptodome
-    fi
+    pip install pycryptodome
     mkdir /home/workspace
     cd /home/workspace
     git clone -b dev https://github.com/vast-ai/vast-pyworker;
