@@ -52,7 +52,7 @@ class ModelPerfTest:
             batch_total_tokens = int(np.random.normal(loc=self.avg_batch_total_tokens, scale=5.0, size=1))
             num_reqs = batch_total_tokens // self.avg_total_tokens
             req_total_tokens = [(int(3 * (tt // 4)), int(tt // 4)) for tt in np.random.normal(loc=self.avg_total_tokens, scale=5.0, size=num_reqs)]
-            print(f"starting test batch: {batch_num} with {num_reqs} concurrent reqs of average total_token num: {self.avg_total_tokens}")
+            print(f"{datetime.datetime.now()} starting test batch: {batch_num} with {num_reqs} concurrent reqs of average total_token num: {self.avg_total_tokens}")
             sys.stdout.flush()
             futures = []
             t1 = time.time()
@@ -74,12 +74,12 @@ class ModelPerfTest:
             throughput = batch_total_tokens / (t2 - t1)
 
             avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
-            print(f"batch: {batch_num} took: {t2 - t1} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
+            print(f"{datetime.datetime.now()} batch: {batch_num} took: {t2 - t1} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
             sys.stdout.flush()
             batches.append((throughput, avg_latency, num_reqs, num_reqs_completed))
 
         throughput, avg_latency, num_reqs, num_reqs_completed =  tuple((sum(series) / num_batches) for series in zip(*batches))
         if num_reqs != num_reqs_completed:
-            print(f"only {num_reqs_completed} reqs completed out of {num_reqs} reqs started")
+            print(f"{datetime.datetime.now()} only {num_reqs_completed} reqs completed out of {num_reqs} reqs started")
 
         return throughput, avg_latency
