@@ -132,7 +132,7 @@ def main():
 
     watch = LogWatch(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
 
-    print("{datetime.datetime.now()} [logwatch] ready and waiting for input\n")
+    print(f"{datetime.datetime.now()} [logwatch] ready and waiting for input\n")
     sys.stdout.flush()
     for line in sys.stdin:
         try:
