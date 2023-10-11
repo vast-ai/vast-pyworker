@@ -6,6 +6,7 @@ import numpy as np
 from concurrent.futures import ThreadPoolExecutor
 import time
 import sys
+import datetime
 
 from tgi_backend import TGIBackend
 
