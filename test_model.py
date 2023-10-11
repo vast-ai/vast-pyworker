@@ -39,8 +39,13 @@ class ModelPerfTest:
     def prompt_model(self, num_prompt_tokens, num_output_tokens):
         prompt = self.make_random_prompt(num_tokens_to_num_words(num_prompt_tokens))
         parameters = {"max_new_tokens" : num_output_tokens}
-        _, _, time = self.backend.generate(inputs=prompt, parameters=parameters)
-        return time
+        rcode, _, time = self.backend.generate(inputs=prompt, parameters=parameters)
+        if (rcode != 200):
+            print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
+        gentokens = 0
+        if (rcode == 200):
+            gentokens = num_prompt_tokens + num_output_tokens
+        return rcode,time, gentokens
 
     def run(self, num_batches):
         # not 100% guaranteed that all these reqs will be completed in one model batch
@@ -63,15 +68,17 @@ class ModelPerfTest:
 
             total_latency = 0.0
             num_reqs_completed = 0
+            total_gentokens = 0
             for future in futures:
-                latency = future.result()
-                if latency is not None:
+                rcode, latency, gentokens = future.result()
+                if (latency is not None) and (rcode == 200):
                     total_latency += latency
+                    total_gentokens += gentokens
                     num_reqs_completed += 1
 
             # all reqs have finished by this point
             t2 = time.time()
-            throughput = batch_total_tokens / (t2 - t1)
+            throughput = total_gentokens / (t2 - t1)
 
             avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
             print(f"{datetime.datetime.now()} batch: {batch_num} took: {t2 - t1} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
