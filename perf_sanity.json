@@ -1,4 +1,4 @@
 {
     "max_throughput" : 5000, 
-    "min_avg_latency" : 0.5
+    "min_avg_latency" : 5.0
 }

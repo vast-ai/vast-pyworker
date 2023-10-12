@@ -7,7 +7,7 @@ import threading
 import requests
 
 def post_request(full_path, data, max_retries=3):
-    for attempt in max_retries:
+    for attempt in range(max_retries):
         try:
             response = requests.post(full_path, json=data, timeout=1)
             # print(f"{time.time()} Notification sent. Response: {response.status_code}")
@@ -150,8 +150,10 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
     def report_loaded(self, log_data):
         self.model_loaded = True
         self.overloaded = False
-        self.max_perf   = log_data["max_perf"]
-        self.loadtime   = log_data["loadtime"]
+        if "max_perf" in log_data.keys():
+            self.max_perf   = log_data["max_perf"]
+        if "loadtime" in log_data.keys():
+            self.loadtime   = log_data["loadtime"]
     
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]

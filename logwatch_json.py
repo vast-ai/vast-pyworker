@@ -71,10 +71,11 @@ class LogWatch:
         data = {"id" : self.id}
         data["max_batch_prefill_tokens"] = self.max_batch_prefill_tokens
         data["max_batch_tokens"] = self.max_batch_total_tokens
-        self.send_data(data, self.auth_server_url, "/report_capacity")
-
         data["max_capacity"] = self.max_batch_total_tokens
         self.send_data(data, self.control_server_url, "/worker_status/")
+
+        data["mtoken"] = self.master_token
+        self.send_data(data, self.auth_server_url, "/report_capacity")
 
     def metrics_sanity_check(self, throughput, avg_latency):
         if os.path.exists(self.sanity_file):
@@ -103,28 +104,31 @@ class LogWatch:
                 results = json.load(f)
                 throughput, avg_latency = results["throughput"], results["avg_latency"]
         else:
-            print(f"{datetime.datetime.now()} [logwatch] starting model perf test")
+            print(f"{datetime.datetime.now()} [logwatch] starting model perf test with max_total_tokens: {self.max_total_tokens}, max_batch_total_tokens: {self.max_batch_total_tokens}")
             perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
-            print(f"[logwatch] starting model perf test")
             sys.stdout.flush()
             sanity_check = perf_test.first_run()
             if sanity_check:
-                throughput, avg_latency = perf_test.run(3)
-                if self.metrics_sanity_check(throughput, avg_latency):
-                    with open(self.perf_file, "w") as f:
-                        json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
-                    data["max_perf"] = throughput
-                    data["cur_perf"] = 0.0
-                    data["avg_latency"] = avg_latency
+                success, throughput, avg_latency = perf_test.run(3)
+                if success:
+                    if self.metrics_sanity_check(throughput, avg_latency):
+                        with open(self.perf_file, "w") as f:
+                            json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
+                        data["max_perf"] = throughput
+                        data["cur_perf"] = 0.0
+                        data["avg_latency"] = avg_latency
+                    else:
+                        data["error_msg"] = "performance metrics out of bounds"
                 else:
-                    data["error_msg"] = "performance metrics out of bounds"
+                    data["error_msg"] = "not all test requests succeeded"
             else:
                 data["error_msg"] = "initial performance test took too long"
                     
             del perf_test
-
         
         self.send_data(data, self.control_server_url, "/worker_status/")
+
+        data["mtoken"] = self.master_token
         self.send_data(data, self.auth_server_url, "/report_loaded")
     
     def forward_server_data(self, line_metrics, generate_params):
@@ -138,6 +142,7 @@ class LogWatch:
                 found = True
 
         if found:
+            data["mtoken"] = self.master_token
             self.send_data(data, self.auth_server_url, "/report_done")
 
     def send_error(self, error_msg):
@@ -183,14 +188,12 @@ def main():
         except Exception as e:
             print(f"exception: {str(e)} parsing {line} ")
             continue
-
-        handle_line(watch, line_json)
         
-        # try:
-        #     handle_line(watch, line_json)
-        # except Exception as e:
-        #     print(f"exception: {str(e)} handling {line_json} ")
-        #     continue
+        try:
+            handle_line(watch, line_json)
+        except Exception as e:
+            print(f"exception: {str(e)} handling {line_json} ")
+            continue
             
 if __name__ == "__main__":
     main()

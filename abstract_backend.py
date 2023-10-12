@@ -46,7 +46,11 @@ class Backend(ABC):
             auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
         else:
             auth_dict = None
-        model_dict = {"inputs" : request["inputs"], "parameters" : request["parameters"]}
+        
+        if "inputs" in request.keys() and "parameters" in request.keys():
+            model_dict = {"inputs" : request["inputs"], "parameters" : request["parameters"]}
+        else:
+            model_dict = None
         return auth_dict, model_dict
 
     def check_signature(self, reqnum, message, signature):

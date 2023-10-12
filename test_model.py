@@ -69,24 +69,26 @@ class ModelPerfTest:
         t2 = time.time()
         return t2 - t1, total_latency, total_gentokens, num_reqs_completed
     
-    
     def first_run(self):
-        num_reqs = 32
-        req_total_tokens = [(12, 4)] * num_reqs
+        num_reqs = 16
+        req_total_tokens = [(48, 16)] * num_reqs # total_tokens = 64
         time_elapsed, total_latency, total_gentokens, num_reqs_completed = self.send_batch(req_total_tokens)
+        throughput = total_gentokens / time_elapsed
+        avg_latency = total_latency / num_reqs_completed
+        print(f"{datetime.datetime.now()} first run completed, time_elapsed: {time_elapsed}, avg_latency: {avg_latency}, throughput: {throughput}, num_reqs_completed: {num_reqs_completed}")
 
-        if time_elapsed > 5.0:
+        if (throughput < 100.0) or (num_reqs_completed != num_reqs):
             return False
         else:
             return True
         
-    
     def run(self, num_batches):
         # not 100% guaranteed that all these reqs will be completed in one model batch
         if num_batches < 1:
             raise ValueError("can't run with less than one perf benchmark iteration!")
 
         batches = []
+        success = True
         for batch_num in range(num_batches):
             batch_total_tokens = int(np.random.normal(loc=self.avg_batch_total_tokens, scale=5.0, size=1))
             num_reqs = batch_total_tokens // self.avg_total_tokens
@@ -95,16 +97,16 @@ class ModelPerfTest:
             sys.stdout.flush()
             
             time_elapsed, total_latency, total_gentokens, num_reqs_completed = self.send_batch(req_total_tokens)
-            throughput1 = total_gentokens / time_elapsed
-            throughput2 = batch_total_tokens / time_elapsed
-
+            throughput = total_gentokens / time_elapsed
             avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
-            print(f"{datetime.datetime.now()} batch: {batch_num} took: {time_elapsed} ... estimated throughput: {throughput1}, theoretical throughput: {throughput2} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
+
+            print(f"{datetime.datetime.now()} batch: {batch_num} took: {time_elapsed} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
             sys.stdout.flush()
             batches.append((throughput, avg_latency, num_reqs, num_reqs_completed))
 
         throughput, avg_latency, num_reqs, num_reqs_completed =  tuple((sum(series) / num_batches) for series in zip(*batches))
         if num_reqs != num_reqs_completed:
             print(f"{datetime.datetime.now()} only {num_reqs_completed} reqs completed out of {num_reqs} reqs started")
+            success = False
 
-        return throughput, avg_latency
+        return success, throughput, avg_latency

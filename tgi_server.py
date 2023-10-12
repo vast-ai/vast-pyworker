@@ -19,6 +19,8 @@ control_server_url = os.environ['REPORT_ADDR']
 
 backend = TGIBackend(container_id=container_id, master_token=master_token, control_server_url=control_server_url, tgi_server_addr=HF_SERVER, send_data=True)
 
+#################################################### CLIENT FACING ENDPOINTS ###########################################################################
+
 @app.route('/generate', methods=['POST'])
 def generate():
     global backend
@@ -27,6 +29,10 @@ def generate():
     if auth_dict:
         if not backend.check_signature(**auth_dict):
             abort(401)
+
+    if model_dict is None:
+        print(f"client request: {request.json} doesn't include model inputs and parameters")
+        abort(400)
 
     code, content, _ = backend.generate(**model_dict)
 
@@ -44,9 +50,51 @@ def generate_stream():
     if auth_dict:
         if not backend.check_signature(**auth_dict):
             abort(401)
+ 
+    if model_dict is None:
+        print(f"client request: {request.json} doesn't include model inputs and parameters")
+        abort(400)
 
     return backend.generate_stream(**model_dict)
 
+@app.route('/health', methods=['GET'])
+def health():
+    global backend
+
+    code, content = backend.health_handler()
+
+    if code == 200:
+        return content
+    else:
+        print(f"health failed with code {code}")
+        abort(code)
+
+@app.route('/info', methods=['GET'])
+def info():
+    global backend
+
+    code, content = backend.info_handler()
+
+    if code == 200:
+        return content
+    else:
+        print(f"info failed with code {code}")
+        abort(code)
+
+@app.route('/metrics', methods=['GET'])
+def metrics():
+    global backend
+
+    code, content = backend.metrics_handler()
+
+    if code == 200:
+        return content
+    else:
+        print(f"metrics failed with code {code}")
+        abort(code)
+
+
+#################################################### INTERNAL ENDPOINTS CALLED BY LOGWATCH #################################################################################################
 @app.route('/report_capacity', methods=['POST'])
 def report_capacity():
     global backend
