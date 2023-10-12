@@ -1,10 +1,11 @@
 import requests
-# import threading
 from concurrent.futures import ThreadPoolExecutor
 import argparse
 import json
 import time
 import random
+
+MAX_WORKERS = 500
 
 def decode_line(line):
     payload = line.decode("utf-8")
@@ -37,10 +38,15 @@ def worker(args, server_address, api_key, prompt_input):
             print(f"Failed to get worker address for {route_url} response.status_code: {response.status_code}")
             return
 
-        print(f"reponse: {response.content}")
-        message = response.json()
-        worker_address = message['url']
-        #worker_address = response.text
+        try:
+            message = response.json()
+            worker_address = message['url']
+        except json.JSONDecodeError as e:
+            print(f"JSON decoding error: {e}")
+            print(f"got reponse: {response.text}")
+            return
+
+        
 
     # Call /generate endpoint
 
@@ -89,8 +95,13 @@ def auth_worker(args, server_address, api_key, prompt_input):
         print(f"Failed to get worker address for {route_url} response.status_code: {response.status_code}")
         return
 
-    message = response.json()
-    worker_address = message['url']
+    try:
+        message = response.json()
+        worker_address = message['url']
+    except json.JSONDecodeError as e:
+        print(f"JSON decoding error: {e}")
+        print(f"got reponse: {response.text}")
+        return
 
     time.sleep(random.randint(0, 3))
 
@@ -137,12 +148,12 @@ def main():
     args = parser.parse_args()
 
     futures = []
-    with ThreadPoolExecutor as e:
-        for _ in range(args.N): #switch to threadpoolexecutor
+    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
+        for _ in range(args.N):
             if args.use_auth:
-                future = e.submit(target=auth_worker, args=(args, args.server_address, args.api_key, args.prompt_input))
+                future = e.submit(auth_worker, args, args.server_address, args.api_key, args.prompt_input)
             else:
-                future = e.submit(target=worker, args=(args, args.server_address, args.api_key, args.prompt_input))
+                future = e.submit(worker, args, args.server_address, args.api_key, args.prompt_input)
 
             futures.append(future)
         
