@@ -40,11 +40,14 @@ class ModelPerfTest:
     def prompt_model(self, num_prompt_tokens, num_output_tokens):
         prompt = self.make_random_prompt(num_tokens_to_num_words(num_prompt_tokens))
         parameters = {"max_new_tokens" : num_output_tokens}
-        _, _, time = self.backend.generate(inputs=prompt, parameters=parameters)
-        return time
+        rcode, _, time = self.backend.generate(inputs=prompt, parameters=parameters)
+        if (rcode != 200):
+            print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
+        gentokens = 0
+        if (rcode == 200):
+            gentokens = num_prompt_tokens + num_output_tokens
+        return rcode, time, gentokens
 
-    
-    
     def send_batch(self, req_total_tokens):
         futures = []
         t1 = time.time()
