@@ -1,7 +1,6 @@
 import secrets
 from abc import ABC, abstractmethod
 from auth import fetch_public_key, verify_signature
-import sys
 import json
 
 NUM_AUTH_TOKENS = 1000

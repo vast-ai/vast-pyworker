@@ -42,6 +42,39 @@ class ModelPerfTest:
         _, _, time = self.backend.generate(inputs=prompt, parameters=parameters)
         return time
 
+    
+    
+    def send_batch(self, req_total_tokens):
+        futures = []
+        t1 = time.time()
+        with ThreadPoolExecutor(MAX_CONCURRENCY) as e:
+            for (num_prompt_tokens, num_output_tokens) in req_total_tokens:
+                future = e.submit(self.prompt_model, num_prompt_tokens, num_output_tokens)
+                futures.append(future)
+
+        total_latency = 0.0
+        num_reqs_completed = 0
+        for future in futures:
+            latency = future.result()
+            if latency is not None:
+                total_latency += latency
+                num_reqs_completed += 1
+
+        t2 = time.time()
+        return t2 - t1, total_latency, num_reqs_completed
+    
+    
+    def first_run(self):
+        num_reqs = 32
+        req_total_tokens = [(12, 4)] * num_reqs
+        time_elapsed, total_latency, num_reqs_completed = self.send_batch(req_total_tokens)
+
+        if time_elapsed > 5.0:
+            return False
+        else:
+            return True
+        
+    
     def run(self, num_batches):
         # not 100% guaranteed that all these reqs will be completed in one model batch
         if num_batches < 1:
@@ -54,27 +87,13 @@ class ModelPerfTest:
             req_total_tokens = [(int(3 * (tt // 4)), int(tt // 4)) for tt in np.random.normal(loc=self.avg_total_tokens, scale=5.0, size=num_reqs)]
             print(f"starting test batch: {batch_num} with {num_reqs} concurrent reqs of average total_token num: {self.avg_total_tokens}")
             sys.stdout.flush()
-            futures = []
-            t1 = time.time()
-            with ThreadPoolExecutor(MAX_CONCURRENCY) as e:
-                for (num_prompt_tokens, num_output_tokens) in req_total_tokens:
-                    future = e.submit(self.prompt_model, num_prompt_tokens, num_output_tokens)
-                    futures.append(future)
-
-            total_latency = 0.0
-            num_reqs_completed = 0
-            for future in futures:
-                latency = future.result()
-                if latency is not None:
-                    total_latency += latency
-                    num_reqs_completed += 1
-
-            # all reqs have finished by this point
-            t2 = time.time()
-            throughput = batch_total_tokens / (t2 - t1)
+            
+            time_elapsed, total_latency, num_reqs_completed = self.send_batch(req_total_tokens)
+            
+            throughput = batch_total_tokens / (time_elapsed)
 
             avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
-            print(f"batch: {batch_num} took: {t2 - t1} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
+            print(f"batch: {batch_num} took: {time_elapsed} ... throughput: {throughput} (tokens / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
             sys.stdout.flush()
             batches.append((throughput, avg_latency, num_reqs, num_reqs_completed))
 

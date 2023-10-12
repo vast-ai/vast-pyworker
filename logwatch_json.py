@@ -34,23 +34,32 @@ class LogWatch:
         self.max_batch_prefill_tokens = None
 
         self.perf_file = "perf_results.json"
+        self.sanity_file = "perf_sanity.json"
 
     def get_url(self):
         internal_port = os.environ['AUTH_PORT']
         port_var = f"VAST_TCP_PORT_{internal_port}"
         return f"http://{os.environ['PUBLIC_IPADDR']}:{os.environ[port_var]}"
         
-    #maybe we should catch request timeout/error here?
-    def send_data(self, data, url, path):
+    def send_data(self, data, url, path, max_retries=3):
         data["mtoken"] = self.master_token
         full_path = url + path
         if ("loaded" in data.keys() or "error_msg" in data.keys()):
             print(f'[logwatch] sending data to url: {full_path}, data: {data}')
             sys.stdout.flush()
-        response = requests.post(full_path, json = data)
-        if ("loaded" in data.keys() or "error_msg" in data.keys()):
-            print(f"[logwatch] Notification sent. Response: {response.status_code}")
-            sys.stdout.flush()
+        for attempt in max_retries:
+            try: 
+                response = requests.post(full_path, json = data)
+                if ("loaded" in data.keys() or "error_msg" in data.keys()):
+                    print(f"[logwatch] Notification sent. Response: {response.status_code}")
+                    sys.stdout.flush()
+                return
+            except requests.exceptions.RequestException as e:
+                print(f"Request failed on attempt {attempt + 1}: {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+                else:
+                    print("Max retries reached. Request failed.")
 
     def read_config(self, config_info_line):
         self.max_batch_prefill_tokens = config_info_line['max_batch_prefill_tokens']
@@ -73,6 +82,19 @@ class LogWatch:
         data["max_capacity"] = self.max_batch_total_tokens
         self.send_data(data, self.control_server_url, "/worker_status/")
 
+    def metrics_sanity_check(self, throughput, avg_latency):
+        if os.path.exists(self.sanity_file):
+            with open(self.sanity_file, "r") as f:
+                bounds = json.load(f)
+            if throughput < bounds["max_throughput"] and avg_latency > bounds["min_avg_latency"]:
+                return True
+        else:
+            print(f"Couldn't find sanity file: {self.sanity_file}")
+        
+        return False
+
+        
+    
     def notify_server_ready(self):
         print("[logwatch] starting notify_server_ready")
         sys.stdout.flush()
@@ -92,14 +114,22 @@ class LogWatch:
             perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
             print(f"[logwatch] starting model perf test")
             sys.stdout.flush()
-            throughput, avg_latency = perf_test.run(3)
-            with open(self.perf_file, "w") as f:
-                json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
+            sanity_check = perf_test.first_run()
+            if sanity_check:
+                throughput, avg_latency = perf_test.run(3)
+                if self.metrics_sanity_check(throughput, avg_latency):
+                    with open(self.perf_file, "w") as f:
+                        json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
+                    data["max_perf"] = throughput
+                    data["cur_perf"] = 0.0
+                    data["avg_latency"] = avg_latency
+                else:
+                    data["error_msg"] = "performance metrics out of bounds"
+            else:
+                data["error_msg"] = "initial performance test took too long"
+                    
             del perf_test
 
-        data["max_perf"] = throughput
-        data["cur_perf"] = 0.0
-        data["avg_latency"] = avg_latency
         
         self.send_data(data, self.control_server_url, "/worker_status/")
         self.send_data(data, self.auth_server_url, "/report_loaded")
@@ -125,6 +155,27 @@ def parse_config(config):
     config = config.replace('{ ', '{"').replace(':', '":').replace(', ', ', "').replace(' }', '}').replace('Some("', '"').replace('")', '"').replace('Some(', '"').replace(')', '"').replace(': None', ': null')
     return json.loads(config)
 
+def handle_line(watch, line_json):
+    if "fields" in line_json.keys():
+        if line_json["level"] == "ERROR":
+            watch.send_error(line_json["fields"]["message"])
+        elif line_json["fields"]["message"][:4] == "Args":               
+            tgi_args = line_json["fields"]["message"][4:]
+            config = parse_config(tgi_args)
+            print(config)
+            sys.stdout.flush()
+            watch.read_config(config)
+    if "message" in line_json.keys():
+        if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
+            watch.notify_server_ready()
+        elif line_json["message"] == "Success" and line_json["target"] == "text_generation_router::server":
+            generate_params = parse_config(line_json["span"]["parameters"][18:])
+            watch.forward_server_data(line_json["span"], generate_params)
+        else:
+            found = watch.read_batch_capacity(line_json["message"])
+            if found:
+                watch.send_capacity()
+
 def main():
     metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
     batch_pattern = re.compile(r'Setting max batch total tokens to (\d+)')
@@ -139,26 +190,12 @@ def main():
         except Exception as e:
             print(f"exception: {str(e)} parsing {line} ")
             continue
-            
-        if "fields" in line_json.keys():
-            if line_json["level"] == "ERROR":
-                watch.send_error(line_json["fields"]["message"])
-            elif line_json["fields"]["message"][:4] == "Args":               
-                tgi_args = line_json["fields"]["message"][4:]
-                config = parse_config(tgi_args)
-                print(config)
-                sys.stdout.flush()
-                watch.read_config(config)
-        if "message" in line_json.keys():
-            if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
-                watch.notify_server_ready()
-            elif line_json["message"] == "Success" and line_json["target"] == "text_generation_router::server":
-                generate_params = parse_config(line_json["span"]["parameters"][18:])
-                watch.forward_server_data(line_json["span"], generate_params)
-            else:
-                found = watch.read_batch_capacity(line_json["message"])
-                if found:
-                    watch.send_capacity()
 
+        try:
+            handle_line(watch, line_json)
+        except Exception as e:
+            print(f"exception: {str(e)} handling {line_json} ")
+            continue
+            
 if __name__ == "__main__":
     main()

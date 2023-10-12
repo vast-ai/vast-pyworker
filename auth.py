@@ -2,7 +2,6 @@ from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 import base64
-import os
 import subprocess
 
 def fetch_public_key():
