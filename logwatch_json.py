@@ -184,11 +184,13 @@ def main():
             print(f"exception: {str(e)} parsing {line} ")
             continue
 
-        try:
-            handle_line(watch, line_json)
-        except Exception as e:
-            print(f"exception: {str(e)} handling {line_json} ")
-            continue
+        handle_line(watch, line_json)
+        
+        # try:
+        #     handle_line(watch, line_json)
+        # except Exception as e:
+        #     print(f"exception: {str(e)} handling {line_json} ")
+        #     continue
             
 if __name__ == "__main__":
     main()

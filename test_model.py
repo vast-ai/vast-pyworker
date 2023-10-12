@@ -73,7 +73,7 @@ class ModelPerfTest:
     def first_run(self):
         num_reqs = 32
         req_total_tokens = [(12, 4)] * num_reqs
-        time_elapsed, total_latency, num_reqs_completed = self.send_batch(req_total_tokens)
+        time_elapsed, total_latency, total_gentokens, num_reqs_completed = self.send_batch(req_total_tokens)
 
         if time_elapsed > 5.0:
             return False
