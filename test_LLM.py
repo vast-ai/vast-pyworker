@@ -1,18 +1,22 @@
 import requests
-import threading
+# import threading
+from concurrent.futures import ThreadPoolExecutor
 import argparse
 import json
 import time
 import random
 
 def decode_line(line):
-	payload = line.decode("utf-8")
-
-	if payload.startswith("data:"):
-		json_payload = json.loads(payload.lstrip("data:").rstrip("/n"))
-		return json_payload["token"]["text"]
-	else:
-		return None
+    payload = line.decode("utf-8")
+    if payload.startswith("data:"):
+        try: 
+            json_payload = json.loads(payload.lstrip("data:").rstrip("/n"))
+            if "token" in json_payload.keys():
+                return json_payload["token"]["text"]
+        except json.JSONDecodeError as e:
+            print(f"JSON decoding error: {e}")
+    
+    return None
 
 def worker(args, server_address, api_key, prompt_input):
 
@@ -33,6 +37,7 @@ def worker(args, server_address, api_key, prompt_input):
             print(f"Failed to get worker address for {route_url} response.status_code: {response.status_code}")
             return
 
+        print(f"reponse: {response.content}")
         message = response.json()
         worker_address = message['url']
         #worker_address = response.text
@@ -131,18 +136,20 @@ def main():
     parser.add_argument("--worker_addr", help="worker address override", default=None)
     args = parser.parse_args()
 
-    threads = []
-    for _ in range(args.N):
-        if args.use_auth:
-            thread = threading.Thread(target=auth_worker, args=(args, args.server_address, args.api_key, args.prompt_input))
-        else:
-            thread = threading.Thread(target=worker, args=(args, args.server_address, args.api_key, args.prompt_input))
-        thread.start()
-        threads.append(thread)
+    futures = []
+    with ThreadPoolExecutor as e:
+        for _ in range(args.N): #switch to threadpoolexecutor
+            if args.use_auth:
+                future = e.submit(target=auth_worker, args=(args, args.server_address, args.api_key, args.prompt_input))
+            else:
+                future = e.submit(target=worker, args=(args, args.server_address, args.api_key, args.prompt_input))
+
+            futures.append(future)
+        
         time.sleep(0.20)
 
-    for thread in threads:
-        thread.join()
+    for future in futures:
+        future.result()
 
 if __name__ == "__main__":
     main()
