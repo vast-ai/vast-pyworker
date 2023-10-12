@@ -23,7 +23,7 @@ class TGIBackend(LLMBackend):
 
             return response.status_code, None, None
 
-        except requests.exceptions.RequestException as e:
+        except requests.exceptions.RequestException as e: #be more specific here?
             print(f"[TGI-backend] Request error: {e}")
 
         return None, None, None

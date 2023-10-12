@@ -7,6 +7,7 @@ import os
 import datetime
 
 from test_model import ModelPerfTest
+from server_metrics import post_request
 
 def format_metric_value(metric_str):
     if metric_str[-2:] == "ms":
@@ -42,30 +43,18 @@ class LogWatch:
         port_var = f"VAST_TCP_PORT_{internal_port}"
         return f"http://{os.environ['PUBLIC_IPADDR']}:{os.environ[port_var]}"
         
-    def send_data(self, data, url, path, max_retries=3):
-        data["mtoken"] = self.master_token
+    def send_data(self, data, url, path):
         full_path = url + path
         if ("loaded" in data.keys() or "error_msg" in data.keys()):
             print(f'{datetime.datetime.now()} [logwatch] sending data to url: {full_path}, data: {data}')
             sys.stdout.flush()
-        for attempt in max_retries:
-            try: 
-                response = requests.post(full_path, json = data)
-                if ("loaded" in data.keys() or "error_msg" in data.keys()):
-                    print(f"[logwatch] Notification sent. Response: {response.status_code}")
-                    sys.stdout.flush()
-                return
-            except requests.exceptions.RequestException as e:
-                print(f"Request failed on attempt {attempt + 1}: {e}")
-                if attempt < max_retries - 1:
-                    time.sleep(2)
-                else:
-                    print("Max retries reached. Request failed.")
-        response = requests.post(full_path, json = data)
-        if ("loaded" in data.keys() or "error_msg" in data.keys()):
-            print(f"{datetime.datetime.now()} [logwatch] Notification sent. Response: {response.status_code}")
-            sys.stdout.flush()
+        
+        rcode = post_request(full_path, data)
 
+        if ("loaded" in data.keys() or "error_msg" in data.keys()):
+            print(f"{datetime.datetime.now()} logwatch] Notification sent. Response: {rcode}")
+            sys.stdout.flush()
+        
     def read_config(self, config_info_line):
         self.max_batch_prefill_tokens = config_info_line['max_batch_prefill_tokens']
         self.max_total_tokens = config_info_line['max_total_tokens']
@@ -201,40 +190,5 @@ def main():
             print(f"exception: {str(e)} handling {line_json} ")
             continue
             
-def main():
-    metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
-    batch_pattern = re.compile(r'Setting max batch total tokens to (\d+)')
-
-    watch = LogWatch(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
-
-    print(f"{datetime.datetime.now()} [logwatch] ready and waiting for input\n")
-    sys.stdout.flush()
-    for line in sys.stdin:
-        try:
-            line_json = json.loads(line)
-        except Exception as e:
-            print(f"exception: {str(e)} parsing {line} ")
-            continue
-            
-        if "fields" in line_json.keys():
-            if line_json["level"] == "ERROR":
-                watch.send_error(line_json["fields"]["message"])
-            elif line_json["fields"]["message"][:4] == "Args":               
-                tgi_args = line_json["fields"]["message"][4:]
-                config = parse_config(tgi_args)
-                print(config)
-                sys.stdout.flush()
-                watch.read_config(config)
-        if "message" in line_json.keys():
-            if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
-                watch.notify_server_ready()
-            elif line_json["message"] == "Success" and line_json["target"] == "text_generation_router::server":
-                generate_params = parse_config(line_json["span"]["parameters"][18:])
-                watch.forward_server_data(line_json["span"], generate_params)
-            else:
-                found = watch.read_batch_capacity(line_json["message"])
-                if found:
-                    watch.send_capacity()
-
 if __name__ == "__main__":
     main()

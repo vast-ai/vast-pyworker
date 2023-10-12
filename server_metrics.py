@@ -6,18 +6,21 @@ from threading import Thread
 import threading
 import requests
 
-def post_request(full_path, data):
-    try:
-        response = requests.post(full_path, json=data, timeout=1)
-        print(f"[server_metrics] {time.time()} Notification sent. Response: {response.status_code}")
-    except requests.Timeout:
-        print("[server_metrics] {time.time()} Request timed out")
-    except Exception as e:
-        print(f"[server_metrics] Error: {e}")
-
-
-# Your main thread will continue running here
-
+def post_request(full_path, data, max_retries=3):
+    for attempt in max_retries:
+        try:
+            response = requests.post(full_path, json=data, timeout=1)
+            # print(f"{time.time()} Notification sent. Response: {response.status_code}")
+            return response.status_code
+        except requests.Timeout:
+            print(f"{time.time()} Request timed out")
+        except Exception as e:
+            print(f"{time.time()} Error: {e}")
+        if attempt < max_retries - 1:
+            print(f"{time.time()} retrying post request")
+            time.sleep(2)
+        else:
+            return 0
 
 class LLMServerMetrics: #could inherit from a more generic Metrics
     def __init__(self, id, control_server_url, master_token, send_data):
@@ -64,9 +67,7 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         # self.batch_capacity = min(json_data["max_batch_prefill_tokens"], json_data["max_batch_tokens"])
         self.batch_capacity = json_data["max_batch_tokens"]
     
-    #maybe we should catch request timeout/error here?
     def send_data(self, data, url, path):
-        # data["mtoken"] = self.master_token
         full_path = url + path
         print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
         #response = requests.post(full_path, json = data)
