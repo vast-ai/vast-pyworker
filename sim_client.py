@@ -145,9 +145,10 @@ class ClientMetrics:
 		# self.lock.release()
 
 class Client:
-	def __init__(self, streaming, backend, api_key, server_addr):
+	def __init__(self, streaming, backend, api_key, server_addr, endpoint):
 		self.metrics = ClientMetrics(streaming=streaming, backend=backend)
 		self.api_key = api_key
+		self.endpoint = endpoint
 		self.lb_server_addr = server_addr #'127.0.0.1:8081'
 		self.error_fd = os.open("error.txt", os.O_WRONLY | os.O_CREAT)
 		os.write(self.error_fd, f"ERRORS: \n".encode("utf-8"))
@@ -185,9 +186,10 @@ class Client:
 		request_dict = {"endpoint" : label, "cost" : cost, "api_key" : self.api_key}
 		URI = f'http://{self.lb_server_addr}/queue_task/'
 		self.metrics.num_serverless_server_started += 1
-		# print(f"sending to URI: {URI} with dict: {request_dict}")
+		print(f"sending to URI: {URI} with dict: {request_dict}")
 		response = requests.post(URI, json=request_dict)
 		self.metrics.num_serverless_server_finished += 1
+		print(f"result: {response.status_code}")
 		if response.status_code == 200:
 			return response.content.decode('utf-8')
 	
@@ -202,9 +204,9 @@ class Client:
 		success = (worker_response["reply"] is not None)
 		self.update_metrics(addr, success, worker_response["num_tokens"], time_elapsed, worker_response["first_msg_wait"])
 
-	def complete_request(self, text_prompt, request_str, num_tokens=100):
+	def complete_request(self, text_prompt, request_str, num_tokens=256):
 		# print(f"{request_str} getting addr")
-		addr = self.get_addr(cost=num_tokens)
+		addr = self.get_addr(label = self.endpoint, cost=num_tokens)
 		token = "d22bd4a60ac70b1bb20873dcd345abe8824f2fb9260df84e2e1320a207d0d247" #hardcoded for testing
 		# print(f"{request_str} got addr")
 		if addr is not None:

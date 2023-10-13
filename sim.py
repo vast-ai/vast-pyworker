@@ -31,7 +31,7 @@ class User:
 		self.lock = Lock()
 
 class Sim:
-	def __init__(self, num_seconds, base_num_users, load_schedule, streaming, api_key, server_addr):
+	def __init__(self, num_seconds, base_num_users, load_schedule, streaming, api_key, server_addr, endpoint):
 		self.users = []
 
 		self.num_seconds = num_seconds
@@ -43,7 +43,7 @@ class Sim:
 		self.num_users = 0
 		
 		self.streaming = streaming
-		self.client = Client(streaming=streaming, backend="tgi", api_key=api_key, server_addr=server_addr)
+		self.client = Client(streaming=streaming, backend="tgi", api_key=api_key, server_addr=server_addr, endpoint=endpoint)
 		self.req_num = 0
 		self.proc = psutil.Process(os.getpid())
 
@@ -161,8 +161,9 @@ def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--api_key", type=str)
 	parser.add_argument("--server_addr", type=str)
+	parser.add_argument("--endpoint", type=str)
 	args = parser.parse_args()
-	sim = Sim(num_seconds=60 * 0.1, base_num_users=50, streaming=False, load_schedule=[1, 1, 1], api_key=args.api_key, server_addr=args.server_addr)
+	sim = Sim(num_seconds=60 * 0.1, base_num_users=50, streaming=False, load_schedule=[1, 1, 1], api_key=args.api_key, server_addr=args.server_addr, endpoint=args.endpoint)
 	sim.run()
 
 if __name__ == "__main__":
