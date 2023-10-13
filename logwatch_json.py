@@ -4,6 +4,7 @@ import requests
 import json
 import time
 import os
+import datetime
 
 from test_model import ModelPerfTest
 
@@ -45,11 +46,11 @@ class LogWatch:
         data["mtoken"] = self.master_token
         full_path = url + path
         if ("loaded" in data.keys() or "error_msg" in data.keys()):
-            print(f'[logwatch] sending data to url: {full_path}, data: {data}')
+            print(f'{datetime.datetime.now()} [logwatch] sending data to url: {full_path}, data: {data}')
             sys.stdout.flush()
         response = requests.post(full_path, json = data)
         if ("loaded" in data.keys() or "error_msg" in data.keys()):
-            print(f"[logwatch] Notification sent. Response: {response.status_code}")
+            print(f"{datetime.datetime.now()} [logwatch] Notification sent. Response: {response.status_code}")
             sys.stdout.flush()
 
     def read_config(self, config_info_line):
@@ -84,13 +85,13 @@ class LogWatch:
 
         if os.path.exists(self.perf_file):
             with open(self.perf_file, "r") as f:
-                print(f"[logwatch] loading model perf test results")
+                print(f"{datetime.datetime.now()} [logwatch] loading model perf test results")
                 sys.stdout.flush()
                 results = json.load(f)
                 throughput, avg_latency = results["throughput"], results["avg_latency"]
         else:
+            print(f"{datetime.datetime.now()} [logwatch] starting model perf test")
             perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
-            print(f"[logwatch] starting model perf test")
             sys.stdout.flush()
             throughput, avg_latency = perf_test.run(3)
             with open(self.perf_file, "w") as f:
@@ -131,7 +132,7 @@ def main():
 
     watch = LogWatch(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
 
-    print("[logwatch] ready and waiting for input\n")
+    print(f"{datetime.datetime.now()} [logwatch] ready and waiting for input\n")
     sys.stdout.flush()
     for line in sys.stdin:
         try:

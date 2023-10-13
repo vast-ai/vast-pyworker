@@ -17,24 +17,18 @@ master_token = os.environ['MASTER_TOKEN']
 container_id = os.environ['CONTAINER_ID']
 control_server_url = os.environ['REPORT_ADDR']
 
-backend = TGIBackend(container_id=container_id, master_token=master_token, control_server_url=control_server_url, tgi_server_addr=HF_SERVER)
-
-@app.route('/tokens', methods=['GET'])
-def get_tokens():
-    global backend
-    if not backend.check_master_token(request.json['mtoken']):
-        abort(401)
-
-    return {"tokens" : backend.get_auth_tokens()}
+backend = TGIBackend(container_id=container_id, master_token=master_token, control_server_url=control_server_url, tgi_server_addr=HF_SERVER, send_data=True)
 
 @app.route('/generate', methods=['POST'])
 def generate():
     global backend
-    if not backend.check_auth_token(request.json['token']):
-        pass
-        #abort(401)
-    
-    code, content, _ = backend.generate(request.json['inputs'], request.json["parameters"])
+
+    auth_dict, model_dict = backend.format_request(request.json)
+    if auth_dict:
+        if not backend.check_signature(**auth_dict):
+            abort(401)
+
+    code, content, _ = backend.generate(**model_dict)
 
     if code == 200:
         return content
@@ -45,12 +39,14 @@ def generate():
 @app.route('/generate_stream', methods=['POST'])
 def generate_stream():
     global backend
-    if not backend.check_auth_token(request.json['token']):
-        pass
-        #abort(401)
 
-    return backend.generate_stream(request.json['inputs'], request.json["parameters"])
-    
+    auth_dict, model_dict = backend.format_request(request.json)
+    if auth_dict:
+        if not backend.check_signature(**auth_dict):
+            abort(401)
+
+    return backend.generate_stream(**model_dict)
+
 @app.route('/report_capacity', methods=['POST'])
 def report_capacity():
     global backend
