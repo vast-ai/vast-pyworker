@@ -99,29 +99,34 @@ class LogWatch:
 
         if os.path.exists(self.perf_file):
             with open(self.perf_file, "r") as f:
-                print(f"{datetime.datetime.now()} [logwatch] loading model perf test results")
                 sys.stdout.flush()
                 results = json.load(f)
                 throughput, avg_latency = results["throughput"], results["avg_latency"]
+                print(f"{datetime.datetime.now()} [logwatch] loaded model perf test results: {throughput} {avg_latency} ")
         else:
             print(f"{datetime.datetime.now()} [logwatch] starting model perf test with max_total_tokens: {self.max_total_tokens}, max_batch_total_tokens: {self.max_batch_total_tokens}")
             perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
             sys.stdout.flush()
             sanity_check = perf_test.first_run()
             if sanity_check:
+                print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
                 success, throughput, avg_latency = perf_test.run(3)
                 if success:
                     if self.metrics_sanity_check(throughput, avg_latency):
+                        print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} in bounds")
                         with open(self.perf_file, "w") as f:
                             json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
                         data["max_perf"] = throughput
                         data["cur_perf"] = 0.0
                         data["avg_latency"] = avg_latency
                     else:
+                        print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} out of bounds")
                         data["error_msg"] = "performance metrics out of bounds"
                 else:
+                    print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest not all test requests succeeded")
                     data["error_msg"] = "not all test requests succeeded"
             else:
+                print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test took too long")
                 data["error_msg"] = "initial performance test took too long"
                     
             del perf_test
