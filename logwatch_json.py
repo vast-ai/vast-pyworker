@@ -105,11 +105,13 @@ class LogWatch:
                 print(f"{datetime.datetime.now()} [logwatch] loaded model perf test results: {throughput} {avg_latency} ")
         else:
             print(f"{datetime.datetime.now()} [logwatch] starting model perf test with max_total_tokens: {self.max_total_tokens}, max_batch_total_tokens: {self.max_batch_total_tokens}")
+            sys.stdout.flush()
             perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
             sys.stdout.flush()
             sanity_check = perf_test.first_run()
             if sanity_check:
                 print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
+                sys.stdout.flush()
                 success, throughput, avg_latency = perf_test.run(3)
                 if success:
                     if self.metrics_sanity_check(throughput, avg_latency):
@@ -121,12 +123,15 @@ class LogWatch:
                         data["avg_latency"] = avg_latency
                     else:
                         print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} out of bounds")
+                        sys.stdout.flush()
                         data["error_msg"] = "performance metrics out of bounds"
                 else:
                     print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest not all test requests succeeded")
+                    sys.stdout.flush()
                     data["error_msg"] = "not all test requests succeeded"
             else:
                 print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test took too long")
+                sys.stdout.flush()
                 data["error_msg"] = "initial performance test took too long"
                     
             del perf_test
