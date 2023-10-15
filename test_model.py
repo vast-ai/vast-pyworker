@@ -18,7 +18,9 @@ def num_tokens_to_num_words(num_tokens):
 
 class ModelPerfTest:
     def __init__(self, max_total_tokens, max_batch_total_tokens):
+        print(f'ModelPerfTest: start nltk.download')
         nltk.download("words")
+        print(f'ModelPerfTest: end nltk.download')
         self.max_total_tokens = max_total_tokens
         self.avg_total_tokens = max_total_tokens // 2
         self.max_batch_total_tokens = max_batch_total_tokens
@@ -33,6 +35,7 @@ class ModelPerfTest:
                                   send_data=False)
 
         self.data = [] # data[i] = (prompt_tokens, output_tokens, output_time)
+        print(f'ModelPerfTest: init complete')
 
     def make_random_prompt(self, prompt_len):
         return " ".join(random.choices(self.word_list, k=prompt_len))
