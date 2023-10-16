@@ -1,13 +1,12 @@
 import sys
 import re
-import requests
 import json
 import time
 import os
 import datetime
 
 from test_model import ModelPerfTest
-from server_metrics import post_request
+from utils import post_request
 
 def format_metric_value(metric_str):
     if metric_str[-2:] == "ms":

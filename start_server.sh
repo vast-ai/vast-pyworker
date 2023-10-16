@@ -29,3 +29,6 @@ fi
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
 source "$SERVER_DIR/launch_model.sh"
+
+sleep 3
+source "$SERVER_DIR/init_check.sh"

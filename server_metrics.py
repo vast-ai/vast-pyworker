@@ -1,26 +1,10 @@
 import sys
-import requests
 import time
 import random
 from threading import Thread
 import threading
-import requests
 
-def post_request(full_path, data, max_retries=3):
-    for attempt in range(max_retries):
-        try:
-            response = requests.post(full_path, json=data, timeout=1)
-            # print(f"{time.time()} Notification sent. Response: {response.status_code}")
-            return response.status_code
-        except requests.Timeout:
-            print(f"{time.time()} Request timed out")
-        except Exception as e:
-            print(f"{time.time()} Error: {e}")
-        if attempt < max_retries - 1:
-            print(f"{time.time()} retrying post request")
-            time.sleep(2)
-        else:
-            return 0
+from utils import post_request
 
 class LLMServerMetrics: #could inherit from a more generic Metrics
     def __init__(self, id, control_server_url, master_token, send_data):
@@ -70,8 +54,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
     def send_data(self, data, url, path):
         full_path = url + path
         print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
-        #response = requests.post(full_path, json = data)
-        #print(f"[server_metrics] Notification sent. Response: {response.status_code}")
         thread = threading.Thread(target=post_request, args=(full_path,data))
         thread.start()
         sys.stdout.flush()
