@@ -1,7 +1,5 @@
 packages=("flask" "nltk" "pycryptodome" "requests" "numpy")
 FULL_ADDR="$REPORT_ADDR/worker_status/"
-echo "container id: $CONTAINER_ID"
-# CONTAINER_STR="$CONTAINER_ID"
 
 for pkg in "${packages[@]}"; do
     if ! pip show "$pkg" &> /dev/null; then
