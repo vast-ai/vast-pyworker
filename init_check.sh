@@ -1,9 +1,15 @@
 packages=("flask" "nltk" "pycryptodome" "requests" "numpy")
+FULL_ADDR="$REPORT_ADDR/worker_status/"
 
 for pkg in "${packages[@]}"; do
-    if dpkg -l | grep -q "$pkg"; then
-        curl -X POST -d "{'error_msg' : 'package failed installing'}" $REPORT_ADDR
-        exit 1
+    if ! pip show "$pkg" &> /dev/null; then
+        echo "$pkg is not installed"
+        curl $FULL_ADDR -X POST -d "{\"error_msg\" : \"package failed installing\", \"id\" : \"$CONTAINER_ID\"}" -H 'Content-Type: application/json'
+        return 1
+    else
+        echo "$pkg is installed"
+    fi       
+done
 
 # Define the target command
 WATCH_CMD="python3 $SERVER_DIR/logwatch_json.py"
@@ -15,8 +21,10 @@ PIDS1=$(ps aux | grep "$WATCH_CMD" | grep -v grep | awk '{print $2}')
 PIDS2=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 PIDS3=$(ps aux | grep "$AUTH_CMD" | grep -v grep | awk '{print $2}')
 
-if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ])
-do 
-    curl -X POST -d "{'error_msg' : 'not all server component processes are running'}" $REPORT_ADDR
-    exit 1
-
+if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ]); then
+    echo "not all server component processes are running"
+    curl $FULL_ADDR -X POST -d "{\"error_msg\" : \"not all server component processes are running\", \"id\" : \"$CONTAINER_ID\"}" -H 'Content-Type: application/json' 
+    return 1
+else
+    echo "all component processes are running"
+fi

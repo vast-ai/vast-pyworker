@@ -18,9 +18,9 @@ def num_tokens_to_num_words(num_tokens):
 
 class ModelPerfTest:
     def __init__(self, max_total_tokens, max_batch_total_tokens):
-        print(f'ModelPerfTest: start nltk.download')
+        # print(f'ModelPerfTest: start nltk.download')
         nltk.download("words")
-        print(f'ModelPerfTest: end nltk.download')
+        # print(f'ModelPerfTest: end nltk.download')
         self.max_total_tokens = max_total_tokens
         self.avg_total_tokens = max_total_tokens // 2
         self.max_batch_total_tokens = max_batch_total_tokens
