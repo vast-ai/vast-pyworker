@@ -4,6 +4,8 @@ for pkg in "${packages[@]}"; do
     if dpkg -l | grep -q "$pkg"; then
         curl -X POST -d "{'error_msg' : 'package failed installing'}" $REPORT_ADDR
         exit 1
+    fi
+done
 
 # Define the target command
 WATCH_CMD="python3 $SERVER_DIR/logwatch_json.py"
@@ -15,8 +17,7 @@ PIDS1=$(ps aux | grep "$WATCH_CMD" | grep -v grep | awk '{print $2}')
 PIDS2=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 PIDS3=$(ps aux | grep "$AUTH_CMD" | grep -v grep | awk '{print $2}')
 
-if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ])
-do 
+if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ]); then
     curl -X POST -d "{'error_msg' : 'not all server component processes are running'}" $REPORT_ADDR
     exit 1
-
+fi

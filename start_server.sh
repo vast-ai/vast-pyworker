@@ -32,3 +32,9 @@ source "$SERVER_DIR/launch_model.sh"
 
 sleep 3
 source "$SERVER_DIR/init_check.sh"
+
+if [ $? -eq 0 ]; then
+    echo "init_check executed successfully."
+else
+    echo "init_check encountered an error. Exit code: $?"
+fi
