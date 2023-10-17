@@ -21,3 +21,5 @@ if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ]); then
     curl -X POST -d "{'error_msg' : 'not all server component processes are running'}" $REPORT_ADDR
     exit 1
 fi
+
+echo "init_check passed successfully" > init_end.log
