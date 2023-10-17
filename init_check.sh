@@ -4,7 +4,7 @@ FULL_ADDR="$REPORT_ADDR/worker_status/"
 for pkg in "${packages[@]}"; do
     if ! pip show "$pkg" &> /dev/null; then
         echo "$pkg is not installed"
-        curl $FULL_ADDR -X POST -d '{"error_msg" : "package failed installing"}' -H 'Content-Type: application/json'
+        curl $FULL_ADDR -X POST -d '{"error_msg" : "package failed installing", "id" : "$CONTAINER_ID"}' -H 'Content-Type: application/json'
         return 1
     else
         echo "$pkg is installed"
@@ -23,7 +23,7 @@ PIDS3=$(ps aux | grep "$AUTH_CMD" | grep -v grep | awk '{print $2}')
 
 if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ]); then
     echo "not all server component processes are running"
-    curl $FULL_ADDR -X POST -d '{"error_msg" : "not all server component processes are running"}' -H 'Content-Type: application/json' 
+    curl $FULL_ADDR -X POST -d '{"error_msg" : "not all server component processes are running", "id" : "$CONTAINER_ID"}' -H 'Content-Type: application/json' 
     return 1
 else
     echo "all component processes are running"
