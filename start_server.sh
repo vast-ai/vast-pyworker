@@ -10,7 +10,7 @@ then
     pip install pycryptodome
     mkdir /home/workspace
     cd /home/workspace
-    git clone -b init_check https://github.com/vast-ai/vast-pyworker
+    git clone https://github.com/vast-ai/vast-pyworker
     touch ~/.no_auto_tmux
     touch /root/hasbooted
 fi
@@ -34,7 +34,7 @@ sleep 1
 source "$SERVER_DIR/init_check.sh"
 
 if [ $? -eq 0 ]; then
-    echo "init_check passed, all server function operating correctly."
+    echo "init_check passed, all server functions operating correctly."
 else
     echo "init_check failed. Exit code: $?"
 fi
