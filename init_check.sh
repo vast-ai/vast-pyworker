@@ -1,6 +1,7 @@
 packages=("flask" "nltk" "pycryptodome" "requests" "numpy")
 FULL_ADDR="$REPORT_ADDR/worker_status/"
 echo "container id: $CONTAINER_ID"
+CONTAINER_STR="$CONTAINER_ID"
 
 for pkg in "${packages[@]}"; do
     if ! pip show "$pkg" &> /dev/null; then
@@ -24,7 +25,7 @@ PIDS3=$(ps aux | grep "$AUTH_CMD" | grep -v grep | awk '{print $2}')
 
 if ([ -z "$PIDS1" ] || [ -z "$PIDS2" ] || [ -z "$PIDS3" ]); then
     echo "not all server component processes are running"
-    curl $FULL_ADDR -X POST -d '{"error_msg" : "not all server component processes are running", "id" : $CONTAINER_ID}' -H 'Content-Type: application/json' 
+    curl $FULL_ADDR -X POST -d '{"error_msg" : "not all server component processes are running", "id" : CONTAINER_STR}' -H 'Content-Type: application/json' 
     return 1
 else
     echo "all component processes are running"
