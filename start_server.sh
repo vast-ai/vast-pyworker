@@ -30,11 +30,11 @@ source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
 source "$SERVER_DIR/launch_model.sh"
 
-sleep 3
+sleep 1
 source "$SERVER_DIR/init_check.sh"
 
 if [ $? -eq 0 ]; then
-    echo "init_check executed successfully."
+    echo "init_check passed, all server function operating correctly."
 else
-    echo "init_check encountered an error. Exit code: $?"
+    echo "init_check failed. Exit code: $?"
 fi
