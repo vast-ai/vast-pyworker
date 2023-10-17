@@ -96,12 +96,15 @@ class LogWatch:
         data["loaded"] = True
         data["loadtime"] = end_time - self.start_time
         data["url"] = self.get_url()
+        data["cur_perf"] = 0.0
 
         if os.path.exists(self.perf_file):
             with open(self.perf_file, "r") as f:
                 sys.stdout.flush()
                 results = json.load(f)
                 throughput, avg_latency = results["throughput"], results["avg_latency"]
+                data["max_perf"] = throughput
+                data["avg_latency"] = avg_latency
                 print(f"{datetime.datetime.now()} [logwatch] loaded model perf test results: {throughput} {avg_latency} ")
         else:
             print(f"{datetime.datetime.now()} [logwatch] starting model perf test with max_total_tokens: {self.max_total_tokens}, max_batch_total_tokens: {self.max_batch_total_tokens}")
@@ -119,7 +122,6 @@ class LogWatch:
                         with open(self.perf_file, "w") as f:
                             json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
                         data["max_perf"] = throughput
-                        data["cur_perf"] = 0.0
                         data["avg_latency"] = avg_latency
                     else:
                         print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} out of bounds")
