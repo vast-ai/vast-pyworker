@@ -10,11 +10,11 @@ class LLMBackend(Backend):
         self.metrics = LLMServerMetrics(id=container_id, control_server_url=control_server_url, master_token=master_token, send_data=send_data)
 
     @abstractmethod
-    def generate(self, inputs, parameters):
+    def generate(self, model_request):
         pass
 
     @abstractmethod
-    def generate_stream(self, inputs, parameters):
+    def generate_stream(self, model_request):
         pass
     
 

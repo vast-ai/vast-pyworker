@@ -40,17 +40,23 @@ class Backend(ABC):
             return False
 
     def format_request(self, request):
-        if "signature" in request.keys():
+        model_dict = {}
+        model_dict.update(request)
+        auth_names = ["signature", "endpoint", "reqnum", "url", "message"]
+        has_auth = True
+        for key in auth_names:
+            if key not in request.keys():
+                has_auth = False
+            else:
+                del model_dict[key]
+
+        if has_auth:
             original_dict = {"cost" : request["cost"], "endpoint" : request["endpoint"], "reqnum" : request["reqnum"], "url" : request["url"]}
             message = json.dumps(original_dict, indent=4)
             auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
         else:
             auth_dict = None
         
-        if "inputs" in request.keys() and "parameters" in request.keys():
-            model_dict = {"inputs" : request["inputs"], "parameters" : request["parameters"]}
-        else:
-            model_dict = None
         return auth_dict, model_dict
 
     def check_signature(self, reqnum, message, signature):
@@ -68,10 +74,10 @@ class Backend(ABC):
             return False
 
     @abstractmethod
-    def generate(self, inputs, parameters):
+    def generate(self, model_request):
         pass
 
     @abstractmethod
-    def generate_stream(self, inputs, parameters):
+    def generate_stream(self, model_request):
         pass
 

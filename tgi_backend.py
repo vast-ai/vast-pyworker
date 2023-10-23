@@ -9,14 +9,13 @@ class TGIBackend(LLMBackend):
         super().__init__(container_id=container_id, control_server_url=control_server_url, master_token=master_token, send_data=send_data)
         self.tgi_server_addr = tgi_server_addr
 
-    def generate(self, inputs, parameters):
-        self.metrics.start_req(text_prompt=inputs, parameters=parameters)
-        hf_prompt = {"inputs" : inputs, "parameters" : parameters}
+    def generate(self, model_request):
+        self.metrics.start_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
         try:
             t1 = time.time()
-            response = requests.post(f"http://{self.tgi_server_addr}/generate", json=hf_prompt)
+            response = requests.post(f"http://{self.tgi_server_addr}/generate", json=model_request)
             t2 = time.time()
-            self.metrics.finish_req(text_prompt=inputs, parameters=parameters)
+            self.metrics.finish_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
 
             if response.status_code == 200:
                 return 200, response.text, t2 - t1
@@ -42,8 +41,8 @@ class TGIBackend(LLMBackend):
         except requests.exceptions.RequestException as e:
             print(f"[TGI-backend] Request error: {e}")
 
-    def generate_stream(self, inputs, parameters):
-        return Response(self.hf_tgi_wrapper(inputs, parameters)) #might want to add check here for connection error with tgi server
+    def generate_stream(self, model_request):
+        return Response(self.hf_tgi_wrapper(model_request["inputs"], model_request["parameters"])) #might want to add check here for connection error with tgi server
 
 
     def health_handler(self):

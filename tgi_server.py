@@ -3,6 +3,7 @@ import os
 import logging
 
 from tgi_backend import TGIBackend
+from ooba_backend import OOBABackend
 
 app = Flask(__name__)
 
@@ -17,7 +18,8 @@ master_token = os.environ['MASTER_TOKEN']
 container_id = os.environ['CONTAINER_ID']
 control_server_url = os.environ['REPORT_ADDR']
 
-backend = TGIBackend(container_id=container_id, master_token=master_token, control_server_url=control_server_url, tgi_server_addr=HF_SERVER, send_data=True)
+# backend = TGIBackend(container_id=container_id, master_token=master_token, control_server_url=control_server_url, tgi_server_addr=HF_SERVER, send_data=True)
+backend = OOBABackend(container_id=container_id, master_token=master_token, control_server_url=control_server_url, tgi_server_addr=HF_SERVER, send_data=True)
 
 #################################################### CLIENT FACING ENDPOINTS ###########################################################################
 
