@@ -13,7 +13,7 @@ class OOBABackend(LLMBackend):
         self.metrics.start_req(text_prompt=model_request["prompt"], parameters=model_request)
         try:
             t1 = time.time()
-            response = requests.post(f"http://{self.tgi_server_addr}/api/v1/generate", json=model_request)
+            response = requests.post(f"http://{self.model_server_addr}/api/v1/generate", json=model_request)
             t2 = time.time()
             self.metrics.finish_req(text_prompt=model_request["prompt"], parameters=model_request)
 

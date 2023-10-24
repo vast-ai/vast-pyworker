@@ -22,6 +22,9 @@ export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
 export REPORT_ADDR="https://run.vast.ai"
 export MASTER_TOKEN="mtoken"
+export CONTAINER_ID=0
+export AUTH_PORT=3000
 
 source "$SERVER_DIR/start_auth.sh"
+source "$SERVER_DIR/start_watch_ooba.sh"
 source "$SERVER_DIR/launch_model_ooba.sh"

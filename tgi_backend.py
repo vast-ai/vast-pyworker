@@ -5,15 +5,15 @@ import time
 from llm_backend import LLMBackend
 
 class TGIBackend(LLMBackend):
-    def __init__(self, container_id, control_server_url, master_token, tgi_server_addr, send_data):
+    def __init__(self, container_id, control_server_url, master_token, model_server_addr, send_data):
         super().__init__(container_id=container_id, control_server_url=control_server_url, master_token=master_token, send_data=send_data)
-        self.tgi_server_addr = tgi_server_addr
+        self.model_server_addr = model_server_addr
 
     def generate(self, model_request):
         self.metrics.start_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
         try:
             t1 = time.time()
-            response = requests.post(f"http://{self.tgi_server_addr}/generate", json=model_request)
+            response = requests.post(f"http://{self.model_server_addr}/generate", json=model_request)
             t2 = time.time()
             self.metrics.finish_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
 
@@ -31,7 +31,7 @@ class TGIBackend(LLMBackend):
         hf_prompt = {"inputs" : inputs, "parameters" : parameters}
         self.metrics.start_req(text_prompt=inputs, parameters=parameters)
         try:
-            response = requests.post(f"http://{self.tgi_server_addr}/generate_stream", json=hf_prompt, stream=True)
+            response = requests.post(f"http://{self.model_server_addr}/generate_stream", json=hf_prompt, stream=True)
             if response.status_code == 200:
                 for byte_payload in response.iter_lines():
                     yield byte_payload
@@ -47,7 +47,7 @@ class TGIBackend(LLMBackend):
 
     def health_handler(self):
         try:
-            response = requests.get(f"http://{self.tgi_server_addr}/health")
+            response = requests.get(f"http://{self.model_server_addr}/health")
             print(f"health response: {response.status_code}")
             if response.status_code == 200:
                 return 200, "" 
@@ -61,7 +61,7 @@ class TGIBackend(LLMBackend):
 
     def info_handler(self):
         try:
-            response = requests.get(f"http://{self.tgi_server_addr}/info")
+            response = requests.get(f"http://{self.model_server_addr}/info")
             print(f"info response: {response.status_code}")
             if response.status_code == 200:
                 return 200, response.content 
@@ -75,7 +75,7 @@ class TGIBackend(LLMBackend):
 
     def metrics_handler(self):
         try:
-            response = requests.get(f"http://{self.tgi_server_addr}/metrics")
+            response = requests.get(f"http://{self.model_server_addr}/metrics")
             print(f"metrics response: {response.status_code}")
             if response.status_code == 200:
                 return 200, response.content

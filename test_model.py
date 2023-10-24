@@ -9,31 +9,33 @@ import sys
 import datetime
 
 from tgi_backend import TGIBackend
+from ooba_backend import OOBABackend
 
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
+
+backend_dict = {"TGI" : TGIBackend, "OOBA" : OOBABackend}
 
 def num_tokens_to_num_words(num_tokens):
     return num_tokens // 3 #seems roughly accurate for these generated words
 
 class ModelPerfTest:
-    def __init__(self, max_total_tokens, max_batch_total_tokens):
-        # print(f'ModelPerfTest: start nltk.download')
+    def __init__(self, max_total_tokens, max_batch_total_tokens, backend="TGI"):
         nltk.download("words")
-        # print(f'ModelPerfTest: end nltk.download')
         self.max_total_tokens = max_total_tokens
         self.avg_total_tokens = max_total_tokens // 2
         self.max_batch_total_tokens = max_batch_total_tokens
         self.avg_batch_total_tokens = (max_batch_total_tokens * 3) // 4
 
         self.word_list = words.words()
-        #needs to be called with the model already running, at least for now
-        self.backend = TGIBackend(container_id=os.environ['CONTAINER_ID'],
-                                  master_token=os.environ['MASTER_TOKEN'],
-                                  control_server_url=os.environ['REPORT_ADDR'],
-                                  tgi_server_addr=HF_SERVER,
-                                  send_data=False)
-
+        #needs to be called with the model already running
+        self.backend = backend_dict[backend](
+            container_id=os.environ['CONTAINER_ID'],
+            master_token=os.environ['MASTER_TOKEN'],
+            control_server_url=os.environ['REPORT_ADDR'],
+            model_server_addr=HF_SERVER,
+            send_data=False
+        )
         self.data = [] # data[i] = (prompt_tokens, output_tokens, output_time)
         print(f'ModelPerfTest: init complete')
 
@@ -42,8 +44,9 @@ class ModelPerfTest:
 
     def prompt_model(self, num_prompt_tokens, num_output_tokens):
         prompt = self.make_random_prompt(num_tokens_to_num_words(num_prompt_tokens))
-        parameters = {"max_new_tokens" : num_output_tokens}
-        rcode, _, time = self.backend.generate(inputs=prompt, parameters=parameters)
+        model_request = {"prompt" : prompt, "max_new_tokens" : num_output_tokens}
+        print(f"sending request: {model_request}")
+        rcode, _, time = self.backend.generate(model_request)
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
         gentokens = 0
