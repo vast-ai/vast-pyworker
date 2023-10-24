@@ -116,10 +116,11 @@ def auth_worker(args, server_address, api_key, prompt_input):
     generate_payload["parameters"] = {"max_new_tokens" : 256}
 
     print(f"calling worker: {worker_address}")
+    print(generate_payload)
     generate_response = requests.post(generate_url, headers={"Content-Type": "application/json"}, json=generate_payload, stream=args.generate_stream)
 
     if generate_response.status_code != 200:
-        print(f"Failed to call /generate endpoint for {generate_url}")
+        print(f"Failed to call /generate endpoint for {generate_url}, got status code: {generate_response.status_code}")
         return
 
     if args.generate_stream:
