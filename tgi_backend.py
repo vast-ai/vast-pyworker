@@ -4,10 +4,12 @@ import time
 
 from llm_backend import LLMBackend
 
+MODEL_SERVER = '127.0.0.1:5001'
+
 class TGIBackend(LLMBackend):
-    def __init__(self, container_id, control_server_url, master_token, model_server_addr, send_data):
+    def __init__(self, container_id, control_server_url, master_token, send_data):
         super().__init__(container_id=container_id, control_server_url=control_server_url, master_token=master_token, send_data=send_data)
-        self.model_server_addr = model_server_addr
+        self.model_server_addr = MODEL_SERVER
 
     def generate(self, model_request):
         self.metrics.start_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
@@ -42,7 +44,7 @@ class TGIBackend(LLMBackend):
             print(f"[TGI-backend] Request error: {e}")
 
     def generate_stream(self, model_request):
-        return Response(self.hf_tgi_wrapper(model_request["inputs"], model_request["parameters"])) #might want to add check here for connection error with tgi server
+        return Response(self.hf_tgi_wrapper(model_request["inputs"], model_request["parameters"]))
 
 
     def health_handler(self):

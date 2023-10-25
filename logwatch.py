@@ -103,5 +103,6 @@ class LogWatch:
             del perf_test
         
         self.send_data(data, self.control_server_url, "/worker_status/")
+        self.send_data(data, self.auth_server_url, "/report_loaded")
 
         

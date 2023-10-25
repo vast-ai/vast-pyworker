@@ -12,8 +12,6 @@ app = Flask(__name__)
 log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARNING)
 
-HF_SERVER = '127.0.0.1:5001' #could make this an environment variable in the future
-
 print(f"tgi_server.py")
 
 master_token = os.environ['MASTER_TOKEN']
@@ -21,7 +19,7 @@ container_id = os.environ['CONTAINER_ID']
 control_server_url = os.environ['REPORT_ADDR']
 backend = os.environ['BACKEND']
 
-backend = backend_dict[backend](container_id=container_id, master_token=master_token, control_server_url=control_server_url, model_server_addr=HF_SERVER, send_data=True)
+backend = backend_dict[backend](container_id=container_id, master_token=master_token, control_server_url=control_server_url, send_data=True)
 
 #################################################### CLIENT FACING ENDPOINTS ###########################################################################
 
