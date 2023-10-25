@@ -18,26 +18,26 @@ class Backend(ABC):
 
         self.public_key = fetch_public_key()
 
-    def get_auth_tokens(self):
-        new_token_batch = []
-        for _ in range(self.num_auth_tokens):
-            token = secrets.token_hex(32)
-            new_token_batch.append(token)
-        self.curr_auth_tokens |= set(new_token_batch)
+    # def get_auth_tokens(self):
+    #     new_token_batch = []
+    #     for _ in range(self.num_auth_tokens):
+    #         token = secrets.token_hex(32)
+    #         new_token_batch.append(token)
+    #     self.curr_auth_tokens |= set(new_token_batch)
 
-        return new_token_batch
+    #     return new_token_batch
 
     def check_master_token(self, token):
         return token == self.master_token
 
-    def check_auth_token(self, token):
-        if token in self.curr_auth_tokens:
-            self.curr_auth_tokens.remove(token)
-            return True
-        elif token == self.master_token:
-            return True
-        else:
-            return False
+    # def check_auth_token(self, token):
+    #     if token in self.curr_auth_tokens:
+    #         self.curr_auth_tokens.remove(token)
+    #         return True
+    #     elif token == self.master_token:
+    #         return True
+    #     else:
+    #         return False
 
     def format_request(self, request):
         model_dict = {}

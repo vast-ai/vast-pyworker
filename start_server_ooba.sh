@@ -23,8 +23,9 @@ export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
 export REPORT_ADDR="https://falling-vaccine-spokesman-joining.trycloudflare.com"
 export MASTER_TOKEN="mtoken"
-export CONTAINER_ID=0
+# export CONTAINER_ID=0
 export AUTH_PORT=3000
+export BACKEND="OOBA"
 
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch_ooba.sh"

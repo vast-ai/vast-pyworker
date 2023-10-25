@@ -5,12 +5,21 @@ env | grep _ >> /etc/environment;
 
 if [ ! -f /root/hasbooted ]
 then
-    pip install flask
-    pip install nltk
-    pip install pycryptodome
+    if [ $BACKEND == "TGI" ]; then
+        pip install flask
+        pip install nltk
+        pip install pycryptodome
+    elif [ $BACKEND == "OOBA" ]; then
+        pip install flask
+        pip install nltk
+        pip install pycryptodome
+        pip install accelerate -U
+        pip install protobuf
+        python -m pip install git+https://github.com/jllllll/exllama
+    fi
     mkdir /home/workspace
     cd /home/workspace
-    git clone https://github.com/vast-ai/vast-pyworker
+    git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
     touch ~/.no_auto_tmux
     touch /root/hasbooted
 fi
@@ -18,23 +27,39 @@ cd /home/workspace/vast-pyworker
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
-export REPORT_ADDR="https://run.vast.ai"
+# export REPORT_ADDR="https://run.vast.ai"
+# export BACKEND="TGI"
 
-if [ -z "$REPORT_ADDR" ] || [ -z "$MODEL_CMD" ] || [ -z "$AUTH_PORT" ]; then
-  echo "REPORT_ADDR, MODEL_CMD, AUTH_PORT env variables must be set!"
-  #example: https://idea-catalogue-cleaner-lg.trycloudflare.com meta-llama/Llama-2-70b-chat-hf 3000
+if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
+  echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"
   exit 1
+fi
+
+if [ $BACKEND == "TGI" ]; then
+    export WATCH_CMD="python3 $SERVER_DIR/logwatch_json.py"
+elif [ $BACKEND == "OOBA" ]; then
+    export WATCH_CMD="python3 $SERVER_DIR/logwatch_ooba.py"
+else
+    echo "Invalid Backend: $BACKEND"
+    exit 1
 fi
 
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
-source "$SERVER_DIR/launch_model.sh"
-
-sleep 1
-source "$SERVER_DIR/init_check.sh"
-
-if [ $? -eq 0 ]; then
-    echo "init_check passed, all server functions operating correctly."
+if [ $BACKEND == "TGI" ]; then
+    source "$SERVER_DIR/launch_model.sh"
+elif [ $BACKEND == "OOBA" ]; then
+    source "$SERVER_DIR/launch_model_ooba.sh"
 else
-    echo "init_check failed. Exit code: $?"
+    echo "Invalid Backend: $BACKEND"
+    exit 1
 fi
+
+# sleep 1
+# source "$SERVER_DIR/init_check.sh"
+
+# if [ $? -eq 0 ]; then
+#     echo "init_check passed, all server functions operating correctly."
+# else
+#     echo "init_check failed. Exit code: $?"
+# fi

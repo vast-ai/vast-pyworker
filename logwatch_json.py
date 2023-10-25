@@ -1,12 +1,9 @@
 import sys
 import re
 import json
-import time
 import os
-import datetime
 
-from test_model import ModelPerfTest
-from utils import post_request
+from logwatch import LogWatch
 
 def format_metric_value(metric_str):
     if metric_str[-2:] == "ms":
@@ -21,39 +18,20 @@ def format_metric_value(metric_str):
     else:
         return metric_str
 
-class LogWatch:
+class LogWatchTGI(LogWatch):
     def __init__(self, id, control_server_url, master_token, metric_names, batch_pattern):
-        self.id = int(id)
-        self.control_server_url = control_server_url
-        self.master_token = master_token
-        self.auth_server_url = f"http://0.0.0.0:{os.environ['AUTH_PORT']}"
-        self.start_time = time.time() #this could be made more precise
+        super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, backend="TGI")
+
         self.metric_names = metric_names
         self.batch_pattern = batch_pattern
 
-        self.max_batch_total_tokens = None
         self.max_batch_prefill_tokens = None
-
-        self.perf_file = "perf_results.json"
-        self.sanity_file = "perf_sanity.json"
-
-    def get_url(self):
-        internal_port = os.environ['AUTH_PORT']
-        port_var = f"VAST_TCP_PORT_{internal_port}"
-        return f"http://{os.environ['PUBLIC_IPADDR']}:{os.environ[port_var]}"
         
-    def send_data(self, data, url, path):
-        full_path = url + path
-        if ("loaded" in data.keys() or "error_msg" in data.keys()):
-            print(f'{datetime.datetime.now()} [logwatch] sending data to url: {full_path}, data: {data}')
-            sys.stdout.flush()
-        
-        rcode = post_request(full_path, data)
+    
+    def check_model_config(self, line):
+        pass
 
-        if ("loaded" in data.keys() or "error_msg" in data.keys()):
-            print(f"{datetime.datetime.now()} logwatch] Notification sent. Response: {rcode}")
-            sys.stdout.flush()
-        
+    
     def read_config(self, config_info_line):
         self.max_batch_prefill_tokens = config_info_line['max_batch_prefill_tokens']
         self.max_total_tokens = config_info_line['max_total_tokens']
@@ -76,71 +54,6 @@ class LogWatch:
         data["mtoken"] = self.master_token
         self.send_data(data, self.auth_server_url, "/report_capacity")
 
-    def metrics_sanity_check(self, throughput, avg_latency):
-        if os.path.exists(self.sanity_file):
-            with open(self.sanity_file, "r") as f:
-                bounds = json.load(f)
-            if throughput < bounds["max_throughput"] and avg_latency > bounds["min_avg_latency"]:
-                return True
-        else:
-            print(f"Couldn't find sanity file: {self.sanity_file}")
-        
-        return False
-
-    def notify_server_ready(self):
-        print("[logwatch] starting notify_server_ready")
-        sys.stdout.flush()
-        end_time = time.time()
-        data = {"id" : self.id}
-        data["loaded"] = True
-        data["loadtime"] = end_time - self.start_time
-        data["url"] = self.get_url()
-        data["cur_perf"] = 0.0
-
-        if os.path.exists(self.perf_file):
-            with open(self.perf_file, "r") as f:
-                sys.stdout.flush()
-                results = json.load(f)
-                throughput, avg_latency = results["throughput"], results["avg_latency"]
-                data["max_perf"] = throughput
-                data["avg_latency"] = avg_latency
-                print(f"{datetime.datetime.now()} [logwatch] loaded model perf test results: {throughput} {avg_latency} ")
-        else:
-            print(f"{datetime.datetime.now()} [logwatch] starting model perf test with max_total_tokens: {self.max_total_tokens}, max_batch_total_tokens: {self.max_batch_total_tokens}")
-            sys.stdout.flush()
-            perf_test = ModelPerfTest(self.max_total_tokens, self.max_batch_total_tokens)
-            sys.stdout.flush()
-            sanity_check = perf_test.first_run()
-            if sanity_check:
-                print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
-                sys.stdout.flush()
-                success, throughput, avg_latency = perf_test.run(3)
-                if success:
-                    if self.metrics_sanity_check(throughput, avg_latency):
-                        print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} in bounds")
-                        with open(self.perf_file, "w") as f:
-                            json.dump({"throughput" : throughput, "avg_latency" : avg_latency}, f)
-                        data["max_perf"] = throughput
-                        data["avg_latency"] = avg_latency
-                    else:
-                        print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} out of bounds")
-                        sys.stdout.flush()
-                        data["error_msg"] = "performance metrics out of bounds"
-                else:
-                    print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest not all test requests succeeded")
-                    sys.stdout.flush()
-                    data["error_msg"] = "not all test requests succeeded"
-            else:
-                print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test took too long")
-                sys.stdout.flush()
-                data["error_msg"] = "initial performance test took too long"
-                    
-            del perf_test
-        
-        self.send_data(data, self.control_server_url, "/worker_status/")
-
-        data["mtoken"] = self.master_token
-        self.send_data(data, self.auth_server_url, "/report_loaded")
     
     def forward_server_data(self, line_metrics, generate_params):
         data = {"id" : self.id}
@@ -176,7 +89,7 @@ def handle_line(watch, line_json):
             watch.read_config(config)
     if "message" in line_json.keys():
         if line_json["message"] == "Connected" and line_json["target"] == "text_generation_router":
-            watch.notify_server_ready()
+            watch.model_loaded()
         elif line_json["message"] == "Success" and line_json["target"] == "text_generation_router::server":
             generate_params = parse_config(line_json["span"]["parameters"][18:])
             watch.forward_server_data(line_json["span"], generate_params)
@@ -189,7 +102,7 @@ def main():
     metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
     batch_pattern = re.compile(r'Setting max batch total tokens to (\d+)')
 
-    watch = LogWatch(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
+    watch = LogWatchTGI(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"], metric_names=metric_names, batch_pattern=batch_pattern)
 
     print("[logwatch] ready and waiting for input\n")
     sys.stdout.flush()

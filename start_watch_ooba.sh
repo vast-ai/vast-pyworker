@@ -18,5 +18,5 @@ do
 done
 
 touch $SERVER_DIR/infer.log
-tail -f -n +1 $SERVER_DIR/infer.log | python3 $SERVER_DIR/logwatch_ooba.py 2>&1 | tee $SERVER_DIR/watch.log &
+tail -f -n +1 $SERVER_DIR/infer.log | $WATCH_CMD 2>&1 | tee $SERVER_DIR/watch.log &
 echo "started logwatch"

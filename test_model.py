@@ -22,30 +22,30 @@ def num_tokens_to_num_words(num_tokens):
 class ModelPerfTest:
     def __init__(self, max_total_tokens, max_batch_total_tokens, backend="TGI"):
         nltk.download("words")
-        self.max_total_tokens = max_total_tokens
-        self.avg_total_tokens = max_total_tokens // 2
-        self.max_batch_total_tokens = max_batch_total_tokens
-        self.avg_batch_total_tokens = (max_batch_total_tokens * 3) // 4
+        self.update_params(max_total_tokens, max_batch_total_tokens)
 
         self.word_list = words.words()
-        #needs to be called with the model already running
-        self.backend = backend_dict[backend](
+        self.backend = backend_dict[backend]( #needs to be called with the model already running
             container_id=os.environ['CONTAINER_ID'],
             master_token=os.environ['MASTER_TOKEN'],
             control_server_url=os.environ['REPORT_ADDR'],
             model_server_addr=HF_SERVER,
             send_data=False
         )
-        self.data = [] # data[i] = (prompt_tokens, output_tokens, output_time)
         print(f'ModelPerfTest: init complete')
 
+    def update_params(self, max_total_tokens, max_batch_total_tokens):
+        self.max_total_tokens = max_total_tokens
+        self.avg_total_tokens = max_total_tokens // 2
+        self.max_batch_total_tokens = max_batch_total_tokens
+        self.avg_batch_total_tokens = (max_batch_total_tokens * 3) // 4
+    
     def make_random_prompt(self, prompt_len):
         return " ".join(random.choices(self.word_list, k=prompt_len))
 
     def prompt_model(self, num_prompt_tokens, num_output_tokens):
         prompt = self.make_random_prompt(num_tokens_to_num_words(num_prompt_tokens))
         model_request = {"prompt" : prompt, "max_new_tokens" : num_output_tokens}
-        print(f"sending request: {model_request}")
         rcode, _, time = self.backend.generate(model_request)
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
