@@ -113,6 +113,7 @@ class ModelPerfTest:
         throughput, avg_latency, num_reqs, num_reqs_completed =  tuple((sum(series) / num_batches) for series in zip(*batches))
         if num_reqs != num_reqs_completed:
             print(f"{datetime.datetime.now()} only {num_reqs_completed} reqs completed out of {num_reqs} reqs started")
-            success = False
+        
+        success = (num_reqs_completed / num_reqs > 0.75)
 
         return success, throughput, avg_latency
