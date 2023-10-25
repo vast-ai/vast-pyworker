@@ -38,7 +38,7 @@ def generate():
         print(f"client request: {request.json} doesn't include model inputs and parameters")
         abort(400)
 
-    code, content, _ = backend.generate(**model_dict)
+    code, content, _ = backend.generate(model_dict)
 
     if code == 200:
         return content
@@ -59,7 +59,7 @@ def generate_stream():
         print(f"client request: {request.json} doesn't include model inputs and parameters")
         abort(400)
 
-    return backend.generate_stream(**model_dict)
+    return backend.generate_stream(model_dict)
 
 @app.route('/health', methods=['GET'])
 def health():

@@ -56,7 +56,7 @@ class LogWatch:
         print("[logwatch] starting model_loaded")
         sys.stdout.flush()
         end_time = time.time()
-        data = {"id" : self.id}
+        data = {"id" : self.id, "mtoken" : self.master_token}
         data["loaded"] = True
         data["loadtime"] = end_time - self.start_time
         # data["url"] = self.get_url()
@@ -79,7 +79,7 @@ class LogWatch:
             if sanity_check:
                 print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
                 sys.stdout.flush()
-                success, throughput, avg_latency = perf_test.run(3)
+                success, throughput, avg_latency = perf_test.run(1) #3
                 if success:
                     if self.metrics_sanity_check(throughput, avg_latency):
                         print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} in bounds")

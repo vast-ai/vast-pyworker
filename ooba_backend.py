@@ -35,3 +35,12 @@ class OOBABackend(LLMBackend):
     
     def generate_stream(self, model_request):
         pass
+
+    def health_handler():
+        return 501, None
+
+    def info_handler():
+        return 501, None
+
+    def metrics_handler():
+        return 501, None

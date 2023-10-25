@@ -43,7 +43,7 @@ class LogWatchOOBA(LogWatch):
         return False
 
     def send_model_update(self, update_params):
-        data = {"id" : self.id}
+        data = {"id" : self.id, "mtoken" : self.master_token}
         for k,v in update_params.items():
             data[k] = v
         self.send_data(data, self.auth_server_url, "/report_done")
