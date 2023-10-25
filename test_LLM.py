@@ -59,9 +59,19 @@ def worker(args, server_address, api_key, prompt_input):
 
     generate_payload = {
         "token": "22e9c620e8c500dbf3ac880fa1b54242ab51a5420c1bd2af5d2450b489d46731",
-        "inputs": prompt_input,
-        "parameters": {"max_new_tokens": 256}
     }
+
+    if args.backend == "TGI":
+        generate_payload["inputs"] = prompt_input
+        generate_payload["parameters"] = {"max_new_tokens" : 256}
+    elif args.backend == "OOBA":
+        generate_payload["prompt"] = prompt_input
+        generate_payload["max_new_tokens"] = 256
+    else:
+        print(f"unsupported backend: {args.backend}")
+        return
+
+    print(f"using payload: {generate_payload}")
     generate_response = requests.post(generate_url, headers={"Content-Type": "application/json"}, data=json.dumps(generate_payload), stream=args.generate_stream)
 
     if generate_response.status_code != 200:
@@ -112,11 +122,17 @@ def auth_worker(args, server_address, api_key, prompt_input):
     else:
         generate_url = f"{worker_address}/generate"
 
-    generate_payload["inputs"] = prompt_input
-    generate_payload["parameters"] = {"max_new_tokens" : 256}
+    if args.backend == "TGI":
+        generate_payload["inputs"] = prompt_input
+        generate_payload["parameters"] = {"max_new_tokens" : 256}
+    elif args.backend == "OOBA":
+        generate_payload["prompt"] = prompt_input
+        generate_payload["max_new_tokens"] = 256
+    else:
+        print(f"unsupported backend: {args.backend}")
+        return
 
-    print(f"calling worker: {worker_address}")
-    print(generate_payload)
+    print(f"calling worker: {worker_address}, using payload: {generate_payload}")
     generate_response = requests.post(generate_url, headers={"Content-Type": "application/json"}, json=generate_payload, stream=args.generate_stream)
 
     if generate_response.status_code != 200:
@@ -146,6 +162,7 @@ def main():
     parser.add_argument("--use_auth", action="store_true", help="Whether to provide crypto message and signature to worker endpoint")
     parser.add_argument("--generate_stream", action="store_true", help="Whether to generate a streaming request or not")
     parser.add_argument("--worker_addr", help="worker address override", default=None)
+    parser.add_argument("--backend", help="Name of backend in use on worker server", default="TGI")
     args = parser.parse_args()
 
     futures = []
