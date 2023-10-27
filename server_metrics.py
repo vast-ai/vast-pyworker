@@ -3,22 +3,97 @@ import time
 import random
 from threading import Thread
 import threading
+from abc import ABC, abstractmethod
 
 from utils import post_request
 
-class LLMServerMetrics: #could inherit from a more generic Metrics
-    def __init__(self, id, control_server_url, master_token, send_data):
+class ServerMetrics(ABC):
+    def __init__(self, id, control_server_url, send_server_data):
         self.id = int(id)
         self.control_server_url = control_server_url
-        self.master_token = master_token #could get rid of this
-        
-        self.batch_capacity = None
-        self.total_prompt_tokens = 0.0
+        self.send_server_data = send_server_data
         self.overloaded = False
-
+        
         self.num_requests_recieved = 0
         self.num_requests_finished = 0
         self.num_requests_working = 0
+
+        self.cur_perf = 0.0
+        self.max_perf = 1.0
+        self.cur_capacity = 0.0
+        self.cur_capacity_lastreport = 0.1234
+
+        self.model_loaded = False
+        self.loadtime = 0.0
+        
+        self.cur_load = 0.0
+        self.fill_data_lut = 0.0
+
+        self.update_interval = 1.0
+        if self.send_server_data:
+            self.t1 = Thread(target=self.send_data_loop)
+            self.t1.start()
+
+        print(f"ServerMetrics({id},{control_server_url})")
+
+    def send_data_loop(self):
+        while True:
+            if ((random.randint(0, 9) == 3) or (self.cur_capacity_lastreport != self.num_tokens_working)) and self.model_loaded:
+                data = {"id" : self.id, "message" : "data update"}
+                self.fill_data(data)
+                self.send_data(data, self.control_server_url, "/worker_status/")
+            time.sleep(self.update_interval)
+
+    def send_data(self, data, url, path):
+        full_path = url + path
+        print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
+        thread = threading.Thread(target=post_request, args=(full_path,data))
+        thread.start()
+        sys.stdout.flush()
+    
+    def fill_data_generic(self, data):
+        data["num_requests_working"] = self.num_requests_working
+        data["overloaded"] = self.overloaded
+        data["num_requests_recieved"] = self.num_requests_recieved
+        data["cur_perf"]     = self.cur_perf
+
+        if self.model_loaded:
+            data["loadtime"] = self.loadtime
+            data["max_perf"] = self.max_perf
+
+    
+    @abstractmethod
+    def fill_data(self, data):
+        pass
+
+    @abstractmethod
+    def start_req(self, request):
+        pass
+
+    @abstractmethod
+    def finish_req(self, request):
+        pass
+
+    @abstractmethod
+    def report_req_stats(self, log_data):
+        pass
+
+    def report_loaded(self, log_data):
+        self.model_loaded = True
+        self.overloaded = False
+        if "max_perf" in log_data.keys():
+            self.max_perf   = log_data["max_perf"]
+        if "loadtime" in log_data.keys():
+            self.loadtime   = log_data["loadtime"]
+
+
+class LLMServerMetrics(ServerMetrics):
+    def __init__(self, id, control_server_url, send_server_data):
+        super().__init__(id, control_server_url, send_server_data)
+        
+        self.batch_capacity = None
+        self.total_prompt_tokens = 0.0
+        
         self.num_tokens_working = 0
         self.num_tokens_finished = 0.0 # is periodically reset every interval
         self.curr_queue_time = 0.0
@@ -27,58 +102,18 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.request_ltime = time.time()
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
-
-        self.cur_perf = 0.0
-        self.max_perf = 1.0
-        self.cur_capacity_lastreport = 0.1234
-
-        self.model_loaded = False
-        self.loadtime = 0.0
-        
-        self.cur_load = 0.0
-        self.fill_data_lut = 0.0
         self.num_tokens_incoming = 0.0
-
-        
-        print(f"LLMServerMetrics({id},{control_server_url},{master_token})")
-
-        self.update_interval = 1.0
-        if send_data:
-            self.t1 = Thread(target=self.send_data_loop)
-            self.t1.start()
-
-    def report_batch_capacity(self, json_data):
-        # self.batch_capacity = min(json_data["max_batch_prefill_tokens"], json_data["max_batch_tokens"])
-        self.batch_capacity = json_data["max_batch_tokens"]
-    
-    def send_data(self, data, url, path):
-        full_path = url + path
-        print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
-        thread = threading.Thread(target=post_request, args=(full_path,data))
-        thread.start()
-        sys.stdout.flush()
-    
-    def send_data_loop(self):
-        while True:
-            if ((random.randint(0, 9) == 3) or (self.cur_capacity_lastreport != self.num_tokens_working)) and self.model_loaded:
-                # print("[server-metrics] sending data")
-                data = {"id" : self.id, "message" : "data update"}
-                self.fill_data(data)
-                self.send_data(data, self.control_server_url, "/worker_status/")
-            time.sleep(self.update_interval)
     
     def fill_data(self, data):
-        data["num_requests_working"] = self.num_requests_working
-        
+        self.fill_data_generic(data)
+
         data["cur_capacity"] = self.num_tokens_working
         data["max_capacity"] = self.batch_capacity
-        data["cur_perf"]     = self.cur_perf
+
         self.cur_capacity_lastreport = self.num_tokens_working
         
         data["curr_tokens_per_second"] = self.curr_tokens_per_second
-        data["overloaded"] = self.overloaded
-        data["num_requests_recieved"] = self.num_requests_recieved
-
+        
         ntime = time.time()
         elapsed = ntime - self.fill_data_lut
         if (self.fill_data_lut == 0.0):
@@ -88,17 +123,6 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
         
-        if self.model_loaded:
-            data["loadtime"] = self.loadtime
-            data["max_perf"] = self.max_perf
-
-        #data["curr_queue_time"] = self.curr_queue_time
-
-    #calculate "work ratio" in terms of tokens
-    def calc_work_ratio(self):
-        if self.batch_capacity is not None:
-            return self.num_tokens_working / self.batch_capacity
-    
     def start_req(self, text_prompt, parameters):
         self.num_requests_recieved += 1
         self.num_requests_working += 1
@@ -128,14 +152,9 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
         self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
         #self.cur_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
         #print(f"cur_perf  {self.cur_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
-
-    def report_loaded(self, log_data):
-        self.model_loaded = True
-        self.overloaded = False
-        if "max_perf" in log_data.keys():
-            self.max_perf   = log_data["max_perf"]
-        if "loadtime" in log_data.keys():
-            self.loadtime   = log_data["loadtime"]
+    
+    def report_batch_capacity(self, json_data):
+        self.batch_capacity = json_data["max_batch_tokens"]
     
     def report_req_stats(self, log_data):
         self.curr_queue_time = log_data["queue_time"]
@@ -158,3 +177,31 @@ class LLMServerMetrics: #could inherit from a more generic Metrics
             self.overloaded = False
 
 
+class IMGServerMetrics(ServerMetrics):
+    def __init__(self, id, control_server_url, send_server_data):
+        super().__init__(id, control_server_url, send_server_data)
+        
+        self.total_prompt_tokens = 0
+        self.tot_request_time = 0
+        self.img_size = 512 * 512 #add this as a parameter
+        
+    def fill_data(self, data):
+        self.fill_data_generic(data)
+        data["cur_load"] = self.img_size * self.num_requests_working
+
+    def start_req(self, request):
+        self.num_requests_recieved += 1
+        self.num_requests_working += 1
+
+        num_prompt_tokens = len(request["prompt"].split())
+        self.total_prompt_tokens += num_prompt_tokens
+
+    def finish_req(self, request):
+        self.num_requests_finished += 1
+        self.num_requests_working -= 1
+
+    def report_req_stats(self, log_data):
+        self.tot_request_time += log_data["time_elapsed"]
+        self.cur_perf = self.img_size * (self.num_requests_finished / self.tot_request_time)
+
+        

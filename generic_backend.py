@@ -73,9 +73,23 @@ class Backend(ABC):
         else:
             return False
 
-    @abstractmethod
-    def generate(self, model_request):
-        pass
+    def generate(self, model_request, endpoint):
+        self.metrics.start_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
+        try:
+            t1 = time.time()
+            response = requests.post(f"http://{self.model_server_addr}/{endpoint}", json=model_request)
+            t2 = time.time()
+            self.metrics.finish_req(text_prompt=model_request["inputs"], parameters=model_request["parameters"])
+
+            if response.status_code == 200:
+                return 200, response.text, t2 - t1
+
+            return response.status_code, None, None
+
+        except requests.exceptions.RequestException as e:
+            print(f"[backend] Request error: {e}")
+
+        return 500, None, None
 
     @abstractmethod
     def generate_stream(self, model_request):
