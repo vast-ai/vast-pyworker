@@ -28,7 +28,6 @@ class ModelPerfTest:
             container_id=os.environ['CONTAINER_ID'],
             master_token=os.environ['MASTER_TOKEN'],
             control_server_url=os.environ['REPORT_ADDR'],
-            model_server_addr=HF_SERVER,
             send_data=False
         )
         self.avg_total_tokens = None
