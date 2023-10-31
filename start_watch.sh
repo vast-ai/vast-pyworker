@@ -6,6 +6,7 @@ then
     export SERVER_DIR="$current_cwd"
 fi
 
+WATCH_CMD="python3 $SERVER_DIR/logwatch.py"
 WATCH_PID=$(ps aux | grep "$WATCH_CMD" | grep -v grep | awk '{print $2}')
 
 while ! [ -z "$WATCH_PID" ]

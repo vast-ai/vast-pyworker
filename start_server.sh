@@ -16,6 +16,8 @@ then
         pip install accelerate -U
         pip install protobuf
         python -m pip install git+https://github.com/jllllll/exllama
+    elif [$BACKEND == "SD_AUTO"]; then
+        source /venv/bin/activate
     fi
     mkdir /home/workspace
     cd /home/workspace
@@ -27,29 +29,20 @@ cd /home/workspace/vast-pyworker
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
-# export REPORT_ADDR="https://run.vast.ai"
-# export BACKEND="TGI"
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"
   exit 1
 fi
 
-if [ $BACKEND == "TGI" ]; then
-    export WATCH_CMD="python3 $SERVER_DIR/logwatch_json.py"
-elif [ $BACKEND == "OOBA" ]; then
-    export WATCH_CMD="python3 $SERVER_DIR/logwatch_ooba.py"
-else
-    echo "Invalid Backend: $BACKEND"
-    exit 1
-fi
-
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
 if [ $BACKEND == "TGI" ]; then
-    source "$SERVER_DIR/launch_model.sh"
+    source "$SERVER_DIR/launch_model_tgi.sh"
 elif [ $BACKEND == "OOBA" ]; then
     source "$SERVER_DIR/launch_model_ooba.sh"
+elif [ $BACKEND == "OOBA" ]; then
+    source "$SERVER_DIR/launch_model_sd_auto.sh"
 else
     echo "Invalid Backend: $BACKEND"
     exit 1

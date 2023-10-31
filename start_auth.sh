@@ -6,7 +6,7 @@ then
     export SERVER_DIR="$current_cwd"
 fi
 
-AUTH_CMD="$SERVER_DIR/tgi_server.py" 
+AUTH_CMD="$SERVER_DIR/server.py" 
 AUTH_PID=$(ps aux | grep "$AUTH_CMD" | grep -v grep | awk '{print $2}')
 
 while ! [ -z "$AUTH_PID" ]

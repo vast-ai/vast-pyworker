@@ -20,9 +20,8 @@ def num_tokens_to_num_words(num_tokens):
     return num_tokens // 3 #seems roughly accurate for these generated words
 
 class ModelPerfTest:
-    def __init__(self, max_total_tokens, max_batch_total_tokens, backend="TGI"):
+    def __init__(self, backend="TGI"):
         nltk.download("words")
-        self.update_params(max_total_tokens, max_batch_total_tokens)
 
         self.word_list = words.words()
         self.backend = backend_dict[backend]( #needs to be called with the model already running
@@ -32,12 +31,12 @@ class ModelPerfTest:
             model_server_addr=HF_SERVER,
             send_data=False
         )
+        self.avg_total_tokens = None
+        self.avg_batch_total_tokens = None
         print(f'ModelPerfTest: init complete')
 
     def update_params(self, max_total_tokens, max_batch_total_tokens):
-        self.max_total_tokens = max_total_tokens
         self.avg_total_tokens = max_total_tokens // 2
-        self.max_batch_total_tokens = max_batch_total_tokens
         self.avg_batch_total_tokens = (max_batch_total_tokens * 3) // 4
     
     def make_random_prompt(self, prompt_len):
@@ -89,7 +88,6 @@ class ModelPerfTest:
             return True
         
     def run(self, num_batches):
-        # not 100% guaranteed that all these reqs will be completed in one model batch
         if num_batches < 1:
             raise ValueError("can't run with less than one perf benchmark iteration!")
 

@@ -87,7 +87,7 @@ class ServerMetrics(ABC):
             self.loadtime   = log_data["loadtime"]
 
 
-class LLMServerMetrics(ServerMetrics):
+class TGIServerMetrics(ServerMetrics):
     def __init__(self, id, control_server_url, send_server_data):
         super().__init__(id, control_server_url, send_server_data)
         
@@ -123,7 +123,7 @@ class LLMServerMetrics(ServerMetrics):
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
         
-    def start_req(self, text_prompt, parameters):
+    def __start_req(self, text_prompt, parameters):
         self.num_requests_recieved += 1
         self.num_requests_working += 1
         
@@ -134,7 +134,32 @@ class LLMServerMetrics(ServerMetrics):
         self.total_prompt_tokens += num_prompt_tokens
         self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
     
-    def finish_req(self, text_prompt, parameters):
+    def start_req(self, request):
+        if request is None:
+            print("metrics starting null request")
+            return
+        self.__start_req(request["inputs"], request["parameters"])
+
+    #undos what __start_req does
+    def __error_req(self, text_prompt, parameters):
+        self.num_requests_recieved -= 1
+        self.num_requests_working -= 1
+
+        num_prompt_tokens = len(text_prompt.split())
+        num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
+        self.num_tokens_working -= num_req_tokens_started
+        self.num_tokens_incoming -= num_req_tokens_started
+        self.total_prompt_tokens -= num_prompt_tokens
+        self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
+
+    def error_req(self, request):
+        if request is None:
+            print("metrics error null request")
+            return
+        self.__error_req(request["inputs"], request["parameters"])
+
+    #confirms a successful request
+    def __finish_req(self, text_prompt, parameters):
         self.num_requests_finished += 1
         self.num_requests_working -= 1
 
@@ -142,6 +167,8 @@ class LLMServerMetrics(ServerMetrics):
         num_req_tokens_finished = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working -= num_req_tokens_finished
         self.num_tokens_finished += num_req_tokens_finished
+        
+        
         self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
 
         elapsed = time.time() - self.request_ltime
@@ -152,7 +179,13 @@ class LLMServerMetrics(ServerMetrics):
         self.tokens_per_req_avg = alpha*self.tokens_per_req_avg + (1-alpha)*num_req_tokens_finished
         #self.cur_perf           = self.tokens_per_req_avg / max(self.elapsed_avg, 0.00001)
         #print(f"cur_perf  {self.cur_perf} = {self.tokens_per_req_avg} / {self.elapsed_avg}")
-    
+
+    def finish_req(self, request):
+        if request is None:
+            print("metrics finishing null request")
+            return
+        self.__finish_req(request["inputs"], request["parameters"])
+
     def report_batch_capacity(self, json_data):
         self.batch_capacity = json_data["max_batch_tokens"]
     
@@ -175,6 +208,28 @@ class LLMServerMetrics(ServerMetrics):
             self.overloaded = True
         else:
             self.overloaded = False
+
+class OOBAServerMetrics(TGIServerMetrics):
+    def __init__(self, id, control_server_url, send_server_data):
+        super().__init__(id, control_server_url, send_server_data)
+
+    def start_req(self, request):
+        if request is None:
+            print("metrics starting null request")
+            return
+        self.__start_req(request["prompt"], request)
+
+    def finish_req(self, request):
+        if request is None:
+            print("metrics finishing null request")
+            return
+        self.__finish_req(request["prompt"], request)
+
+    def error_req(self, request):
+        if request is None:
+            print("metrics error null request")
+            return
+        self.__error_req(request["prompt"], request)
 
 
 class IMGServerMetrics(ServerMetrics):
