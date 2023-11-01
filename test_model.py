@@ -43,8 +43,8 @@ class ModelPerfTest:
 
     def prompt_model(self, num_prompt_tokens, num_output_tokens):
         prompt = self.make_random_prompt(num_tokens_to_num_words(num_prompt_tokens))
-        model_request = {"prompt" : prompt, "max_new_tokens" : num_output_tokens}
-        rcode, _, time = self.backend.generate(model_request)
+        model_request = {"inputs" : prompt, "parameters" : {"max_new_tokens" : num_output_tokens}} #need to add a function to handle this (is different for OOBA)
+        rcode, _, time = self.backend.generate(model_request, metrics=False)
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
         gentokens = 0
@@ -60,6 +60,9 @@ class ModelPerfTest:
                 future = e.submit(self.prompt_model, num_prompt_tokens, num_output_tokens)
                 futures.append(future)
 
+        print("sent batch and waiting")
+        sys.stdout.flush()
+        
         total_latency = 0.0
         num_reqs_completed = 0
         total_gentokens = 0
@@ -70,16 +73,22 @@ class ModelPerfTest:
                 total_gentokens += gentokens
                 num_reqs_completed += 1
 
+        print("batch returning")
+        sys.stdout.flush()
+        
         t2 = time.time()
         return t2 - t1, total_latency, total_gentokens, num_reqs_completed
     
     def first_run(self):
-        num_reqs = 16
+        print("starting first run")
+        sys.stdout.flush()
+        num_reqs = 2
         req_total_tokens = [(48, 16)] * num_reqs # total_tokens = 64
         time_elapsed, total_latency, total_gentokens, num_reqs_completed = self.send_batch(req_total_tokens)
         throughput = total_gentokens / time_elapsed
         avg_latency = total_latency / num_reqs_completed
         print(f"{datetime.datetime.now()} first run completed, time_elapsed: {time_elapsed}, avg_latency: {avg_latency}, throughput: {throughput}, num_reqs_completed: {num_reqs_completed}")
+        sys.stdout.flush()
 
         if (throughput < 50.0) or (num_reqs_completed != num_reqs): #some machines give ~75.0
             return False

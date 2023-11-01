@@ -5,7 +5,7 @@ MODEL_SERVER = '127.0.0.1:5001'
 
 class SDAUTOBackend(Backend):
     def __init__(self, container_id, control_server_url, master_token, send_data):
-        metrics = IMGServerMetrics(id=container_id, control_server_url=control_server_url, send_data=send_data)
+        metrics = IMGServerMetrics(id=container_id, control_server_url=control_server_url, send_server_data=send_data)
         super().__init__(master_token=master_token, metrics=metrics)
         self.model_server_addr = MODEL_SERVER
 

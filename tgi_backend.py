@@ -1,5 +1,6 @@
 import requests
-from flask import Response, request, abort
+from flask import Response, abort
+import sys
 
 from server_metrics import TGIServerMetrics
 from generic_backend import Backend
@@ -8,12 +9,12 @@ MODEL_SERVER = '127.0.0.1:5001'
 
 class TGIBackend(Backend):
     def __init__(self, container_id, control_server_url, master_token, send_data):
-        metrics = TGIServerMetrics(id=container_id, control_server_url=control_server_url, send_data=send_data)
+        metrics = TGIServerMetrics(id=container_id, control_server_url=control_server_url, send_server_data=send_data)
         super().__init__(master_token=master_token, metrics=metrics)
         self.model_server_addr = MODEL_SERVER
 
-    def generate(self, model_request):
-        return super().generate(model_request, self.model_server_addr, "generate", lambda r: r.text, metrics=True)
+    def generate(self, model_request, metrics=True):
+        return super().generate(model_request, self.model_server_addr, "generate", lambda r: r.text, metrics=metrics)
 
     def hf_tgi_wrapper(self, inputs, parameters):
         hf_prompt = {"inputs" : inputs, "parameters" : parameters}

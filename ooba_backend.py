@@ -10,7 +10,7 @@ STREAMING_SERVER = '127.0.0.1:5002'
 
 class OOBABackend(Backend):
     def __init__(self, container_id, control_server_url, master_token, send_data):
-        metrics = OOBAServerMetrics(id=container_id, control_server_url=control_server_url, send_data=send_data)
+        metrics = OOBAServerMetrics(id=container_id, control_server_url=control_server_url, send_server_data=send_data)
         super().__init__(master_token=master_token, metrics=metrics)
         self.blocking_server_addr = BLOCKING_SERVER
         self.streaming_server_addr = STREAMING_SERVER

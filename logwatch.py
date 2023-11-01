@@ -57,9 +57,11 @@ class LogWatch(ABC):
             data["max_perf"] = throughput
             data["avg_latency"] = avg_latency
             print(f"{datetime.datetime.now()} [logwatch] loaded model perf test results: {throughput} {avg_latency} ")
+            sys.stdout.flush()
 
     def run_perf_test(self, data):
         print(f"{datetime.datetime.now()} [logwatch] starting model perf test")
+        sys.stdout.flush()
         sanity_check = self.perf_test.first_run()
         if sanity_check:
             print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
@@ -83,7 +85,7 @@ class LogWatch(ABC):
         else:
             print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test took too long")
             sys.stdout.flush()
-            data["error_msg"] = "initial performance test took too long"
+            data["error_msg"] = "initial performance test failed"
                 
     def model_loaded(self):
         print("[logwatch] starting model_loaded")
@@ -101,7 +103,9 @@ class LogWatch(ABC):
                 self.run_perf_test(data)
             
             del self.perf_test
-                
+
+        print("[logwatch] sending data for model_loaded")
+        sys.stdout.flush()     
         self.send_data(data, self.control_server_url, "/worker_status/")
         self.send_data(data, self.auth_server_url, "/report_loaded")
 

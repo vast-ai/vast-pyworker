@@ -38,7 +38,8 @@ class ServerMetrics(ABC):
 
     def send_data_loop(self):
         while True:
-            if ((random.randint(0, 9) == 3) or (self.cur_capacity_lastreport != self.num_tokens_working)) and self.model_loaded:
+            print(f"num_tokens_finished: {self.num_tokens_finished}")
+            if self.send_data_condition():
                 data = {"id" : self.id, "message" : "data update"}
                 self.fill_data(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
@@ -61,6 +62,9 @@ class ServerMetrics(ABC):
             data["loadtime"] = self.loadtime
             data["max_perf"] = self.max_perf
 
+    @abstractmethod
+    def send_data_condition(self):
+        pass
     
     @abstractmethod
     def fill_data(self, data):
@@ -89,12 +93,11 @@ class ServerMetrics(ABC):
 
 class TGIServerMetrics(ServerMetrics):
     def __init__(self, id, control_server_url, send_server_data):
-        super().__init__(id, control_server_url, send_server_data)
-        
         self.batch_capacity = None
         self.total_prompt_tokens = 0.0
         
         self.num_tokens_working = 0
+        print(f"num_tokens_working: {self.num_tokens_working}")
         self.num_tokens_finished = 0.0 # is periodically reset every interval
         self.curr_queue_time = 0.0
         self.curr_tokens_per_second = 0.0 # this is on a request by request basis, and doesn't take into account concurrent requests because of batching
@@ -103,6 +106,12 @@ class TGIServerMetrics(ServerMetrics):
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
         self.num_tokens_incoming = 0.0
+
+        super().__init__(id, control_server_url, send_server_data)
+    
+    def send_data_condition(self):
+        # print(f"num_tokens_working: {self.num_tokens_working}")
+        return ((random.randint(0, 9) == 3) or (self.cur_capacity_lastreport != self.num_tokens_working)) and self.model_loaded
     
     def fill_data(self, data):
         self.fill_data_generic(data)
