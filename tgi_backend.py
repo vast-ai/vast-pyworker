@@ -16,31 +16,35 @@ class TGIBackend(Backend):
     def generate(self, model_request, metrics=True):
         return super().generate(model_request, self.model_server_addr, "generate", lambda r: r.text, metrics=metrics)
 
-    def hf_tgi_wrapper(self, inputs, parameters):
-        hf_prompt = {"inputs" : inputs, "parameters" : parameters}
-        self.metrics.start_req(text_prompt=inputs, parameters=parameters)
+    def hf_tgi_wrapper(self, model_request):
+        success = True
+        self.metrics.start_req(model_request)
         try:
-            response = requests.post(f"http://{self.model_server_addr}/generate_stream", json=hf_prompt, stream=True)
+            response = requests.post(f"http://{self.model_server_addr}/generate_stream", json=model_request, stream=True)
             if response.status_code == 200:
                 for byte_payload in response.iter_lines():
                     yield byte_payload
                     yield "\n"
-            self.metrics.finish_req(text_prompt=inputs, parameters=parameters)
+                self.metrics.finish_req(model_request)
+                success = True
         
         except requests.exceptions.RequestException as e:
             print(f"[TGI-backend] Request error: {e}")
+        
+        if not success:
+            self.metrics.error_req(model_request)
 
     def generate_stream(self, model_request):
-        return Response(self.hf_tgi_wrapper(model_request["inputs"], model_request["parameters"]))
+        return Response(self.hf_tgi_wrapper(model_request))
 
     def health_handler(self):
-        return super().generate(None, self.model_server_addr, "health")
+        return super().get(None, self.model_server_addr, "health", lambda r: r.text,)
 
     def info_handler(self):
-        return super().generate(None, self.model_server_addr, "info")
+        return super().get(None, self.model_server_addr, "info", lambda r: r.text)
 
     def metrics_handler(self):
-        return super().generate(None, self.model_server_addr, "metrics")
+        return super().get(None, self.model_server_addr, "metrics", lambda r: r.text)
     
 ######################################### FLASK HANDLER METHODS ###############################################################
 
@@ -109,9 +113,13 @@ def metrics_handler(backend, request):
         abort(code)
 
 flask_dict = {
-    "generate" : generate_handler,
-    "generate_stream" : generate_stream_handler,
-    "health" : health_handler,
-    "info" : info_handler,
-    "metrics" : metrics_handler
+    "POST" : {
+        "generate" : generate_handler,
+        "generate_stream" : generate_stream_handler,
+    },
+    "GET" : {
+        "health" : health_handler,
+        "info" : info_handler,
+        "metrics" : metrics_handler
+    }
 }

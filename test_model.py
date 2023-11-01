@@ -10,11 +10,12 @@ import datetime
 
 from tgi_backend import TGIBackend
 from ooba_backend import OOBABackend
+from sd_auto_backend import SDAUTOBackend
 
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
 
-backend_dict = {"TGI" : TGIBackend, "OOBA" : OOBABackend}
+backend_dict = {"TGI" : TGIBackend, "OOBA" : OOBABackend, "SD_AUTO" : SDAUTOBackend}
 
 def num_tokens_to_num_words(num_tokens):
     return num_tokens // 3 #seems roughly accurate for these generated words
@@ -82,7 +83,7 @@ class ModelPerfTest:
     def first_run(self):
         print("starting first run")
         sys.stdout.flush()
-        num_reqs = 2
+        num_reqs = 16
         req_total_tokens = [(48, 16)] * num_reqs # total_tokens = 64
         time_elapsed, total_latency, total_gentokens, num_reqs_completed = self.send_batch(req_total_tokens)
         throughput = total_gentokens / time_elapsed
