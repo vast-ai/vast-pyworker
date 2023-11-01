@@ -33,10 +33,17 @@ class OOBABackend(Backend):
 ######################################### FLASK HANDLER METHODS ###############################################################
 
 def generate_handler(backend, request):
-    return backend.generate(request)
+    
+    code, content, _ = backend.generate(request.json)
+    
+    if code == 200:
+        return content
+    else:
+        print(f"generate failed with code {code}")
+        abort(code)
 
 flask_dict = {
-    "GET" : {
+    "POST" : {
         "api/v1/generate" : generate_handler
     }
 }

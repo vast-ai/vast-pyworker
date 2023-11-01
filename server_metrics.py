@@ -240,15 +240,17 @@ class OOBAServerMetrics(TGIServerMetrics):
 
 class IMGServerMetrics(ServerMetrics):
     def __init__(self, id, control_server_url, send_server_data):
-        super().__init__(id, control_server_url, send_server_data)
-        
         self.total_prompt_tokens = 0
         self.tot_request_time = 0
         self.img_size = 512 * 512 #add this as a parameter
+
+        super().__init__(id, control_server_url, send_server_data)
         
     def fill_data(self, data):
         self.fill_data_generic(data)
         data["cur_load"] = self.img_size * self.num_requests_working
+        data["total_prompt_tokens"] = self.total_prompt_tokens
+        self.cur_capacity_lastreport = self.total_prompt_tokens
 
     def start_req(self, request):
         self.num_requests_recieved += 1
@@ -261,8 +263,18 @@ class IMGServerMetrics(ServerMetrics):
         self.num_requests_finished += 1
         self.num_requests_working -= 1
 
+    def error_req(self, request):
+        self.num_requests_recieved -= 1
+        self.num_requests_working -= 1
+
+        num_prompt_tokens = len(request["prompt"].split())
+        self.total_prompt_tokens -= num_prompt_tokens
+
     def report_req_stats(self, log_data):
         self.tot_request_time += log_data["time_elapsed"]
         self.cur_perf = self.img_size * (self.num_requests_finished / self.tot_request_time)
+
+    def send_data_condition(self):
+        return (((random.randint(0, 9) == 3) or (self.total_prompt_tokens != self.cur_capacity_lastreport)) and self.model_loaded)
 
         

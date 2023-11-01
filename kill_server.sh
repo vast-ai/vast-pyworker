@@ -8,7 +8,10 @@ fi
 
 # Define the target command
 WATCH_CMD="python3 $SERVER_DIR/logwatch.py"
-MODEL_LAUNCH_CMD="text-generation-launcher"
+if [ -z "$MODEL_LAUNCH_CMD" ]
+then
+    MODEL_LAUNCH_CMD="text-generation-launcher"
+fi
 AUTH_CMD="$SERVER_DIR/server.py" 
 
 

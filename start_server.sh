@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "onstart_TGI_test_nick.sh"
+echo "start_server.sh"
 date;
 env | grep _ >> /etc/environment;
 
@@ -9,13 +9,16 @@ then
         pip install accelerate -U
         pip install protobuf
         python -m pip install git+https://github.com/jllllll/exllama
-    elif [$BACKEND == "SD_AUTO"]; then
-        source /venv/bin/activate
+    elif [ $BACKEND == "SD_AUTO" ]; then
+        rsync --remove-source-files -rlptDu --ignore-existing /venv/ /workspace/venv/
+        source /workspace/venv/bin/activate
     fi
     mkdir /home/workspace
     cd /home/workspace
     git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
 
+    echo "$VIRTUAL_ENV"
+    
     pip install requests
     pip install flask
     pip install nltk
@@ -26,12 +29,12 @@ then
     touch /root/hasbooted
 fi
 cd /home/workspace/vast-pyworker
-if [$BACKEND == "SD_AUTO"]; then
-    source /venv/bin/activate
+if [ $BACKEND == "SD_AUTO" ]; then
+    source /workspace/venv/bin/activate
 fi
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export PATH="/opt/conda/bin:$PATH"
+# export PATH="/opt/conda/bin:$PATH"
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"

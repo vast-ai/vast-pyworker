@@ -280,7 +280,8 @@ class LogWatchOOBA(LogWatch):
 class LogWatchSDAUTO(LogWatch):
     def __init__(self, id, control_server_url, master_token):
         super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, perf_test=None)
-        self.ready_pattern = re.compile("Model loaded in (\d+\.\d+)s")
+        # self.ready_pattern = re.compile("Model loaded in (\d+\.\d+)s")
+        self.ready_pattern = re.compile("Uvicorn running on http://127.0.0.1:5000")
     
     def check_model_ready(self, line):
         if self.ready_pattern.search(line):
@@ -291,7 +292,7 @@ class LogWatchSDAUTO(LogWatch):
     def handle_line(self, line):
         self.check_model_ready(line)
 
-watch_dict = {"TGI" : LogWatchTGI, "OOBA" : LogWatchOOBA, "SDAUTO" : LogWatchSDAUTO}
+watch_dict = {"TGI" : LogWatchTGI, "OOBA" : LogWatchOOBA, "SD_AUTO" : LogWatchSDAUTO}
 
 def main():
     lw = watch_dict[os.environ['BACKEND']](id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"])
