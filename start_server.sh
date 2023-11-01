@@ -5,14 +5,7 @@ env | grep _ >> /etc/environment;
 
 if [ ! -f /root/hasbooted ]
 then
-    if [ $BACKEND == "TGI" ]; then
-        pip install flask
-        pip install nltk
-        pip install pycryptodome
-    elif [ $BACKEND == "OOBA" ]; then
-        pip install flask
-        pip install nltk
-        pip install pycryptodome
+    if [ $BACKEND == "OOBA" ]; then
         pip install accelerate -U
         pip install protobuf
         python -m pip install git+https://github.com/jllllll/exllama
@@ -22,10 +15,20 @@ then
     mkdir /home/workspace
     cd /home/workspace
     git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
+
+    pip install requests
+    pip install flask
+    pip install nltk
+    pip install pycryptodome
+    pip install numpy
+
     touch ~/.no_auto_tmux
     touch /root/hasbooted
 fi
 cd /home/workspace/vast-pyworker
+if [$BACKEND == "SD_AUTO"]; then
+    source /venv/bin/activate
+fi
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
 export PATH="/opt/conda/bin:$PATH"
@@ -41,7 +44,7 @@ if [ $BACKEND == "TGI" ]; then
     source "$SERVER_DIR/launch_model_tgi.sh"
 elif [ $BACKEND == "OOBA" ]; then
     source "$SERVER_DIR/launch_model_ooba.sh"
-elif [ $BACKEND == "OOBA" ]; then
+elif [ $BACKEND == "SD_AUTO" ]; then
     source "$SERVER_DIR/launch_model_sd_auto.sh"
 else
     echo "Invalid Backend: $BACKEND"
