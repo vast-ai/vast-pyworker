@@ -27,22 +27,7 @@ class OOBABackend(Backend):
         return super().generate(model_request, self.blocking_server_addr, "api/v1/generate", response_func, metrics=True)
     
     # Doesn't work with websockets
-
-    # def ooba_wrapper(self, model_request):
-    #     self.metrics.start_req(text_prompt=model_request["prompt"], parameters=model_request)
-    #     try:
-    #         response = requests.post(f"ws://{self.streaming_server_addr}/api/v1/stream", json=model_request, stream=True)
-    #         if response.status_code == 200:
-    #             for byte_payload in response.iter_lines():
-    #                 yield byte_payload
-    #                 yield "\n"
-    #         self.metrics.finish_req(text_prompt=model_request["prompt"], parameters=model_request)
-        
-    #     except requests.exceptions.RequestException as e:
-    #         print(f"[TGI-backend] Request error: {e}")
-
     def generate_stream(self, model_request):
-        # return Response(self.ooba_wrapper(model_request))
         return "501: Not Implemented"
     
 ######################################### FLASK HANDLER METHODS ###############################################################
@@ -50,4 +35,8 @@ class OOBABackend(Backend):
 def generate_handler(backend, request):
     return backend.generate(request)
 
-flask_dict = {"api/v1/generate" : generate_handler}
+flask_dict = {
+    "GET" : {
+        "api/v1/generate" : generate_handler
+    }
+}

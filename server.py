@@ -15,6 +15,7 @@ log = logging.getLogger('werkzeug')
 log.setLevel(logging.WARNING)
 
 print(f"server.py")
+print(f"available endpoints: {flask_dict}")
 
 master_token = os.environ['MASTER_TOKEN']
 container_id = os.environ['CONTAINER_ID']
@@ -24,10 +25,13 @@ backend = backend_class(container_id=container_id, master_token=master_token, co
 
 #################################################### CLIENT FACING ENDPOINTS ###########################################################################
 
-@app.route('/<route>')
+@app.route('/<route>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def handler(route):
     global backend
-    flask_dict[route](backend, request)
+    if (request.method not in flask_dict.keys()) or (route not in flask_dict[request.method].keys()):
+        abort(404)
+    
+    return flask_dict[request.method][route](backend, request)
     
 #################################################### INTERNAL ENDPOINTS CALLED BY LOGWATCH #################################################################################################
 @app.route('/report_capacity', methods=['POST'])

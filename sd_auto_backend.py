@@ -21,4 +21,8 @@ class SDAUTOBackend(Backend):
 def txt2img_handler(backend, request):
     return backend.txt2img(request)
 
-flask_dict = {"sdapi/v1/txt2img" : txt2img_handler}
+flask_dict = {
+    "GET" : {
+        "sdapi/v1/txt2img" : txt2img_handler
+    }
+}

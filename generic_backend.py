@@ -58,17 +58,12 @@ class Backend(ABC):
             return False
 
     def generate(self, model_request, model_server_addr, endpoint, response_func, metrics=False):
-        print(f"inner sending {model_request} to {model_server_addr}")
-        sys.stdout.flush()
         if metrics:
             self.metrics.start_req(model_request)
         try:
             t1 = time.time()
-            print(f"sending {model_request} to {model_server_addr}")
-            sys.stdout.flush()
             response = requests.post(f"http://{model_server_addr}/{endpoint}", json=model_request)
             t2 = time.time()
-            print(f"recieved response code: {response.status_code} and response: {response.text}")
             
             if response.status_code == 200:
                 if metrics:
@@ -87,6 +82,20 @@ class Backend(ABC):
         
         return ret_code, None, None
 
+    def get(self, request, model_server_addr, endpoint, response_func):
+        try:
+            response = requests.get(f"http://{model_server_addr}/{endpoint}", json=request)
+            if response.status_code == 200:
+                return 200, response_func(response)
+            else:
+                ret_code = response.status_code
+
+        except requests.exceptions.RequestException as e:
+            ret_code = 500
+            print(f"[backend] Request error: {e}")
+
+        return ret_code, None
+          
     @abstractmethod
     def generate_stream(self, model_request):
         pass
