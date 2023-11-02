@@ -196,14 +196,11 @@ class TGIServerMetrics(ServerMetrics):
         self.batch_capacity = json_data["max_batch_tokens"]
     
     def report_req_stats(self, log_data):
+
         self.curr_queue_time = log_data["queue_time"]
 
-        if "tokens_per_second" not in log_data.keys():
-            tokens_per_second = 1 / log_data["time_per_token"]
-            real_tokens_generated = int(log_data["inference_time"] * tokens_per_second)
-        else:
-            tokens_per_second = log_data["tokens_per_second"]
-            real_tokens_generated = log_data["tokens_generated"]
+        tokens_per_second = 1 / log_data["time_per_token"]
+        real_tokens_generated = int(log_data["inference_time"] * tokens_per_second)
 
         alpha = pow(0.5, real_tokens_generated / (4*1024))
         self.curr_tokens_per_second = alpha*self.curr_tokens_per_second + (1.0-alpha)*tokens_per_second
@@ -237,6 +234,12 @@ class OOBAServerMetrics(TGIServerMetrics):
             return
         super()._error_req(request["prompt"], request)
 
+    def report_req_stats(self, log_data):
+        tokens_per_second = log_data["tokens_per_second"]
+        real_tokens_generated = log_data["tokens_generated"]
+
+        alpha = pow(0.5, real_tokens_generated / (4*1024))
+        self.curr_tokens_per_second = alpha*self.curr_tokens_per_second + (1.0-alpha)*tokens_per_second
 
 class IMGServerMetrics(ServerMetrics):
     def __init__(self, id, control_server_url, send_server_data):

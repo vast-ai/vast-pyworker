@@ -17,12 +17,11 @@ class OOBABackend(Backend):
 
     def generate(self, model_request, metrics=True):
         def response_func(response):
-            print(response.content)
             try:
                 response_json = response.json()
                 return response_json['results'][0]['text']
             except json.decoder.JSONDecodeError:
-                print(f"[OOBA-backend] JSONDecodeError")
+                print(f"[OOBA-backend] JSONDecodeError for response: {response.content}")
                 return None
             
         return super().generate(model_request, self.blocking_server_addr, "api/v1/generate", response_func, metrics=metrics)
