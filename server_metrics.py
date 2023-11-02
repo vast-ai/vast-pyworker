@@ -274,8 +274,15 @@ class IMGServerMetrics(ServerMetrics):
         self.total_prompt_tokens -= num_prompt_tokens
 
     def report_req_stats(self, log_data):
-        self.tot_request_time += log_data["time_elapsed"]
-        self.cur_perf = self.img_size * (self.num_requests_finished / self.tot_request_time)
+        # self.tot_request_time += log_data["time_elapsed"]
+        # self.cur_perf = self.img_size * (self.num_requests_finished / self.tot_request_time)
+        self.curr_wait_time = log_data["wait_time"]
+        self.cur_perf = self.img_size / self.curr_wait_time
+
+        if self.curr_wait_time > 30.0:
+            self.overloaded = True
+        else:
+            self.overloaded = False
 
     def send_data_condition(self):
         return (((random.randint(0, 9) == 3) or (self.total_prompt_tokens != self.cur_capacity_lastreport)) and self.model_loaded)
