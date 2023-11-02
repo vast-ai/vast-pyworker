@@ -28,15 +28,15 @@ class LogWatch(ABC):
 
     def send_data(self, data, url, path):
         full_path = url + path
-        if ("loaded" in data.keys() or "error_msg" in data.keys() or "tokens_per_second" in data.keys()):
-            print(f'{datetime.datetime.now()} [logwatch] sending data to url: {full_path}, data: {data}')
-            sys.stdout.flush()
+        # if ("loaded" in data.keys() or "error_msg" in data.keys() or "tokens_per_second" in data.keys()):
+        print(f'{datetime.datetime.now()} [logwatch] sending data to url: {full_path}, data: {data}')
+        sys.stdout.flush()
         
         rcode = post_request(full_path, data)
 
-        if ("loaded" in data.keys() or "error_msg" in data.keys() or "tokens_per_second" in data.keys()):
-            print(f"{datetime.datetime.now()} logwatch] Notification sent. Response: {rcode}")
-            sys.stdout.flush()
+        # if ("loaded" in data.keys() or "error_msg" in data.keys() or "tokens_per_second" in data.keys()):
+        print(f"{datetime.datetime.now()} logwatch] Notification sent. Response: {rcode}")
+        sys.stdout.flush()
     
     def send_model_update(self, update_params):
         data = {"id" : self.id, "mtoken" : self.master_token}
@@ -295,9 +295,8 @@ class LogWatchSDAUTO(LogWatch):
         
     def check_model_update(self, line):
         match = self.update_pattern.search(line)
-        print(f"line: {line}, match: {match}")
         if match:
-            wait_time = match.group(1)
+            wait_time = float(match.group(1))
             update_params = {"wait_time" : wait_time}
             self.send_model_update(update_params)
             return True
