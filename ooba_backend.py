@@ -1,5 +1,5 @@
 import requests
-from flask import Response
+from flask import Response, abort
 import json
 
 from generic_backend import Backend

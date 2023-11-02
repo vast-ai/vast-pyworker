@@ -129,7 +129,7 @@ class TGIServerMetrics(ServerMetrics):
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
         
-    def __start_req(self, text_prompt, parameters):
+    def _start_req(self, text_prompt, parameters):
         self.num_requests_recieved += 1
         self.num_requests_working += 1
         
@@ -144,10 +144,10 @@ class TGIServerMetrics(ServerMetrics):
         if request is None:
             print("metrics starting null request")
             return
-        self.__start_req(request["inputs"], request["parameters"])
+        self._start_req(request["inputs"], request["parameters"])
 
     #undos what __start_req does
-    def __error_req(self, text_prompt, parameters):
+    def _error_req(self, text_prompt, parameters):
         self.num_requests_recieved -= 1
         self.num_requests_working -= 1
 
@@ -162,10 +162,10 @@ class TGIServerMetrics(ServerMetrics):
         if request is None:
             print("metrics error null request")
             return
-        self.__error_req(request["inputs"], request["parameters"])
+        self._error_req(request["inputs"], request["parameters"])
 
     #confirms a successful request
-    def __finish_req(self, text_prompt, parameters):
+    def _finish_req(self, text_prompt, parameters):
         self.num_requests_finished += 1
         self.num_requests_working -= 1
 
@@ -190,7 +190,7 @@ class TGIServerMetrics(ServerMetrics):
         if request is None:
             print("metrics finishing null request")
             return
-        self.__finish_req(request["inputs"], request["parameters"])
+        self._finish_req(request["inputs"], request["parameters"])
 
     def report_batch_capacity(self, json_data):
         self.batch_capacity = json_data["max_batch_tokens"]
@@ -223,19 +223,19 @@ class OOBAServerMetrics(TGIServerMetrics):
         if request is None:
             print("metrics starting null request")
             return
-        super().__start_req(request["prompt"], request)
+        super()._start_req(request["prompt"], request)
 
     def finish_req(self, request):
         if request is None:
             print("metrics finishing null request")
             return
-        super().__finish_req(request["prompt"], request)
+        super()._finish_req(request["prompt"], request)
 
     def error_req(self, request):
         if request is None:
             print("metrics error null request")
             return
-        super().__error_req(request["prompt"], request)
+        super()._error_req(request["prompt"], request)
 
 
 class IMGServerMetrics(ServerMetrics):
