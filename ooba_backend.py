@@ -15,8 +15,9 @@ class OOBABackend(Backend):
         self.blocking_server_addr = BLOCKING_SERVER
         self.streaming_server_addr = STREAMING_SERVER
 
-    def generate(self, model_request):
+    def generate(self, model_request, metrics=True):
         def response_func(response):
+            print(response.content)
             try:
                 response_json = response.json()
                 return response_json['results'][0]['text']
@@ -24,7 +25,7 @@ class OOBABackend(Backend):
                 print(f"[OOBA-backend] JSONDecodeError")
                 return None
             
-        return super().generate(model_request, self.blocking_server_addr, "api/v1/generate", response_func, metrics=True)
+        return super().generate(model_request, self.blocking_server_addr, "api/v1/generate", response_func, metrics=metrics)
     
     # Doesn't work with websockets
     def generate_stream(self, model_request):

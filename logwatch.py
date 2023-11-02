@@ -133,7 +133,7 @@ def parse_config(config):
 
 class LogWatchTGI(LogWatch):
     def __init__(self, id, control_server_url, master_token):
-        perf_test = ModelPerfTest(backend="TGI")
+        perf_test = ModelPerfTest(backend_name="TGI")
         super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, perf_test=perf_test)
 
         self.metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
@@ -224,10 +224,11 @@ class LogWatchTGI(LogWatch):
 
 class LogWatchOOBA(LogWatch):
     def __init__(self, id, control_server_url, master_token):
-       perf_test = ModelPerfTest(backend="OOBA")
+       perf_test = ModelPerfTest(backend_name="OOBA")
        super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, perf_test=perf_test)
        self.max_total_tokens = 1500
        self.max_batch_total_tokens = 25000 #have to estimate for now
+       self.perf_test.update_params(self.max_total_tokens, self.max_batch_total_tokens)
        self.ready_pattern = re.compile(r'Loaded the model')
        self.update_pattern = re.compile(r'(\d+\.\d+) tokens/s, (\d+) tokens')
 

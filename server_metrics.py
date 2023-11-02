@@ -223,19 +223,19 @@ class OOBAServerMetrics(TGIServerMetrics):
         if request is None:
             print("metrics starting null request")
             return
-        self.__start_req(request["prompt"], request)
+        super().__start_req(request["prompt"], request)
 
     def finish_req(self, request):
         if request is None:
             print("metrics finishing null request")
             return
-        self.__finish_req(request["prompt"], request)
+        super().__finish_req(request["prompt"], request)
 
     def error_req(self, request):
         if request is None:
             print("metrics error null request")
             return
-        self.__error_req(request["prompt"], request)
+        super().__error_req(request["prompt"], request)
 
 
 class IMGServerMetrics(ServerMetrics):

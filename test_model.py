@@ -21,11 +21,12 @@ def num_tokens_to_num_words(num_tokens):
     return num_tokens // 3 #seems roughly accurate for these generated words
 
 class ModelPerfTest:
-    def __init__(self, backend="TGI"):
+    def __init__(self, backend_name="TGI"):
         nltk.download("words")
 
+        self.backend_name = backend_name
         self.word_list = words.words()
-        self.backend = backend_dict[backend]( #needs to be called with the model already running
+        self.backend = backend_dict[backend_name]( #needs to be called with the model already running
             container_id=os.environ['CONTAINER_ID'],
             master_token=os.environ['MASTER_TOKEN'],
             control_server_url=os.environ['REPORT_ADDR'],
@@ -44,7 +45,10 @@ class ModelPerfTest:
 
     def prompt_model(self, num_prompt_tokens, num_output_tokens):
         prompt = self.make_random_prompt(num_tokens_to_num_words(num_prompt_tokens))
-        model_request = {"inputs" : prompt, "parameters" : {"max_new_tokens" : num_output_tokens}} #need to add a function to handle this (is different for OOBA)
+        if self.backend_name == "TGI":
+            model_request = {"inputs" : prompt, "parameters" : {"max_new_tokens" : num_output_tokens}}
+        elif self.backend_name == "OOBA":
+            model_request = {"prompt" : prompt, "max_new_tokens" : num_output_tokens}
         rcode, _, time = self.backend.generate(model_request, metrics=False)
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
