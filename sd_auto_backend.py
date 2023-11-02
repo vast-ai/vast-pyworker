@@ -1,3 +1,5 @@
+from flask import abort
+
 from generic_backend import Backend
 from server_metrics import IMGServerMetrics
 
@@ -12,21 +14,23 @@ class SDAUTOBackend(Backend):
     def txt2img(self, model_request):
         return super().generate(model_request, self.model_server_addr, "sdapi/v1/txt2img", lambda r: r.content, metrics=True)
 
-    def generate_stream(self, model_request):
-        pass
-
-
 ######################################### FLASK HANDLER METHODS ###############################################################
 
 def txt2img_handler(backend, request):
 
-    code, content, _ = backend.txt2img(request.json)
+    auth_dict, model_dict = backend.format_request(request.json)
+    if auth_dict:
+        if not backend.check_signature(**auth_dict):
+            abort(401)
+
+    code, content, _ = backend.txt2img(model_dict)
 
     if code == 200:
         return content
     else:
         print(f"txt2img failed with code {code}")
         abort(code)
+
 
 flask_dict = {
     "POST" : {

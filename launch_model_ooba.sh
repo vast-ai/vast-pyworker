@@ -6,6 +6,10 @@ then
     export SERVER_DIR="$current_cwd"
 fi
 
+pip install accelerate -U
+pip install protobuf
+python -m pip install git+https://github.com/jllllll/exllama
+
 ACCOUNT_NAME=TheBloke
 MODEL_NAME=Llama-2-13B-chat-GPTQ
 export MODEL_PATH="models/${ACCOUNT_NAME}_${MODEL_NAME}"

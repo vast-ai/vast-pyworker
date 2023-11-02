@@ -1,20 +1,15 @@
-from abc import ABC, abstractmethod
 from auth import fetch_public_key, verify_signature
 import json
 import time
 import requests
-import sys
-
-NUM_AUTH_TOKENS = 1000
+ 
 MSG_HISTORY_LEN = 100
 
-class Backend(ABC):
+class Backend():
     def __init__(self, master_token, metrics):
         self.master_token = master_token
         self.metrics = metrics
         
-        self.curr_auth_tokens = set()
-        self.num_auth_tokens = NUM_AUTH_TOKENS
         self.reqnum = 0
         self.msg_history = []
 
@@ -95,8 +90,5 @@ class Backend(ABC):
             print(f"[backend] Request error: {e}")
 
         return ret_code, None
-          
-    @abstractmethod
-    def generate_stream(self, model_request):
-        pass
+
 

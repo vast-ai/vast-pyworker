@@ -4,20 +4,14 @@ date;
 env | grep _ >> /etc/environment;
 
 if [ ! -f /root/hasbooted ]
-then
-    if [ $BACKEND == "OOBA" ]; then
-        pip install accelerate -U
-        pip install protobuf
-        python -m pip install git+https://github.com/jllllll/exllama
-    elif [ $BACKEND == "SD_AUTO" ]; then
+then  
+    if [ $BACKEND == "SD_AUTO" ]; then
         rsync --remove-source-files -rlptDu --ignore-existing /venv/ /workspace/venv/
         source /workspace/venv/bin/activate
     fi
     mkdir /home/workspace
     cd /home/workspace
     git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
-
-    echo "$VIRTUAL_ENV"
     
     pip install requests
     pip install flask
@@ -28,6 +22,7 @@ then
     touch ~/.no_auto_tmux
     touch /root/hasbooted
 fi
+
 cd /home/workspace/vast-pyworker
 if [ $BACKEND == "SD_AUTO" ]; then
     source /workspace/venv/bin/activate
