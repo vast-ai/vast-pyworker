@@ -295,6 +295,7 @@ class LogWatchSDAUTO(LogWatch):
         
     def check_model_update(self, line):
         match = self.update_pattern.search(line)
+        print(f"line: {line}, match: {match}")
         if match:
             wait_time = match.group(1)
             update_params = {"wait_time" : wait_time}
@@ -304,7 +305,10 @@ class LogWatchSDAUTO(LogWatch):
         return False
    
     def handle_line(self, line):
-        self.check_model_ready(line)
+        if self.check_model_ready(line):
+            return
+        elif self.check_model_update(line):
+            return
 
 watch_dict = {"TGI" : LogWatchTGI, "OOBA" : LogWatchOOBA, "SD_AUTO" : LogWatchSDAUTO}
 
