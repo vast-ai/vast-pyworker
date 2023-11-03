@@ -5,10 +5,6 @@ env | grep _ >> /etc/environment;
 
 if [ ! -f /root/hasbooted ]
 then  
-    if [ $BACKEND == "SD_AUTO" ]; then
-        rsync --remove-source-files -rlptDu --ignore-existing /venv/ /workspace/venv/
-        source /workspace/venv/bin/activate
-    fi
     mkdir /home/workspace
     cd /home/workspace
     git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
@@ -24,9 +20,6 @@ then
 fi
 
 cd /home/workspace/vast-pyworker
-if [ $BACKEND == "SD_AUTO" ]; then
-    source /workspace/venv/bin/activate
-fi
 
 export SERVER_DIR="/home/workspace/vast-pyworker"
 # export PATH="/opt/conda/bin:$PATH"
