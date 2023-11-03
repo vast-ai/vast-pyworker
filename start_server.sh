@@ -9,6 +9,9 @@ then
     cd /home/workspace
     git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
     
+    python3 -m venv /home/workspace/worker-env
+    source /home/workspace/worker-env/bin/activate
+
     pip install requests
     pip install flask
     pip install nltk
@@ -19,8 +22,12 @@ then
     touch /root/hasbooted
 fi
 
-cd /home/workspace/vast-pyworker
+if [ -z "$VIRTUAL_ENV" ]
+then
+    source /home/workspace/worker-env/bin/activate
+fi
 
+cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
 # export PATH="/opt/conda/bin:$PATH"
 

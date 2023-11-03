@@ -1,3 +1,5 @@
+deactivate #deactivates the vast-pyworker venv, in preperation for activating the backend specific venv
+
 if [ ! -d "/home/workspace/$HF_MODEL_REPO" ]
 then
     rsync --remove-source-files -rlptDu --ignore-existing /venv/ /workspace/venv/
