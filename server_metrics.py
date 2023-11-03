@@ -265,6 +265,7 @@ class IMGServerMetrics(ServerMetrics):
     def finish_req(self, request):
         self.num_requests_finished += 1
         self.num_requests_working -= 1
+        self.tot_request_time += request["time_elapsed"]
 
     def error_req(self, request):
         self.num_requests_recieved -= 1
@@ -277,7 +278,7 @@ class IMGServerMetrics(ServerMetrics):
         # self.tot_request_time += log_data["time_elapsed"]
         # self.cur_perf = self.img_size * (self.num_requests_finished / self.tot_request_time)
         self.curr_wait_time = log_data["wait_time"]
-        self.cur_perf = self.img_size / self.curr_wait_time
+        self.cur_perf = self.img_size / self.tot_request_time if self.tot_request_time != 0.0 else 0.0
 
         if self.curr_wait_time > 30.0:
             self.overloaded = True

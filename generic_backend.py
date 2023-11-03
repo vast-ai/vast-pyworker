@@ -62,6 +62,7 @@ class Backend():
             
             if response.status_code == 200:
                 if metrics:
+                    model_request["time_elapsed"] = t2 - t1
                     self.metrics.finish_req(model_request)
 
                 return 200, response_func(response), t2 - t1
