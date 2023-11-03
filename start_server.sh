@@ -29,7 +29,7 @@ fi
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://fax-np-holes-vol.trycloudflare.com"
+export REPORT_ADDR="https://run.vast.ai"
 # export PATH="/opt/conda/bin:$PATH"
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
