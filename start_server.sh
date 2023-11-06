@@ -2,7 +2,6 @@
 echo "start_server.sh"
 date;
 env | grep _ >> /etc/environment;
-deactivate
 
 if [ ! -f /root/hasbooted ]
 then  
@@ -24,7 +23,7 @@ then
 fi
 
 echo "$VIRTUAL_ENV"
-if [ -z "$VIRTUAL_ENV" ]
+if [ "$VIRTUAL_ENV" != "/home/workspace/worker-env" ]
 then
     source /home/workspace/worker-env/bin/activate
     echo "environment activated"
@@ -33,7 +32,6 @@ fi
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
 export REPORT_ADDR="https://switching-feed-wisdom-whether.trycloudflare.com"
-# export PATH="/opt/conda/bin:$PATH"
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"
