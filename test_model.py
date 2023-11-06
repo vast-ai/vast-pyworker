@@ -15,7 +15,6 @@ from sd_auto_backend import SDAUTOBackend
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
 
-backend_dict = {"TGI" : TGIBackend, "OOBA" : OOBABackend, "SD_AUTO" : SDAUTOBackend}
 
 def num_tokens_to_num_words(num_tokens):
     return num_tokens // 3 #seems roughly accurate for these generated words

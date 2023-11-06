@@ -1,16 +1,15 @@
-import requests
 from flask import Response, abort
 import json
 
-from generic_backend import Backend
-from server_metrics import OOBAServerMetrics
+from backend import GenericBackend
+from ooba.metrics import Metrics
 
 BLOCKING_SERVER = '127.0.0.1:5001'
 STREAMING_SERVER = '127.0.0.1:5002' 
 
-class OOBABackend(Backend):
+class Backend(GenericBackend):
     def __init__(self, container_id, control_server_url, master_token, send_data):
-        metrics = OOBAServerMetrics(id=container_id, control_server_url=control_server_url, send_server_data=send_data)
+        metrics = Metrics(id=container_id, control_server_url=control_server_url, send_server_data=send_data)
         super().__init__(master_token=master_token, metrics=metrics)
         self.blocking_server_addr = BLOCKING_SERVER
         self.streaming_server_addr = STREAMING_SERVER

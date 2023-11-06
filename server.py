@@ -3,11 +3,8 @@ import os
 import logging
 import importlib
 
-backend_name = os.environ['BACKEND']
-backend_file_dict = {"TGI" : "tgi_backend", "OOBA" : "ooba_backend", "SD_AUTO" : "sd_auto_backend"}
-backend_dict = {"TGI" : "TGIBackend", "OOBA" : "OOBABackend", "SD_AUTO" : "SDAUTOBackend"}
-backend_lib = importlib.import_module(backend_file_dict[backend_name])
-backend_class = getattr(backend_lib, backend_dict[backend_name])
+backend_lib = importlib.import_module(f"{os.environ['BACKEND']}/backend.py")
+backend_class = getattr(backend_lib, "Backend")
 flask_dict = getattr(backend_lib, "flask_dict")
 
 app = Flask(__name__)

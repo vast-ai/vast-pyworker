@@ -40,16 +40,7 @@ fi
 
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
-if [ $BACKEND == "TGI" ]; then
-    source "$SERVER_DIR/launch_model_tgi.sh"
-elif [ $BACKEND == "OOBA" ]; then
-    source "$SERVER_DIR/launch_model_ooba.sh"
-elif [ $BACKEND == "SD_AUTO" ]; then
-    source "$SERVER_DIR/launch_model_sd_auto.sh"
-else
-    echo "Invalid Backend: $BACKEND"
-    exit 1
-fi
+source "$SERVER_DIR/launch_$BACKEND.sh"
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"

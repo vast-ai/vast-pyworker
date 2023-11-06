@@ -5,7 +5,7 @@ import requests
  
 MSG_HISTORY_LEN = 100
 
-class Backend():
+class GenericBackend():
     def __init__(self, master_token, metrics):
         self.master_token = master_token
         self.metrics = metrics

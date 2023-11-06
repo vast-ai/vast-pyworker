@@ -1,6 +1,6 @@
 #!/bin/bash
-deactivate #deactivates the vast-pyworker venv, in preperation for activating the backend specific venv
 
+deactivate #deactivates the vast-pyworker venv, in preperation for activating the backend specific venv
 if [ ! -f "/home/workspace/init_launch" ]
 then
     rsync --remove-source-files -rlptDu --ignore-existing /venv/ /workspace/venv/
