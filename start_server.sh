@@ -38,9 +38,15 @@ if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
   exit 1
 fi
 
+if [ ! -d "$SERVER_DIR/$BACKEND" ]
+then
+    echo "$BACKEND not supported!"
+    exit 1
+fi
+
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
-source "$SERVER_DIR/launch_$BACKEND.sh"
+source "$SERVER_DIR/$BACKEND/launch.sh"
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"
