@@ -22,15 +22,16 @@ then
     touch /root/hasbooted
 fi
 
-if [ -z "$VIRTUAL_ENV" ]
+echo "$VIRTUAL_ENV"
+if [ "$VIRTUAL_ENV" != "/home/workspace/worker-env" ]
 then
     source /home/workspace/worker-env/bin/activate
+    echo "environment activated"
 fi
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://run.vast.ai"
-# export PATH="/opt/conda/bin:$PATH"
+export REPORT_ADDR="https://switching-feed-wisdom-whether.trycloudflare.com"
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"

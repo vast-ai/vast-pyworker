@@ -72,6 +72,10 @@ class ServerMetrics(ABC):
     @abstractmethod
     def start_req(self, request):
         pass
+        
+    @abstractmethod
+    def error_req(self, request):
+        pass
 
     @abstractmethod
     def finish_req(self, request):

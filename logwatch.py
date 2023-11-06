@@ -262,8 +262,8 @@ class LogWatchOOBA(LogWatch):
     def check_model_update(self, line):
         match = self.update_pattern.search(line)
         if match:
-            tps = match.group(1)
-            tokens = match.group(2)
+            tps = float(match.group(1))
+            tokens = float(match.group(2))
             update_params = {"tokens_per_second" : tps, "tokens_generated" : tokens}
             self.send_model_update(update_params)
             return True
