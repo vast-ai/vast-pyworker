@@ -13,6 +13,6 @@ python -m pip install git+https://github.com/jllllll/exllama
 MODEL_PATH="models/${MODEL_USER}_${MODEL_NAME}"
 echo "$MODEL_PATH"
 cd /src
-python3 /app/download-model.py $ACCOUNT_NAME/$MODEL_NAME > $SERVER_DIR/download.log 2>&1
+python3 /app/download-model.py $MODEL_USER/$MODEL_NAME > $SERVER_DIR/download.log 2>&1
 python3 /app/server.py --extensions api --api-blocking-port 5001 --api-streaming-port 5002 --model $MODEL_PATH --listen > $SERVER_DIR/infer.log 2>&1 &
 echo "done"
