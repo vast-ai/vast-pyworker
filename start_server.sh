@@ -2,6 +2,7 @@
 echo "start_server.sh"
 date;
 env | grep _ >> /etc/environment;
+deactivate
 
 if [ ! -f /root/hasbooted ]
 then  
@@ -22,6 +23,7 @@ then
     touch /root/hasbooted
 fi
 
+echo "$VIRTUAL_ENV"
 if [ -z "$VIRTUAL_ENV" ]
 then
     source /home/workspace/worker-env/bin/activate
