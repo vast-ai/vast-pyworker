@@ -10,9 +10,7 @@ pip install accelerate -U
 pip install protobuf
 python -m pip install git+https://github.com/jllllll/exllama
 
-ACCOUNT_NAME=TheBloke
-MODEL_NAME=Llama-2-13B-chat-GPTQ
-export MODEL_PATH="models/${ACCOUNT_NAME}_${MODEL_NAME}"
+MODEL_PATH="models/${MODEL_USER}_${MODEL_NAME}"
 echo "$MODEL_PATH"
 cd /src
 python3 /app/download-model.py $ACCOUNT_NAME/$MODEL_NAME > $SERVER_DIR/download.log 2>&1
