@@ -81,10 +81,6 @@ class ServerMetrics(ABC):
     def finish_req(self, request):
         pass
 
-    @abstractmethod
-    def report_req_stats(self, log_data):
-        pass
-
     def report_loaded(self, log_data):
         self.model_loaded = True
         self.overloaded = False

@@ -66,6 +66,10 @@ class LogWatch(ABC):
             sys.stdout.flush()
 
     def run_perf_test(self, data):
+        if self.perf_test is None:
+            print(f"{datetime.datetime.now()} [logwatch] perf test hasn't been set up")
+            return
+        
         print(f"{datetime.datetime.now()} [logwatch] starting model perf test")
         sys.stdout.flush()
         sanity_check = self.perf_test.first_run()
