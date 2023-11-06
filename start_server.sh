@@ -25,11 +25,12 @@ fi
 if [ -z "$VIRTUAL_ENV" ]
 then
     source /home/workspace/worker-env/bin/activate
+    echo "environment activated"
 fi
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://fax-np-holes-vol.trycloudflare.com"
+# export REPORT_ADDR="https://fax-np-holes-vol.trycloudflare.com"
 # export PATH="/opt/conda/bin:$PATH"
 
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
