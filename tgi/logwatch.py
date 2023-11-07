@@ -78,6 +78,7 @@ class LogWatch(GenericLogWatch):
     def send_error(self, error_msg):
         data = {"id" : self.id, "error_msg" : error_msg}
         self.send_data(data, self.control_server_url, "/worker_status/")
+        data["mtoken"] = self.master_token
         self.send_data(data, self.auth_server_url, "/report_error")
 
 
