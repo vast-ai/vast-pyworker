@@ -45,6 +45,7 @@ class GenericMetrics(ABC):
                 data = {"id" : self.id, "message" : "loading update"}
                 self.update_loading(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
+                time.sleep(self.update_interval * 4)
             elif self.send_data_condition():
                 data = {"id" : self.id, "message" : "data update"}
                 self.fill_data(data)
@@ -62,6 +63,7 @@ class GenericMetrics(ABC):
         new_usage = psutil.disk_usage('/').used
         data["disk_usage"] = new_usage
         data["additional_disk_usage"] = new_usage - self.last_disk_usage
+        self.last_disk_usage = new_usage
     
     def fill_data_generic(self, data):
         data["num_requests_working"] = self.num_requests_working

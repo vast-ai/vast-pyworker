@@ -13,6 +13,7 @@ then
     source /home/workspace/worker-env/bin/activate
 
     pip install requests
+    pip install psutil
     pip install flask
     pip install nltk
     pip install pycryptodome
