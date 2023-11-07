@@ -8,10 +8,6 @@ import importlib
 
 from utils import post_request
 
-logwatch_lib = importlib.import_module(f"{os.environ['BACKEND']}.logwatch")
-logwatch_class = getattr(logwatch_lib, "LogWatch")
-
-
 class GenericLogWatch(ABC):
     def __init__(self, id, control_server_url, master_token, perf_test):
         self.id = id
@@ -127,7 +123,9 @@ class GenericLogWatch(ABC):
         pass
 
 def main():
-    lw = backend_class(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"])
+    logwatch_lib = importlib.import_module(f"{os.environ['BACKEND']}.logwatch")
+    logwatch_class = getattr(logwatch_lib, "LogWatch")
+    lw = logwatch_class(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"])
     print("[logwatch] ready and waiting for input\n")
     sys.stdout.flush()
     for line in sys.stdin:
