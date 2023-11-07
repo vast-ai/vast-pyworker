@@ -1,6 +1,6 @@
-from metrics import GenericMetrics
+from tgi.metrics import Metrics as TGIMetrics
 
-class Metrics(GenericMetrics):
+class Metrics(TGIMetrics):
     def __init__(self, id, control_server_url, send_server_data):
         super().__init__(id, control_server_url, send_server_data)
 
