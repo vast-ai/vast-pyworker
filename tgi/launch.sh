@@ -11,13 +11,6 @@ MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 
 echo "using args: $MODEL_ARGS"
 
-if [ ! -f "/home/workspace/init_launch" ]
-then
-    pip install optimum
-    pip install auto-gptq
-    touch /home/workspace/init_launch
-fi
-
 if [ -z "$MODEL_PID" ]
 then
     echo "starting model download" > $SERVER_DIR/infer.log
