@@ -39,7 +39,7 @@ class Metrics(GenericMetrics):
         # self.tot_request_time += log_data["time_elapsed"]
         # self.cur_perf = self.img_size * (self.num_requests_finished / self.tot_request_time)
         self.curr_wait_time = log_data["wait_time"]
-        self.cur_perf = self.img_size / self.tot_request_time if self.tot_request_time != 0.0 else 0.0
+        self.cur_perf = self.img_size / (self.tot_request_time / self.num_requests_recieved) if (self.tot_request_time != 0 and self.num_requests_recieved != 0.0) else 0.0
 
         if self.curr_wait_time > 30.0:
             self.overloaded = True
