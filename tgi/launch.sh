@@ -11,6 +11,13 @@ MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 
 echo "using args: $MODEL_ARGS"
 
+if [ ! -f "/home/workspace/init_launch" ]
+then
+    pip install optimum
+    pip install auto-gptq
+    touch /home/workspace/init_launch
+fi
+
 if [ -z "$MODEL_PID" ]
 then
     text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" > $SERVER_DIR/infer.log 2>&1 &

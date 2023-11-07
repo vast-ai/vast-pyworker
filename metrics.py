@@ -29,7 +29,7 @@ class GenericMetrics(ABC):
         self.fill_data_lut = 0.0
 
         self.base_disk_usage = psutil.disk_usage('/').used
-        self.last_disk_usage = 0.0
+        self.last_disk_usage = self.base_disk_usage
         
         self.update_interval = 1.0
         if self.send_server_data:
