@@ -7,10 +7,10 @@ from concurrent.futures import ThreadPoolExecutor
 import time
 import sys
 import datetime
+import importlib
 
-from tgi_backend import TGIBackend
-from ooba_backend import OOBABackend
-from sd_auto_backend import SDAUTOBackend
+backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
+backend_class = getattr(backend_lib, "Backend")
 
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
@@ -25,7 +25,7 @@ class ModelPerfTest:
 
         self.backend_name = backend_name
         self.word_list = words.words()
-        self.backend = backend_dict[backend_name]( #needs to be called with the model already running
+        self.backend = backend_class( #needs to be called with the model already running
             container_id=os.environ['CONTAINER_ID'],
             master_token=os.environ['MASTER_TOKEN'],
             control_server_url=os.environ['REPORT_ADDR'],
