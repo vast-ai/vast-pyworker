@@ -30,7 +30,6 @@ class GenericMetrics(ABC):
 
         self.base_disk_usage = psutil.disk_usage('/').used
         self.last_disk_usage = 0.0
-        self.loaded = False #whether the model has been loaded
         
         self.update_interval = 1.0
         if self.send_server_data:
@@ -41,7 +40,7 @@ class GenericMetrics(ABC):
 
     def send_data_loop(self):
         while True:
-            if not self.loaded:
+            if not self.model_loaded:
                 data = {"id" : self.id, "message" : "loading update"}
                 self.update_loading(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
