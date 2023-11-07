@@ -3,7 +3,7 @@ import os
 import logging
 import importlib
 
-backend_lib = importlib.import_module(f"{os.environ['BACKEND']}/backend.py")
+backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
 backend_class = getattr(backend_lib, "Backend")
 flask_dict = getattr(backend_lib, "flask_dict")
 
