@@ -7,7 +7,7 @@ if [ ! -f /root/hasbooted ]
 then  
     mkdir /home/workspace
     cd /home/workspace
-    git clone -b ooba-compat https://github.com/vast-ai/vast-pyworker
+    git clone -b structure-refactor https://github.com/vast-ai/vast-pyworker
     
     python3 -m venv /home/workspace/worker-env
     source /home/workspace/worker-env/bin/activate
