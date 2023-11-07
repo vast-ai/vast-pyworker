@@ -8,8 +8,8 @@ import importlib
 
 from utils import post_request
 
-backend_lib = importlib.import_module(f"{os.environ['BACKEND']}/logwatch.py")
-backend_class = getattr(backend_lib, "Backend")
+logwatch_lib = importlib.import_module(f"{os.environ['BACKEND']}.logwatch")
+logwatch_class = getattr(logwatch_lib, "LogWatch")
 
 
 class GenericLogWatch(ABC):
