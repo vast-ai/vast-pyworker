@@ -12,6 +12,7 @@ class GenericMetrics(ABC):
         self.control_server_url = control_server_url
         self.send_server_data = send_server_data
         self.overloaded = False
+        self.error = False
         
         self.num_requests_recieved = 0
         self.num_requests_finished = 0
@@ -69,6 +70,7 @@ class GenericMetrics(ABC):
         data["overloaded"] = self.overloaded
         data["num_requests_recieved"] = self.num_requests_recieved
         data["cur_perf"]     = self.cur_perf
+        data["error"]        = self.error
 
         if self.model_loaded:
             data["loadtime"] = self.loadtime
@@ -101,6 +103,10 @@ class GenericMetrics(ABC):
             self.max_perf   = log_data["max_perf"]
         if "loadtime" in log_data.keys():
             self.loadtime   = log_data["loadtime"]
+
+    def report_error(self, log_data):
+        self.error = True
+        self.error_msg = log_data["error_msg"]
 
 
 

@@ -55,6 +55,14 @@ def report_done():
     backend.metrics.report_req_stats(request.json)
     return "Updated Metrics"
 
+@app.route('/report_error', methods=['POST'])
+def report_done():
+    global backend
+    if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
+        abort(401)
+    backend.metrics.report_error(request.json)
+    return "Updated Metrics"
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=os.environ['AUTH_PORT'], threaded=True)
 
