@@ -1,5 +1,6 @@
 import re
 import json
+import sys
 
 from logwatch import GenericLogWatch
 from test_model import ModelPerfTest

@@ -7,7 +7,7 @@ if [ ! -f /root/hasbooted ]
 then  
     mkdir /home/workspace
     cd /home/workspace
-    git clone https://github.com/vast-ai/vast-pyworker
+    git clone -b report-test https://github.com/vast-ai/vast-pyworker
     
     python3 -m venv /home/workspace/worker-env
     source /home/workspace/worker-env/bin/activate
@@ -31,7 +31,7 @@ fi
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://run.vast.ai"
+export REPORT_ADDR="https://petroleum-war-nebraska-albert.trycloudflare.com"
 
 if [ -z "$MASTER_TOKEN" ]
 then
