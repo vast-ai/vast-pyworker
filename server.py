@@ -40,7 +40,7 @@ def report_capacity():
     return "Reported capacity"
 
 @app.route('/report_loading', methods=['POST'])
-def report_loaded():
+def report_loading():
     global backend
     if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
         abort(401)
@@ -64,7 +64,7 @@ def report_done():
     return "Updated Metrics"
 
 @app.route('/report_error', methods=['POST'])
-def report_done():
+def report_error():
     global backend
     if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
         abort(401)
