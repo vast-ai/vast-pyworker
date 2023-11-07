@@ -23,15 +23,15 @@ class GenericMetrics(ABC):
         self.cur_capacity = 0.0
         self.cur_capacity_lastreport = 0.1234
 
+        self.model_loading = False
         self.model_loaded = False
+        self.base_disk_usage = 0.0
+        self.last_disk_usage = 0.0
         self.loadtime = 0.0
         
         self.cur_load = 0.0
         self.fill_data_lut = 0.0
 
-        self.base_disk_usage = psutil.disk_usage('/').used
-        self.last_disk_usage = self.base_disk_usage
-        
         self.update_interval = 1.0
         if self.send_server_data:
             self.t1 = threading.Thread(target=self.send_data_loop)
@@ -41,7 +41,7 @@ class GenericMetrics(ABC):
 
     def send_data_loop(self):
         while True:
-            if not self.model_loaded:
+            if not self.model_loaded and self.model_loading:
                 data = {"id" : self.id, "message" : "loading update"}
                 self.update_loading(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
@@ -96,6 +96,11 @@ class GenericMetrics(ABC):
     def finish_req(self, request):
         pass
 
+    def report_loading(self, log_data):
+        self.base_disk_usage = psutil.disk_usage('/').used
+        self.last_disk_usage = self.base_disk_usage
+        self.model_loading = True
+    
     def report_loaded(self, log_data):
         self.model_loaded = True
         self.overloaded = False

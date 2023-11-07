@@ -39,6 +39,14 @@ def report_capacity():
     backend.metrics.report_batch_capacity(request.json)
     return "Reported capacity"
 
+@app.route('/report_loading', methods=['POST'])
+def report_loaded():
+    global backend
+    if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
+        abort(401)
+    backend.metrics.report_loading(request.json)
+    return "Reported loading"
+
 @app.route('/report_loaded', methods=['POST'])
 def report_loaded():
     global backend
@@ -61,7 +69,7 @@ def report_done():
     if ("mtoken" not in request.json.keys()) or not backend.check_master_token(request.json['mtoken']):
         abort(401)
     backend.metrics.report_error(request.json)
-    return "Updated Metrics"
+    return "Reported error"
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=os.environ['AUTH_PORT'], threaded=True)

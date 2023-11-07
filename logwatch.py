@@ -3,6 +3,7 @@ import os
 import time
 import datetime
 import json
+import re
 from abc import ABC, abstractmethod
 import importlib
 
@@ -21,7 +22,9 @@ class GenericLogWatch(ABC):
 
         self.max_total_tokens = None
         self.max_batch_total_tokens = None
-        
+        self.loading = False
+        self.loading_line = re.compile("starting model download")
+
         self.perf_file = "perf_results.json"
         self.sanity_file = "perf_sanity.json"
 
@@ -96,6 +99,11 @@ class GenericLogWatch(ABC):
             sys.stdout.flush()
             data["error_msg"] = "initial performance test failed"
                 
+    def check_loading(self, line):
+        if self.loading_line.search(line):
+            self.loading = True
+            self.send_data({"mtoken" : self.master_token}, self.auth_server_url, "/report_loading")
+
     def model_loaded(self):
         print("[logwatch] starting model_loaded")
         sys.stdout.flush()
@@ -130,6 +138,8 @@ def main():
     sys.stdout.flush()
     for line in sys.stdin:
         lw.handle_line(line)
+        if not lw.loading:
+            lw.check_loading(line)
         
 if __name__ == "__main__":
     main()

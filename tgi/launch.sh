@@ -20,7 +20,8 @@ fi
 
 if [ -z "$MODEL_PID" ]
 then
-    text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" > $SERVER_DIR/infer.log 2>&1 &
+    echo "starting model download" > $SERVER_DIR/infer.log
+    text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" >> $SERVER_DIR/infer.log 2>>&1 &
     echo "launched model"
 else
     echo "model already running"
