@@ -40,7 +40,7 @@ class GenericMetrics(ABC):
         print(f"ServerMetrics({id},{control_server_url})")
 
     def send_data_loop(self):
-        while True:
+        while not self.error:
             if not self.model_loaded and self.model_loading:
                 data = {"id" : self.id, "message" : "loading update"}
                 self.update_loading(data)
