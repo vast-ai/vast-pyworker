@@ -24,5 +24,5 @@ then
 else
     CKPT_ARG=""
 fi
-python /stable-diffusion-webui/launch.py $CKPT_ARG $MODEL_ARGS --api-log --nowebui --port 5000 >> $SERVER_DIR/infer.log 2>>&1 &
+python /stable-diffusion-webui/launch.py $CKPT_ARG $MODEL_ARGS --api-log --nowebui --port 5000 >> $SERVER_DIR/infer.log 2>&1 &
 echo "launched model"
