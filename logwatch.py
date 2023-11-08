@@ -107,6 +107,7 @@ class GenericLogWatch(ABC):
     def model_loaded(self):
         print("[logwatch] starting model_loaded")
         sys.stdout.flush()
+        self.send_data(data, self.auth_server_url, "/report_loaded") #so that it stops sending loading update messages
         end_time = time.time()
         data = {"id" : self.id, "mtoken" : self.master_token}
         data["loaded"] = True
@@ -124,7 +125,7 @@ class GenericLogWatch(ABC):
         print("[logwatch] sending data for model_loaded")
         sys.stdout.flush()     
         self.send_data(data, self.control_server_url, "/worker_status/")
-        self.send_data(data, self.auth_server_url, "/report_loaded")
+        
 
     @abstractmethod
     def handle_line(self, line):
