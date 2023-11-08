@@ -56,7 +56,10 @@ fi
 
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
-# source "$SERVER_DIR/$BACKEND/launch.sh"
+if [-f "$SERVER_DIR/$BACKEND/launch.sh"]
+then
+    source "$SERVER_DIR/$BACKEND/launch.sh"
+fi
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"

@@ -9,7 +9,15 @@ else
     $SERVER_DIR/start_server.sh $BACKEND
 fi
 
-MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq"
+if [ -z $MODEL_ARGS ]
+    if [ ! -z $MODEL_CMD ]
+    then
+        MODEL_ARGS=$MODEL_CMD  
+    else
+        MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq"
+    fi
+fi
+
 echo "using args: $MODEL_ARGS"
 
 MODEL_LAUNCH_CMD="text-generation-launcher"
