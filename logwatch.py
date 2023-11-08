@@ -127,6 +127,7 @@ class GenericLogWatch(ABC):
 
         print("[logwatch] sending data for model_loaded")
         sys.stdout.flush()     
+        self.send_data(data, self.auth_server_url, "/report_loaded") #to give model performance update
         self.send_data(data, self.control_server_url, "/worker_status/")
         
 
