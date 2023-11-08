@@ -54,7 +54,7 @@ fi
 
 source "$SERVER_DIR/start_auth.sh"
 source "$SERVER_DIR/start_watch.sh"
-source "$SERVER_DIR/$BACKEND/launch.sh"
+# source "$SERVER_DIR/$BACKEND/launch.sh"
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"

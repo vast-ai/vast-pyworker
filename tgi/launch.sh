@@ -1,5 +1,13 @@
 #!/bin/bash
 
+export BACKEND=tgi 
+export MODEL_ARGS="--model-id TheBloke/Llama-2-70B-chat-GPTQ --quantize gptq --max-batch-prefill-tokens 32768"
+
+if [ ! -d "/home/workspace/vast-pyworker" ]
+then
+    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/start_server.sh | bash
+fi
+
 if [ -z "$SERVER_DIR" ]
 then
     current_cwd=$(pwd)
