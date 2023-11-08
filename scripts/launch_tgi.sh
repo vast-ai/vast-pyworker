@@ -5,7 +5,7 @@ export MODEL_ARGS="--model-id TheBloke/Llama-2-70B-chat-GPTQ --quantize gptq --m
 
 if [ ! -d "/home/workspace/vast-pyworker" ]
 then
-    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/start_server.sh | bash
+    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/new-launch/start_server.sh | bash
 fi
 
 if [ -z "$SERVER_DIR" ]
