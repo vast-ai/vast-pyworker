@@ -1,5 +1,5 @@
 class Backend():
-    def __init__(self):
+    def __init__(self, *args):
         self.count = 0
 
 def increment_handler(backend, request):
