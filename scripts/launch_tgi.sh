@@ -4,7 +4,7 @@ SERVER_DIR=/home/workspace/vast-pyworker
 BACKEND=tgi
 if [ ! -d "$SERVER_DIR" ]
 then
-    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/new-launch/start_server.sh | bash -s $BACKEND
+    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/start_server.sh | bash -s $BACKEND
 else
     $SERVER_DIR/start_server.sh $BACKEND
 fi
