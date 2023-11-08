@@ -135,6 +135,9 @@ class GenericLogWatch(ABC):
         pass
 
 def main():
+    if not os.path.exists(f"{os.environ['BACKEND']}/logwatch.py"):
+        print(f"[logwatch] logwatch.py doesn't exist for backend: {os.environ['BACKEND']}, skipping activation")
+        return
     logwatch_lib = importlib.import_module(f"{os.environ['BACKEND']}.logwatch")
     logwatch_class = getattr(logwatch_lib, "LogWatch")
     lw = logwatch_class(id=os.environ['CONTAINER_ID'], control_server_url=os.environ["REPORT_ADDR"], master_token=os.environ["MASTER_TOKEN"])
