@@ -3,6 +3,7 @@ import psutil
 import time
 import threading
 from abc import ABC, abstractmethod
+import datetime
 
 from utils import post_request
 
@@ -37,7 +38,7 @@ class GenericMetrics(ABC):
             self.t1 = threading.Thread(target=self.send_data_loop)
             self.t1.start()
 
-        print(f"ServerMetrics({id},{control_server_url})")
+        print(f"{datetime.datetime.now()} ServerMetrics({id},{control_server_url})")
 
     def send_data_loop(self):
         while not self.error:
@@ -45,7 +46,7 @@ class GenericMetrics(ABC):
                 data = {"id" : self.id, "message" : "loading update"}
                 self.update_loading(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
-                time.sleep(self.update_interval * 4)
+                time.sleep(self.update_interval * 10)
             elif self.send_data_condition():
                 data = {"id" : self.id, "message" : "data update"}
                 self.fill_data(data)
@@ -54,10 +55,11 @@ class GenericMetrics(ABC):
 
     def send_data(self, data, url, path):
         full_path = url + path
-        print(f'[server_metrics] sending data to url: {full_path}, data: {data}')
+        print(f'{datetime.datetime.now()} [server_metrics] sending data to url: {full_path}, data: {data}')
+        sys.stdout.flush()
         thread = threading.Thread(target=post_request, args=(full_path,data))
         thread.start()
-        sys.stdout.flush()
+        
     
     def update_loading(self, data):
         new_usage = psutil.disk_usage('/').used
