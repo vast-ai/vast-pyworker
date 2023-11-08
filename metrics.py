@@ -47,7 +47,7 @@ class GenericMetrics(ABC):
                 self.update_loading(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
                 time.sleep(self.update_interval * 10)
-            elif self.send_data_condition():
+            elif not self.model_loading and self.send_data_condition():
                 data = {"id" : self.id, "message" : "data update"}
                 self.fill_data(data)
                 self.send_data(data, self.control_server_url, "/worker_status/")
@@ -106,10 +106,13 @@ class GenericMetrics(ABC):
     def report_loaded(self, log_data):
         self.model_loaded = True
         self.overloaded = False
-        if "max_perf" in log_data.keys():
-            self.max_perf   = log_data["max_perf"]
         if "loadtime" in log_data.keys():
             self.loadtime   = log_data["loadtime"]
+        
+        if "max_perf" in log_data.keys():
+            self.model_loading = False #perf test done
+            self.max_perf   = log_data["max_perf"]
+        
 
     def report_error(self, log_data):
         self.error = True
