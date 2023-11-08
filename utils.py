@@ -25,7 +25,6 @@ def post_request(full_path, data, max_retries=3):
     for attempt in range(max_retries):
         try:
             response = requests.post(full_path, json=data, timeout=1)
-            print(f"{time.time()} Notification sent. Response: {response.status_code}")
             return response.status_code
         except requests.Timeout:
             print(f"{time.time()} Request timed out")

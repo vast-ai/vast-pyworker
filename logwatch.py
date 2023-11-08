@@ -103,17 +103,20 @@ class GenericLogWatch(ABC):
         if re.search(self.loading_line, line):
             self.loading = True
             self.send_data({"mtoken" : self.master_token}, self.auth_server_url, "/report_loading")
+            return True
+        return False
 
     def model_loaded(self):
         print("[logwatch] starting model_loaded")
         sys.stdout.flush()
-        self.send_data(data, self.auth_server_url, "/report_loaded") #so that it stops sending loading update messages
+        
         end_time = time.time()
         data = {"id" : self.id, "mtoken" : self.master_token}
         data["loaded"] = True
         data["loadtime"] = end_time - self.start_time
         data["cur_perf"] = 0.0
 
+        self.send_data(data, self.auth_server_url, "/report_loaded") #so that it stops sending loading update messages
         if self.perf_test:
             if os.path.exists(self.perf_file):
                 self.load_perf_results(data)
@@ -138,9 +141,12 @@ def main():
     print("[logwatch] ready and waiting for input\n")
     sys.stdout.flush()
     for line in sys.stdin:
-        lw.handle_line(line)
         if not lw.loading:
-            lw.check_loading(line)
+            if lw.check_loading(line):
+                continue
+
+        lw.handle_line(line)
+        
         
 if __name__ == "__main__":
     main()
