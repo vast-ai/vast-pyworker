@@ -39,6 +39,8 @@ then
     export MASTER_TOKEN="mtoken"
 fi
 
+export AUTH_PORT=3000
+
 if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
   echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"
   exit 1
