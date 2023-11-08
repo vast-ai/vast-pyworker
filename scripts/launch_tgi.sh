@@ -10,6 +10,7 @@ else
 fi
 
 if [ -z $MODEL_ARGS ]
+then
     if [ ! -z $MODEL_CMD ]
     then
         MODEL_ARGS=$MODEL_CMD  
