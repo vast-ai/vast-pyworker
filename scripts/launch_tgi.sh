@@ -2,16 +2,13 @@
 
 export BACKEND=tgi 
 export MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq --max-batch-prefill-tokens 32768"
+export SERVER_DIR=/home/workspace/vast-pyworker
 
-if [ ! -d "/home/workspace/vast-pyworker" ]
+if [ ! -d "$SERVER_DIR" ]
 then
     wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/new-launch/start_server.sh | bash
-fi
-
-if [ -z "$SERVER_DIR" ]
-then
-    current_cwd=$(pwd)
-    export SERVER_DIR="$current_cwd"
+else
+    source $SERVER_DIR/start_server.sh
 fi
 
 MODEL_LAUNCH_CMD="text-generation-launcher"
