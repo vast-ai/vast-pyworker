@@ -3,6 +3,8 @@ echo "start_server.sh"
 date;
 env | grep _ >> /etc/environment;
 
+export BACKEND=$1
+
 if [ ! -f /root/hasbooted ]
 then  
     mkdir /home/workspace

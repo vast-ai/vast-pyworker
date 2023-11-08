@@ -1,20 +1,19 @@
 #!/bin/bash
 
-export BACKEND=tgi 
-export MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq"
-export SERVER_DIR=/home/workspace/vast-pyworker
-
+SERVER_DIR=/home/workspace/vast-pyworker
+BACKEND=tgi
 if [ ! -d "$SERVER_DIR" ]
 then
-    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/new-launch/start_server.sh | bash
+    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/new-launch/start_server.sh | bash -s $BACKEND
 else
-    source $SERVER_DIR/start_server.sh
+    $SERVER_DIR/start_server.sh $BACKEND
 fi
+
+MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq"
+echo "using args: $MODEL_ARGS"
 
 MODEL_LAUNCH_CMD="text-generation-launcher"
 MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
-
-echo "using args: $MODEL_ARGS"
 
 if [ -z "$MODEL_PID" ]
 then
