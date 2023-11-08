@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export BACKEND=tgi 
-export MODEL_ARGS="--model-id TheBloke/Llama-2-70B-chat-GPTQ --quantize gptq --max-batch-prefill-tokens 32768"
+export MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq --max-batch-prefill-tokens 32768"
 
 if [ ! -d "/home/workspace/vast-pyworker" ]
 then
