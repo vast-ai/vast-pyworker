@@ -3,7 +3,7 @@ class Backend():
         self.count = 0
 
 def increment_handler(backend, request):
-    backend.count += request["amount"]
+    backend.count += request.json["amount"]
     return "Incremented"
 
 def value_handler(backend, request):
