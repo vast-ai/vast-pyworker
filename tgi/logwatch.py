@@ -4,6 +4,7 @@ import sys
 
 from logwatch import GenericLogWatch
 from test_model import ModelPerfTest
+from utils import send_data
 
 def format_metric_value(metric_str):
     if metric_str[-2:] == "ms":
@@ -53,10 +54,10 @@ class LogWatch(GenericLogWatch):
         data["max_batch_prefill_tokens"] = self.max_batch_prefill_tokens
         data["max_batch_tokens"] = self.max_batch_total_tokens
         data["max_capacity"] = self.max_batch_total_tokens
-        self.send_data(data, self.control_server_url, "/worker_status/")
+        send_data(data, self.control_server_url, "/worker_status/", "logwatch-tgi")
 
         data["mtoken"] = self.master_token
-        self.send_data(data, self.auth_server_url, "/report_capacity")
+        send_data(data, self.auth_server_url, "/report_capacity", "logwatch-tgi")
         
         self.perf_test.update_params(self.max_total_tokens, self.max_batch_total_tokens)
 
@@ -73,13 +74,13 @@ class LogWatch(GenericLogWatch):
 
         if found:
             data["mtoken"] = self.master_token
-            self.send_data(data, self.auth_server_url, "/report_done")
+            send_data(data, self.auth_server_url, "/report_done", "logwatch-tgi")
 
     def send_error(self, error_msg):
         data = {"id" : self.id, "error_msg" : error_msg}
-        self.send_data(data, self.control_server_url, "/worker_status/")
+        send_data(data, self.control_server_url, "/worker_status/", "logwatch-tgi")
         data["mtoken"] = self.master_token
-        self.send_data(data, self.auth_server_url, "/report_error")
+        send_data(data, self.auth_server_url, "/report_error", "logwatch-tgi")
 
 
     def __handle_line(self, line_json):
