@@ -5,7 +5,7 @@ env | grep _ >> /etc/environment;
 
 export BACKEND=$1
 
-if [ ! -f /root/hasbooted ]
+if [ ! -f /root/hasbooted2 ]
 then  
     mkdir /home/workspace
     cd /home/workspace
@@ -22,7 +22,7 @@ then
     pip install numpy
 
     touch ~/.no_auto_tmux
-    touch /root/hasbooted
+    touch /root/hasbooted2
 fi
 
 echo "$VIRTUAL_ENV"
