@@ -6,4 +6,12 @@ start_server() {
         $1/start_server.sh $2
     fi
 }
+
+if [ ! -f /root/hasbooted ]
+then
+    echo "hasbooted doesn't exist"
+else
+    echo "hasbooted does exist"
+fi
+
 start_server /home/workspace/vast-pyworker helloautoscaler

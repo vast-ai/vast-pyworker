@@ -7,6 +7,13 @@ export BACKEND=$1
 echo "$BACKEND"
 
 if [ ! -f /root/hasbooted ]
+then
+    echo "hasbooted doesn't exist"
+else
+    echo "hasbooted does exist"
+fi
+
+if [ ! -f /root/hasbooted ]
 then 
     echo "booting"
     mkdir /home/workspace
