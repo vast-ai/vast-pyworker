@@ -1,4 +1,5 @@
 import time
+import threading
 from flask import abort
 
 import notify
@@ -18,6 +19,8 @@ class Backend():
         t2 = time.time()
 
         notify.loaded(id=self.id, load_time=t2 - t1, max_perf=self.max_perf)
+        t1 = threading.Thread(target=self.send_data_loop)
+        t1.start()
         
     def send_data_loop(self):
         while True:
