@@ -10,29 +10,32 @@ class Backend():
         t1 = time.time()
         self.id = container_id
         
-        self.max_perf = 5.0
         self.count = 0
         self.num_requests_recieved = 0
         self.interval_requests_recieved = 0
         
-        self.update_interval = 10
         t2 = time.time()
 
-        notify.loaded(id=self.id, load_time=t2 - t1, max_perf=self.max_perf)
+        notify.loaded(id=self.id, load_time=t2 - t1, max_perf=5.0)
+
+        self.update_interval = 10
         t1 = threading.Thread(target=self.send_data_loop)
         t1.start()
         
     def send_data_loop(self):
         while True:
-            cur_load = self.interval_requests_recieved / self.update_interval
+            cur_load = self.interval_requests_recieved
             notify.update(self.id, cur_load, self.num_requests_recieved)
             self.interval_requests_recieved = 0
             time.sleep(self.update_interval)
 
+    def track_request(self):
+        self.num_requests_recieved += 1
+        self.interval_requests_recieved += 1
+
 def increment_handler(backend, request):
+    backend.track_request()
     request_dict = request.json
-    backend.num_requests_recieved += 1
-    backend.interval_requests_recieved += 1
     if "amount" in request_dict.keys():
         backend.count += request_dict["amount"]        
         return "Incremented"
@@ -40,6 +43,7 @@ def increment_handler(backend, request):
     abort(400)
 
 def value_handler(backend, request):
+    backend.track_request()
     return {"value" : backend.count}
 
 flask_dict = {
