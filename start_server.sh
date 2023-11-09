@@ -6,14 +6,14 @@ env | grep _ >> /etc/environment;
 export BACKEND=$1
 echo "$BACKEND"
 
-if [ ! -f /root/hasbooted ]
+if [ ! -f /root/hasbooted2 ]
 then
-    echo "hasbooted doesn't exist"
+    echo "hasbooted2 doesn't exist"
 else
-    echo "hasbooted does exist"
+    echo "hasbooted2 does exist"
 fi
 
-if [ ! -f /root/hasbooted ]
+if [ ! -f /root/hasbooted2 ]
 then 
     echo "booting"
     mkdir /home/workspace
@@ -31,7 +31,7 @@ then
     pip install numpy
 
     touch ~/.no_auto_tmux
-    touch /root/hasbooted
+    touch /root/hasbooted2
 fi
 
 echo "$VIRTUAL_ENV"

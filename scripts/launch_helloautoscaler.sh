@@ -7,11 +7,11 @@ start_server() {
     fi
 }
 
-if [ ! -f /root/hasbooted ]
+if [ ! -f /root/hasbooted2 ]
 then
-    echo "hasbooted doesn't exist"
+    echo "hasbooted2 doesn't exist"
 else
-    echo "hasbooted does exist"
+    echo "hasbooted2 does exist"
 fi
 
 start_server /home/workspace/vast-pyworker helloautoscaler
