@@ -16,7 +16,7 @@ class Backend():
         
         t2 = time.time()
 
-        notify.loaded(id=self.id, load_time=t2 - t1, max_perf=5.0)
+        notify.loaded(id=self.id, load_time=t2 - t1, max_perf=0.5)
 
         self.update_interval = 10
         t1 = threading.Thread(target=self.send_data_loop)
@@ -24,7 +24,7 @@ class Backend():
         
     def send_data_loop(self):
         while True:
-            cur_load = self.interval_requests_recieved
+            cur_load = self.interval_requests_recieved / self.update_interval
             notify.update(self.id, cur_load, self.num_requests_recieved)
             self.interval_requests_recieved = 0
             time.sleep(self.update_interval)
