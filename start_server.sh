@@ -4,9 +4,11 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
+echo "$BACKEND"
 
 if [ ! -f /root/hasbooted ]
-then  
+then 
+    echo "booting"
     mkdir /home/workspace
     cd /home/workspace
     git clone -b helloautoscaler https://github.com/vast-ai/vast-pyworker
@@ -34,7 +36,7 @@ fi
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://run.vast.ai"
+export REPORT_ADDR="https://cds-bargain-subscription-essay.trycloudflare.com"
 
 if [ -z "$MASTER_TOKEN" ]
 then

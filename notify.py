@@ -1,7 +1,7 @@
 from utils import send_data
 
 autoscaler_address = "http://run.vast.ai"
-notify_endpoint = "worker_status"
+notify_endpoint = "/worker_status"
 
 def loaded(id, load_time, max_perf):
     data = {"id" : id, "loadtime" : load_time, "max_perf" : max_perf}
