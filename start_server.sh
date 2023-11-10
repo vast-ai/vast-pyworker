@@ -36,7 +36,7 @@ fi
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://flux-surfaces-yoga-boat.trycloudflare.com"
+export REPORT_ADDR="https://run.vast.ai"
 
 if [ -z "$MASTER_TOKEN" ]
 then
