@@ -22,5 +22,5 @@ then
     touch $SERVER_DIR/infer.log
 fi
 
-tail -f -n +1 $SERVER_DIR/infer.log | $WATCH_CMD |& tee $SERVER_DIR/watch.log &
-echo "started logwatch" | tee /root/debug.log
+tail -f -n +1 $SERVER_DIR/infer.log | $WATCH_CMD |& tee -a $SERVER_DIR/watch.log &
+echo "started logwatch" | tee -a /root/debug.log

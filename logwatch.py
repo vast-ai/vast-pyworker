@@ -90,7 +90,7 @@ class GenericLogWatch(ABC):
     def check_loading(self, line):
         if re.search(self.loading_line, line):
             self.loading = True
-            send_data({"mtoken" : self.master_token}, self.auth_server_url, "/report_loading", "logwatch")
+            send_data({"mtoken" : self.master_token}, self.auth_server_url, "/report_loading", "logwatch-internal")
             return True
         return False
 
@@ -104,7 +104,7 @@ class GenericLogWatch(ABC):
         data["loadtime"] = end_time - self.start_time
         data["cur_perf"] = 0.0
 
-        send_data(data, self.auth_server_url, "/report_loaded", "logwatch") #so that it stops sending loading update messages
+        send_data(data, self.auth_server_url, "/report_loaded", "logwatch-internal") #so that it stops sending loading update messages
         if self.perf_test:
             if os.path.exists(self.perf_file):
                 self.load_perf_results(data)
@@ -115,7 +115,7 @@ class GenericLogWatch(ABC):
 
         print("[logwatch] sending data for model_loaded")
         sys.stdout.flush()     
-        send_data(data, self.auth_server_url, "/report_loaded", "logwatch") #to give model performance update
+        send_data(data, self.auth_server_url, "/report_loaded", "logwatch-internal") #to give model performance update
         send_data(data, self.control_server_url, "/worker_status/", "logwatch")
         
 

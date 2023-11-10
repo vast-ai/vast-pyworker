@@ -55,7 +55,7 @@ class LogWatch(GenericLogWatch):
         data["max_batch_tokens"] = self.max_batch_total_tokens
         data["max_capacity"] = self.max_batch_total_tokens
         send_data(data, self.control_server_url, "/worker_status/", "logwatch-tgi")
-        send_data(data, self.auth_server_url, "/report_capacity", "logwatch-tgi")
+        send_data(data, self.auth_server_url, "/report_capacity", "logwatch-internal")
         
         self.perf_test.update_params(self.max_total_tokens, self.max_batch_total_tokens)
 
@@ -70,13 +70,13 @@ class LogWatch(GenericLogWatch):
                 found = True
 
         if found:
-            send_data(data, self.auth_server_url, "/report_done", "logwatch-tgi")
+            send_data(data, self.auth_server_url, "/report_done", "logwatch-internal")
 
     def send_error(self, error_msg):
         data = {"id" : self.id, "mtoken" : self.master_token}
         data["error_msg"] = error_msg
         send_data(data, self.control_server_url, "/worker_status/", "logwatch-tgi")
-        send_data(data, self.auth_server_url, "/report_error", "logwatch-tgi")
+        send_data(data, self.auth_server_url, "/report_error", "logwatch-internal")
 
 
     def __handle_line(self, line_json):
