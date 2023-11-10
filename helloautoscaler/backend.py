@@ -5,10 +5,12 @@ from flask import abort
 import notify
 
 class Backend():
-    def __init__(self, container_id, *args, **kwargs):
+    def __init__(self, container_id, master_token, control_server_url, send_data):
     
         t1 = time.time()
         self.id = container_id
+        self.master_token = master_token
+        self.control_server_url = control_server_url
         
         self.count = 0
         self.num_requests_recieved = 0
