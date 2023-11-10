@@ -11,6 +11,8 @@ start_server() {
 
 start_server $SERVER_DIR tgi |& tee /root/debug.log
 
+echo "resuming launch_tgi"
+
 if [ -z "$MODEL_ARGS" ]
 then
     if [ ! -z "$MODEL_CMD" ]
@@ -34,3 +36,5 @@ then
 else
     echo "model already running" | tee /root/debug.log
 fi
+
+echo "launch_tgi done"
