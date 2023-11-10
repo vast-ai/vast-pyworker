@@ -75,7 +75,7 @@ class GenericLogWatch(ABC):
         print(f"{datetime.datetime.now()} [logwatch] starting model perf test")
         sys.stdout.flush()
         sanity_check = self.perf_test.first_run()
-        if sanity_check:
+        if sanity_check == "success":
             print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
             sys.stdout.flush()
             success, throughput, avg_latency = self.perf_test.run(3) #3
@@ -95,9 +95,9 @@ class GenericLogWatch(ABC):
                 sys.stdout.flush()
                 data["error_msg"] = "not all test requests succeeded"
         else:
-            print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test took too long")
+            print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test failed: {sanity_check}")
             sys.stdout.flush()
-            data["error_msg"] = "initial performance test failed"
+            data["error_msg"] = f"initial performance test failed: {sanity_check}"
                 
     def check_loading(self, line):
         if re.search(self.loading_line, line):

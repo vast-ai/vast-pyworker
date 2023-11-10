@@ -95,9 +95,9 @@ class ModelPerfTest:
         sys.stdout.flush()
 
         if (throughput < 50.0) or (num_reqs_completed != num_reqs): #some machines give ~75.0
-            return False
+            return f"throughput: {throughput}<50.0 or ({num_reqs_completed} != {num_reqs})"
         else:
-            return True
+            return "success"
         
     def run(self, num_batches):
         if num_batches < 1:
