@@ -1,5 +1,5 @@
 #!/bin/bash
-
+SERVER_DIR=/home/workspace/vast-pyworker
 start_server() {
     if [ ! -d "$1" ]
     then
@@ -9,7 +9,7 @@ start_server() {
     fi
 }
 
-start_server /home/workspace/vast-pyworker tgi
+start_server $SERVER_DIR tgi
 
 if [ -z "$MODEL_ARGS" ]
 then
