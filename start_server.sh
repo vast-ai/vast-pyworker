@@ -69,6 +69,7 @@ if [ -f "$SERVER_DIR/$BACKEND/launch.sh" ]
 then
     source "$SERVER_DIR/$BACKEND/launch.sh"
 fi
+echo "start server done"
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"
