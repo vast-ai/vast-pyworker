@@ -8,9 +8,10 @@ import datetime
 from utils import send_data
 
 class GenericMetrics(ABC):
-    def __init__(self, id, control_server_url, send_server_data):
+    def __init__(self, id, master_token, control_server_url, send_server_data):
         self.id = int(id)
         self.control_server_url = control_server_url
+        self.master_token = master_token
         self.send_server_data = send_server_data
         self.overloaded = False
         self.error = False
@@ -43,12 +44,12 @@ class GenericMetrics(ABC):
     def send_data_loop(self):
         while not self.error:
             if not self.model_loaded and self.model_loading:
-                data = {"id" : self.id, "message" : "loading update"}
+                data = {"id" : self.id, "mtoken" : self.master_token, "message" : "loading update"}
                 self.update_loading(data)
                 threading.Thread(target=send_data, args=(data, self.control_server_url, "/worker_status/", "metrics")).start()
                 time.sleep(self.update_interval * 10)
             elif not self.model_loading and self.send_data_condition():
-                data = {"id" : self.id, "message" : "data update"}
+                data = {"id" : self.id, "mtoken" : self.master_token, "message" : "data update"}
                 self.fill_data(data)
                 threading.Thread(target=send_data, args=(data, self.control_server_url, "/worker_status/", "metrics")).start()
             time.sleep(self.update_interval)
