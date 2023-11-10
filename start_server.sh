@@ -4,7 +4,7 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
-echo "$BACKEND"
+echo "$BACKEND" | tee -a /root/debug.log
 
 if [ ! -f /root/hasbooted2 ]
 then 
@@ -27,12 +27,12 @@ then
     touch /root/hasbooted2
 fi
 
-echo "$VIRTUAL_ENV" | tee -a /root/debug.log
 if [ "$VIRTUAL_ENV" != "/home/workspace/worker-env" ]
 then
     source /home/workspace/worker-env/bin/activate
     echo "environment activated" | tee -a /root/debug.log
 fi
+echo "venv: $VIRTUAL_ENV" | tee -a /root/debug.log
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"

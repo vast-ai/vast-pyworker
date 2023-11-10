@@ -9,7 +9,7 @@ flask_dict = getattr(backend_lib, "flask_dict")
 
 app = Flask(__name__)
 log = logging.getLogger('werkzeug')
-log.setLevel(logging.DEBUG)
+log.setLevel(logging.WARNING)
 
 print(f"server.py")
 print(f"available endpoints: {flask_dict}")
