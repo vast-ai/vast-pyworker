@@ -56,6 +56,8 @@ def generate_handler(backend, request):
     if auth_dict:
         if not backend.check_signature(**auth_dict):
             abort(401)
+    else:
+        print("WARNING: support for /generate requests without a signed signature will soon be deprecated")
 
     if model_dict is None:
         print(f"client request: {request.json} doesn't include model inputs and parameters")
@@ -75,6 +77,8 @@ def generate_stream_handler(backend, request):
     if auth_dict:
         if not backend.check_signature(**auth_dict):
             abort(401)
+    else:
+        print("WARNING: support for /generate_stream requests without a signed signature will soon be deprecated")
  
     if model_dict is None:
         print(f"client request: {request.json} doesn't include model inputs and parameters")
