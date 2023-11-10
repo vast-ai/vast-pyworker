@@ -17,6 +17,10 @@ do
     WATCH_PID=$(ps aux | grep "$WATCH_CMD" | grep -v grep | awk '{print $2}')
 done
 
-touch $SERVER_DIR/infer.log
-tail -f -n +1 $SERVER_DIR/infer.log |$WATCH_CMD 2>&1 | tee $SERVER_DIR/watch.log &
-echo "started logwatch"
+if [ ! -f $SERVER_DIR/infer.log ]
+then
+    touch $SERVER_DIR/infer.log
+fi
+
+tail -f -n +1 $SERVER_DIR/infer.log | $WATCH_CMD |& tee $SERVER_DIR/watch.log &
+echo "started logwatch" | tee /root/debug.log

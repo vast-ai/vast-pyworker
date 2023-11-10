@@ -17,5 +17,5 @@ do
     AUTH_PID=$(ps aux | grep "$AUTH_CMD" | grep -v grep | awk '{print $2}')
 done
 
-python3 $SERVER_DIR/server.py 2>&1 | tee $SERVER_DIR/auth.log &
-echo "started auth server"
+python3 $SERVER_DIR/server.py |& tee $SERVER_DIR/auth.log &
+echo "started auth server" | tee /root/debug.log

@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "start_server.sh"
+echo "start_server.sh" | tee /root/debug.log
 date;
 env | grep _ >> /etc/environment;
 
@@ -7,15 +7,8 @@ export BACKEND=$1
 echo "$BACKEND"
 
 if [ ! -f /root/hasbooted2 ]
-then
-    echo "hasbooted2 doesn't exist"
-else
-    echo "hasbooted2 does exist"
-fi
-
-if [ ! -f /root/hasbooted2 ]
 then 
-    echo "booting"
+    echo "booting" | tee /root/debug.log
     mkdir /home/workspace
     cd /home/workspace
     git clone -b helloautoscaler https://github.com/vast-ai/vast-pyworker
@@ -34,11 +27,11 @@ then
     touch /root/hasbooted2
 fi
 
-echo "$VIRTUAL_ENV"
+echo "$VIRTUAL_ENV" | tee /root/debug.log
 if [ "$VIRTUAL_ENV" != "/home/workspace/worker-env" ]
 then
     source /home/workspace/worker-env/bin/activate
-    echo "environment activated"
+    echo "environment activated" | tee /root/debug.log
 fi
 
 cd /home/workspace/vast-pyworker
@@ -59,7 +52,7 @@ fi
 
 if [ ! -d "$SERVER_DIR/$BACKEND" ]
 then
-    echo "$BACKEND not supported!"
+    echo "$BACKEND not supported!" | tee /root/debug.log
     exit 1
 fi
 
@@ -69,7 +62,7 @@ if [ -f "$SERVER_DIR/$BACKEND/launch.sh" ]
 then
     source "$SERVER_DIR/$BACKEND/launch.sh"
 fi
-echo "start server done"
+echo "start server done" | tee /root/debug.log
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"
