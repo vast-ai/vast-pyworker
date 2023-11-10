@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "launch_tgi.sh" | tee /root/debug.log
+echo "launch_tgi.sh" | tee -a /root/debug.log
 
 SERVER_DIR=/home/workspace/vast-pyworker
 start_server() {
@@ -23,17 +23,17 @@ then
     fi
 fi
 
-echo "using args: $MODEL_ARGS" | tee /root/debug.log
+echo "using args: $MODEL_ARGS" | tee -a /root/debug.log
 
 MODEL_LAUNCH_CMD="text-generation-launcher"
 MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 
 if [ -z "$MODEL_PID" ]
 then
-    echo "starting model download" >> $SERVER_DIR/infer.log
+    echo "starting model download" > $SERVER_DIR/infer.log
     text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" &>> $SERVER_DIR/infer.log  &
-    echo "launched model" | tee /root/debug.log
+    echo "launched model" | tee -a /root/debug.log
 else
-    echo "model already running" | tee /root/debug.log
+    echo "model already running" | tee -a /root/debug.log
 fi
 
