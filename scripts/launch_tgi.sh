@@ -9,7 +9,7 @@ start_server() {
     fi
 }
 
-start_server $SERVER_DIR tgi
+start_server $SERVER_DIR tgi |& tee /root/debug.log
 
 if [ -z "$MODEL_ARGS" ]
 then
@@ -21,16 +21,16 @@ then
     fi
 fi
 
-echo "using args: $MODEL_ARGS"
+echo "using args: $MODEL_ARGS" | tee /root/debug.log
 
 MODEL_LAUNCH_CMD="text-generation-launcher"
 MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 
 if [ -z "$MODEL_PID" ]
 then
-    echo "starting model download" > $SERVER_DIR/infer.log
-    text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" >> $SERVER_DIR/infer.log 2>&1 &
-    echo "launched model"
+    echo "starting model download" |& tee $SERVER_DIR/infer.log /root/debug.log
+    text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" |& tee $SERVER_DIR/infer.log /root/debug.log &
+    echo "launched model" | tee /root/debug.log
 else
-    echo "model already running"
+    echo "model already running" | tee /root/debug.log
 fi

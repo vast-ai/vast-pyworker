@@ -25,13 +25,15 @@ def get_model_address(instance):
 
 def send_data(data, url, path, sender):
     full_path = url + path
-    print(f'{datetime.datetime.now()} [{sender}] sending data to url: {full_path}, data: {data}')
-    sys.stdout.flush()
+    if sender != "logwatch-internal":
+        print(f'{datetime.datetime.now()} [{sender}] sending data to url: {full_path}, data: {data}')
+        sys.stdout.flush()
     
     rcode = post_request(full_path, data)
     
-    print(f"{datetime.datetime.now()} [{sender}] Notification sent. Response: {rcode}")
-    sys.stdout.flush()
+    if sender != "logwatch-internal":
+        print(f"{datetime.datetime.now()} [{sender}] Notification sent. Response: {rcode}")
+        sys.stdout.flush()
 
 def post_request(full_path, data, max_retries=3):
     for attempt in range(max_retries):

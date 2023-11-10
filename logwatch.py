@@ -32,7 +32,7 @@ class GenericLogWatch(ABC):
         data = {"id" : self.id, "mtoken" : self.master_token}
         for k,v in update_params.items():
             data[k] = v
-        send_data(data, self.auth_server_url, "/report_done")
+        send_data(data, self.auth_server_url, "/report_done", "logwatch-internal")
     
     def metrics_sanity_check(self, throughput, avg_latency):
         if os.path.exists(self.sanity_file):
