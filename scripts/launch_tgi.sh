@@ -1,13 +1,15 @@
 #!/bin/bash
 
-SERVER_DIR=/home/workspace/vast-pyworker
-BACKEND=tgi
-if [ ! -d "$SERVER_DIR" ]
-then
-    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/start_server.sh | bash -s $BACKEND
-else
-    $SERVER_DIR/start_server.sh $BACKEND
-fi
+start_server() {
+    if [ ! -d "$1" ]
+    then
+        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler/start_server.sh | bash -s $2
+    else
+        $1/start_server.sh $2
+    fi
+}
+
+start_server /home/workspace/vast-pyworker tgi
 
 if [ -z "$MODEL_ARGS" ]
 then
