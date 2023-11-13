@@ -2,6 +2,8 @@
 echo "launch_tgi.sh" | tee -a /root/debug.log
 
 SERVER_DIR=/home/workspace/vast-pyworker
+export REPORT_ADDR="https://shareware-sad-supporters-stocks.trycloudflare.com"
+
 start_server() {
     if [ ! -d "$1" ]
     then
