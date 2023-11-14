@@ -1,8 +1,8 @@
 from tgi.metrics import Metrics as TGIMetrics
 
 class Metrics(TGIMetrics):
-    def __init__(self, id, control_server_url, send_server_data):
-        super().__init__(id, control_server_url, send_server_data)
+    def __init__(self, id, master_token, control_server_url, send_server_data):
+        super().__init__(id, master_token, control_server_url, send_server_data)
 
     def start_req(self, request):
         if request is None:

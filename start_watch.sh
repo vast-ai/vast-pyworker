@@ -18,7 +18,7 @@ do
 done
 
 
-rm -f $SERVER_DIR/infer.log
+rm -f $SERVER_DIR/infer.log #want to make sure previous log messages aren't read by logwatch on reboot
 touch $SERVER_DIR/infer.log
 
 tail -f -n +1 $SERVER_DIR/infer.log | $WATCH_CMD |& tee -a $SERVER_DIR/watch.log &

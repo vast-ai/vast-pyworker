@@ -3,12 +3,12 @@ import random
 from metrics import GenericMetrics
 
 class Metrics(GenericMetrics):
-    def __init__(self, id, control_server_url, send_server_data):
+    def __init__(self, id, master_token, control_server_url, send_server_data):
         self.total_prompt_tokens = 0
         self.tot_request_time = 0
         self.img_size = 512 * 512 #add this as a parameter
 
-        super().__init__(id, control_server_url, send_server_data)
+        super().__init__(id, master_token, control_server_url, send_server_data)
         
     def fill_data(self, data):
         self.fill_data_generic(data)

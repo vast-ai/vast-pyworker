@@ -1,4 +1,4 @@
-from flask import Response, abort
+from flask import abort
 import json
 
 from backend import GenericBackend
@@ -9,7 +9,7 @@ STREAMING_SERVER = '127.0.0.1:5002'
 
 class Backend(GenericBackend):
     def __init__(self, container_id, control_server_url, master_token, send_data):
-        metrics = Metrics(id=container_id, control_server_url=control_server_url, send_server_data=send_data)
+        metrics = Metrics(id=container_id, master_token=master_token, control_server_url=control_server_url, send_server_data=send_data)
         super().__init__(master_token=master_token, metrics=metrics)
         self.blocking_server_addr = BLOCKING_SERVER
         self.streaming_server_addr = STREAMING_SERVER
