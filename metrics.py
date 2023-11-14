@@ -55,7 +55,7 @@ class GenericMetrics(ABC):
             time.sleep(self.update_interval)
     
     def update_loading(self, data):
-        new_usage = psutil.disk_usage('/').used
+        new_usage = psutil.disk_usage('/').used / (2**30) # want units of GB
         data["disk_usage"] = new_usage
         data["additional_disk_usage"] = new_usage - self.last_disk_usage
         self.last_disk_usage = new_usage
@@ -92,7 +92,7 @@ class GenericMetrics(ABC):
         pass
 
     def report_loading(self, log_data):
-        self.base_disk_usage = psutil.disk_usage('/').used
+        self.base_disk_usage = psutil.disk_usage('/').used / (2**30) # want units of GB
         self.last_disk_usage = self.base_disk_usage
         self.model_loading = True
     
