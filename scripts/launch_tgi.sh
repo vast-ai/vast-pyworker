@@ -2,7 +2,7 @@
 echo "launch_tgi.sh" | tee -a /root/debug.log
 
 SERVER_DIR=/home/workspace/vast-pyworker
-export REPORT_ADDR="https://shareware-sad-supporters-stocks.trycloudflare.com"
+export REPORT_ADDR="https://matt-laos-labour-outlined.trycloudflare.com"
 
 start_server() {
     if [ ! -d "$1" ]
