@@ -4,7 +4,6 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
-export REPORT_ADDR=$2
 
 if [ -z "$BACKEND" ]; then
   echo "BACKEND must be set!"
