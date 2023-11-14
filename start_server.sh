@@ -4,7 +4,14 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
+
+if [ -z "$BACKEND" ]; then
+  echo "BACKEND must be set!"
+  exit 1
+fi
+
 echo "$BACKEND" | tee -a /root/debug.log
+echo "$REPORT_ADDR" | tee -a /root/debug.log
 
 if [ ! -f /root/hasbooted2 ]
 then 
@@ -36,7 +43,10 @@ echo "venv: $VIRTUAL_ENV" | tee -a /root/debug.log
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://run.vast.ai"
+if [ -z "$REPORT_ADDR" ]
+then
+    export REPORT_ADDR="https://run.vast.ai"
+fi
 
 if [ -z "$MASTER_TOKEN" ]
 then
@@ -44,11 +54,6 @@ then
 fi
 
 export AUTH_PORT=3000
-
-if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
-  echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"
-  exit 1
-fi
 
 if [ ! -d "$SERVER_DIR/$BACKEND" ]
 then

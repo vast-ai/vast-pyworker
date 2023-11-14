@@ -2,16 +2,18 @@
 echo "launch_tgi.sh" | tee -a /root/debug.log
 
 SERVER_DIR=/home/workspace/vast-pyworker
+export REPORT_ADDR="https://matt-laos-labour-outlined.trycloudflare.com"
+
 start_server() {
     if [ ! -d "$1" ]
     then
-        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler/start_server.sh | bash -s $2
+        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler-local/start_server.sh | bash -s "$2"
     else
-        $1/start_server.sh $2
+        $1/start_server.sh "$2"
     fi
 }
 
-start_server $SERVER_DIR tgi
+start_server "$SERVER_DIR" "tgi"
 
 if [ -z "$MODEL_ARGS" ]
 then
