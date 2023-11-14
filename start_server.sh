@@ -1,15 +1,24 @@
 #!/bin/bash
-echo "start_server.sh"
+echo "start_server.sh" | tee -a /root/debug.log
 date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
 
+if [ -z "$BACKEND" ]; then
+  echo "BACKEND must be set!"
+  exit 1
+fi
+
+echo "$BACKEND" | tee -a /root/debug.log
+echo "$REPORT_ADDR" | tee -a /root/debug.log
+
 if [ ! -f /root/hasbooted2 ]
-then  
+then 
+    echo "booting" | tee -a /root/debug.log
     mkdir /home/workspace
     cd /home/workspace
-    git clone https://github.com/vast-ai/vast-pyworker
+    git clone -b helloautoscaler https://github.com/vast-ai/vast-pyworker
     
     python3 -m venv /home/workspace/worker-env
     source /home/workspace/worker-env/bin/activate
@@ -25,16 +34,20 @@ then
     touch /root/hasbooted2
 fi
 
-echo "$VIRTUAL_ENV"
 if [ "$VIRTUAL_ENV" != "/home/workspace/worker-env" ]
 then
     source /home/workspace/worker-env/bin/activate
-    echo "environment activated"
+    echo "environment activated" | tee -a /root/debug.log
 fi
+echo "venv: $VIRTUAL_ENV" | tee -a /root/debug.log
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://run.vast.ai"
+
+if [ -z "$REPORT_ADDR" ]
+then
+    export REPORT_ADDR="https://run.vast.ai"
+fi
 
 if [ -z "$MASTER_TOKEN" ]
 then
@@ -43,14 +56,9 @@ fi
 
 export AUTH_PORT=3000
 
-if [ -z "$REPORT_ADDR" ] || [ -z "$BACKEND" ] || [ -z "$AUTH_PORT" ]; then
-  echo "REPORT_ADDR, BACKEND, AUTH_PORT env variables must be set!"
-  exit 1
-fi
-
 if [ ! -d "$SERVER_DIR/$BACKEND" ]
 then
-    echo "$BACKEND not supported!"
+    echo "$BACKEND not supported!" | tee -a /root/debug.log
     exit 1
 fi
 
@@ -60,6 +68,7 @@ if [ -f "$SERVER_DIR/$BACKEND/launch.sh" ]
 then
     source "$SERVER_DIR/$BACKEND/launch.sh"
 fi
+echo "start server done" | tee -a /root/debug.log
 
 # sleep 1
 # source "$SERVER_DIR/init_check.sh"

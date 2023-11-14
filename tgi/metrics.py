@@ -4,7 +4,7 @@ import random
 from metrics import GenericMetrics
 
 class Metrics(GenericMetrics):
-    def __init__(self, id, control_server_url, send_server_data):
+    def __init__(self, id, master_token, control_server_url, send_server_data):
         self.batch_capacity = None
         self.total_prompt_tokens = 0.0
         
@@ -18,7 +18,7 @@ class Metrics(GenericMetrics):
         self.tokens_per_req_avg = 1024.0
         self.num_tokens_incoming = 0.0
 
-        super().__init__(id, control_server_url, send_server_data)
+        super().__init__(id, master_token, control_server_url, send_server_data)
     
     def send_data_condition(self):
         return ((random.randint(0, 9) == 3) or (self.cur_capacity_lastreport != self.num_tokens_working)) and self.model_loaded

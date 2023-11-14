@@ -1,13 +1,18 @@
 #!/bin/bash
+echo "launch_tgi.sh" | tee -a /root/debug.log
 
-SERVER_DIR=/home/workspace/vast-pyworker
-BACKEND=tgi
-if [ ! -d "$SERVER_DIR" ]
-then
-    wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/start_server.sh | bash -s $BACKEND
-else
-    $SERVER_DIR/start_server.sh $BACKEND
-fi
+SERVER_DIR="/home/workspace/vast-pyworker"
+
+start_server() {
+    if [ ! -d "$1" ]
+    then
+        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler/start_server.sh | bash -s "$2"
+    else
+        $1/start_server.sh "$2"
+    fi
+}
+
+start_server "$SERVER_DIR" "tgi"
 
 if [ -z "$MODEL_ARGS" ]
 then
@@ -19,7 +24,7 @@ then
     fi
 fi
 
-echo "using args: $MODEL_ARGS"
+echo "using args: $MODEL_ARGS" | tee -a /root/debug.log
 
 MODEL_LAUNCH_CMD="text-generation-launcher"
 MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
@@ -27,8 +32,9 @@ MODEL_PID=$(ps aux | grep "$MODEL_LAUNCH_CMD" | grep -v grep | awk '{print $2}')
 if [ -z "$MODEL_PID" ]
 then
     echo "starting model download" > $SERVER_DIR/infer.log
-    text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" >> $SERVER_DIR/infer.log 2>&1 &
-    echo "launched model"
+    text-generation-launcher $MODEL_ARGS --json-output --port 5001 --hostname "127.0.0.1" &>> $SERVER_DIR/infer.log  &
+    echo "launched model" | tee -a /root/debug.log
 else
-    echo "model already running"
+    echo "model already running" | tee -a /root/debug.log
 fi
+

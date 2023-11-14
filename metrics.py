@@ -5,12 +5,13 @@ import threading
 from abc import ABC, abstractmethod
 import datetime
 
-from utils import post_request
+from utils import send_data
 
 class GenericMetrics(ABC):
-    def __init__(self, id, control_server_url, send_server_data):
+    def __init__(self, id, master_token, control_server_url, send_server_data):
         self.id = int(id)
         self.control_server_url = control_server_url
+        self.master_token = master_token
         self.send_server_data = send_server_data
         self.overloaded = False
         self.error = False
@@ -43,26 +44,18 @@ class GenericMetrics(ABC):
     def send_data_loop(self):
         while not self.error:
             if not self.model_loaded and self.model_loading:
-                data = {"id" : self.id, "message" : "loading update"}
+                data = {"id" : self.id, "mtoken" : self.master_token, "message" : "loading update"}
                 self.update_loading(data)
-                self.send_data(data, self.control_server_url, "/worker_status/")
+                threading.Thread(target=send_data, args=(data, self.control_server_url, "/worker_status/", "metrics")).start()
                 time.sleep(self.update_interval * 10)
             elif not self.model_loading and self.send_data_condition():
-                data = {"id" : self.id, "message" : "data update"}
+                data = {"id" : self.id, "mtoken" : self.master_token, "message" : "data update"}
                 self.fill_data(data)
-                self.send_data(data, self.control_server_url, "/worker_status/")
+                threading.Thread(target=send_data, args=(data, self.control_server_url, "/worker_status/", "metrics")).start()
             time.sleep(self.update_interval)
-
-    def send_data(self, data, url, path):
-        full_path = url + path
-        print(f'{datetime.datetime.now()} [server_metrics] sending data to url: {full_path}, data: {data}')
-        sys.stdout.flush()
-        thread = threading.Thread(target=post_request, args=(full_path,data))
-        thread.start()
-        
     
     def update_loading(self, data):
-        new_usage = psutil.disk_usage('/').used
+        new_usage = psutil.disk_usage('/').used / (2**30) # want units of GB
         data["disk_usage"] = new_usage
         data["additional_disk_usage"] = new_usage - self.last_disk_usage
         self.last_disk_usage = new_usage
@@ -99,7 +92,7 @@ class GenericMetrics(ABC):
         pass
 
     def report_loading(self, log_data):
-        self.base_disk_usage = psutil.disk_usage('/').used
+        self.base_disk_usage = psutil.disk_usage('/').used / (2**30) # want units of GB
         self.last_disk_usage = self.base_disk_usage
         self.model_loading = True
     
@@ -113,7 +106,6 @@ class GenericMetrics(ABC):
             self.model_loading = False #perf test done
             self.max_perf   = log_data["max_perf"]
         
-
     def report_error(self, log_data):
         self.error = True
         self.error_msg = log_data["error_msg"]
