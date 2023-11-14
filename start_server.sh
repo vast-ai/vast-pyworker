@@ -43,6 +43,7 @@ echo "venv: $VIRTUAL_ENV" | tee -a /root/debug.log
 
 cd /home/workspace/vast-pyworker
 export SERVER_DIR="/home/workspace/vast-pyworker"
+
 if [ -z "$REPORT_ADDR" ]
 then
     export REPORT_ADDR="https://run.vast.ai"
