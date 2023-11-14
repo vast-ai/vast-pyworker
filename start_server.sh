@@ -18,7 +18,7 @@ then
     echo "booting" | tee -a /root/debug.log
     mkdir /home/workspace
     cd /home/workspace
-    git clone https://github.com/vast-ai/vast-pyworker
+    git clone -b helloautoscaler-test https://github.com/vast-ai/vast-pyworker
     
     python3 -m venv /home/workspace/worker-env
     source /home/workspace/worker-env/bin/activate
