@@ -12,6 +12,7 @@ if [ -z "$BACKEND" ]; then
 fi
 
 echo "$BACKEND" | tee -a /root/debug.log
+echo "$REPORT_ADDR" | tee -a /root/debug.log
 
 if [ ! -f /root/hasbooted2 ]
 then 

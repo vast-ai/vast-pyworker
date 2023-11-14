@@ -7,13 +7,13 @@ REPORT_ADDR="https://shareware-sad-supporters-stocks.trycloudflare.com"
 start_server() {
     if [ ! -d "$1" ]
     then
-        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler/start_server.sh | bash -s $2 $3
+        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler/start_server.sh | bash -s "$2" "$3"
     else
-        $1/start_server.sh $2 $3
+        $1/start_server.sh "$2" "$3"
     fi
 }
 
-start_server $SERVER_DIR tgi $REPORT_ADDR
+start_server "$SERVER_DIR" "tgi" "$REPORT_ADDR"
 
 if [ -z "$MODEL_ARGS" ]
 then
