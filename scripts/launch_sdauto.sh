@@ -1,6 +1,21 @@
 #!/bin/bash
+echo "launch_sdauto.sh" | tee -a /root/debug.log
 
+SERVER_DIR="/home/workspace/vast-pyworker"
+export REPORT_ADDR="https://chat-afternoon-considered-expanding.trycloudflare.com"
+
+start_server() {
+    if [ ! -d "$1" ]
+    then
+        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler-test/start_server.sh | bash -s "$2"
+    else
+        $1/start_server.sh "$2"
+    fi
+}
+
+start_server "$SERVER_DIR" "sdauto"
 deactivate #deactivates the vast-pyworker venv, in preperation for activating the backend specific venv
+
 if [ ! -f "/home/workspace/init_launch" ]
 then
     rsync --remove-source-files -rlptDu --ignore-existing /venv/ /workspace/venv/
@@ -26,3 +41,4 @@ else
 fi
 python /stable-diffusion-webui/launch.py $CKPT_ARG $MODEL_ARGS --api-log --nowebui --port 5000 >> $SERVER_DIR/infer.log 2>&1 &
 echo "launched model"
+
