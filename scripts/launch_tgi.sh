@@ -2,7 +2,6 @@
 echo "launch_tgi.sh" | tee -a /root/debug.log
 
 SERVER_DIR="/home/workspace/vast-pyworker"
-export REPORT_ADDR="https://chat-afternoon-considered-expanding.trycloudflare.com"
 
 start_server() {
     if [ ! -d "$1" ]
