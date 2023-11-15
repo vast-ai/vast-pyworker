@@ -89,8 +89,8 @@ class ModelPerfTest:
         num_reqs = 16
         req_total_tokens = [(48, 16)] * num_reqs # total_tokens = 64
         time_elapsed, total_latency, total_gentokens, num_reqs_completed = self.send_batch(req_total_tokens)
-        throughput = total_gentokens / time_elapsed
-        avg_latency = total_latency / num_reqs_completed
+        throughput = total_gentokens / time_elapsed if time_elapsed != 0 else 0
+        avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else float('inf')
         print(f"{datetime.datetime.now()} first run completed, time_elapsed: {time_elapsed}, avg_latency: {avg_latency}, throughput: {throughput}, num_reqs_completed: {num_reqs_completed}")
         sys.stdout.flush()
 
