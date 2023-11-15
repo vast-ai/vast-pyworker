@@ -24,3 +24,7 @@ This is the access token for installation. More information on these access toke
 -e MODEL_ARGS= “”
 
 Different options are shown here: https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Command-Line-Arguments-and-Settings#all-command-line-arguments. The applicable options are likely found under the “PERFORMANCE” category. Be cautious with the options that are selected as we use certain options to set up the server in API mode, and integrate it with the vast-pyworker framework. These arguments will be used in addition to the arguments we use by default, which can be seen here. This variable is optional.
+
+Full "launch_args" example for Autogroup (note that --disk with depend on your model size):
+
+"--image runpod/stable-diffusion:web-ui-10.1.1 --env '-p 3000:3000 -e HF_MODEL_REPO="stable-diffusion-xl-base-0.9" -e HF_MODEL_USER="stabilityai" -e HF_MODEL_FILE="sd_xl_base_0.9.safetensors" -e HF_USERNAME="[INSERT_USERNAME_HERE]" -e HUGGING_FACE_HUB_TOKEN="[INSERT_TOKEN_HERE]"' --onstart wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/scripts/launch_sdauto.sh | bash --disk 8.0 --ssh"
