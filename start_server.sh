@@ -4,7 +4,6 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
-export REPORT_ADDR="https://engaged-cal-capital-namespace.trycloudflare.com"
 
 if [ -z "$BACKEND" ]; then
   echo "BACKEND must be set!"
@@ -12,14 +11,13 @@ if [ -z "$BACKEND" ]; then
 fi
 
 echo "$BACKEND" | tee -a /root/debug.log
-# echo "$REPORT_ADDR" | tee -a /root/debug.log
 
 if [ ! -f /root/hasbooted2 ]
 then 
     echo "booting" | tee -a /root/debug.log
     mkdir /home/workspace
     cd /home/workspace
-    git clone -b helloautoscaler-test https://github.com/vast-ai/vast-pyworker
+    git clone https://github.com/vast-ai/vast-pyworker
     
     python3 -m venv /home/workspace/worker-env
     source /home/workspace/worker-env/bin/activate
