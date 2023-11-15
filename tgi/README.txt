@@ -10,6 +10,6 @@ If you are trying to download a gated model from huggingface, you need to specif
 
 Full "launch_args" for Autogroup (note that --disk with depend on your model size):
 
-"--image ghcr.io/huggingface/text-generation-inference:1.0.3 --env '-p 3000:3000' --onstart-cmd 'wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/helloautoscaler-local/scripts/launch_tgi.sh | bash' --disk 8.0 --ssh --direct"
+"--image ghcr.io/huggingface/text-generation-inference:1.0.3 --env '-p 3000:3000' --onstart-cmd 'wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/scripts/launch_tgi.sh | bash' --disk 8.0 --ssh --direct"
 
 
