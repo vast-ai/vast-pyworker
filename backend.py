@@ -30,13 +30,18 @@ class GenericBackend():
                 del model_dict[key]
 
         if has_auth:
-            original_dict = {"url" : request["url"], "endpoint" : request["endpoint"], "cost" : request["cost"], "reqnum" : request["reqnum"]}
-            message = json.dumps(original_dict, indent=4)
+            if "message" in request.keys():
+                message = request["message"]
+                del model_dict["message"]
+            else:
+                original_dict = {"url" : request["url"], "endpoint" : request["endpoint"], "cost" : request["cost"], "reqnum" : request["reqnum"]}
+                message = json.dumps(original_dict, indent=4)
             print(f"message: {message}")
             auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
         else:
             auth_dict = None
 
+        print(f"auth_dict: {auth_dict}, model_dict: {model_dict}")
         return auth_dict, model_dict
 
     def check_signature(self, reqnum, message, signature):
