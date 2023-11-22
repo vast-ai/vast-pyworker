@@ -2,14 +2,14 @@ from auth import fetch_public_key, verify_signature
 import json
 import time
 import requests
- 
+
 MSG_HISTORY_LEN = 100
 
 class GenericBackend():
     def __init__(self, master_token, metrics):
         self.master_token = master_token
         self.metrics = metrics
-        
+
         self.reqnum = 0
         self.msg_history = []
 
@@ -21,7 +21,7 @@ class GenericBackend():
     def format_request(self, request):
         model_dict = {}
         model_dict.update(request)
-        auth_names = ["signature", "endpoint", "reqnum", "url", "message"]
+        auth_names = ["signature", "cost", "endpoint", "reqnum", "url"]
         has_auth = True
         for key in auth_names:
             if key not in request.keys():
@@ -35,7 +35,7 @@ class GenericBackend():
             auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
         else:
             auth_dict = None
-        
+
         return auth_dict, model_dict
 
     def check_signature(self, reqnum, message, signature):
@@ -59,7 +59,7 @@ class GenericBackend():
             t1 = time.time()
             response = requests.post(f"http://{model_server_addr}/{endpoint}", json=model_request)
             t2 = time.time()
-            
+
             if response.status_code == 200:
                 if metrics:
                     model_request["time_elapsed"] = t2 - t1
@@ -68,14 +68,14 @@ class GenericBackend():
                 return 200, response_func(response), t2 - t1
             else:
                 ret_code = response.status_code
-        
+
         except requests.exceptions.RequestException as e:
             ret_code = 500
             print(f"[backend] Request error: {e}")
 
         if metrics:
             self.metrics.error_req(model_request)
-        
+
         return ret_code, None, None
 
     def get(self, request, model_server_addr, endpoint, response_func):
