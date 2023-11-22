@@ -30,8 +30,9 @@ class GenericBackend():
                 del model_dict[key]
 
         if has_auth:
-            original_dict = {"cost" : request["cost"], "endpoint" : request["endpoint"], "reqnum" : request["reqnum"], "url" : request["url"]}
+            original_dict = {"url" : request["url"], "endpoint" : request["endpoint"], "cost" : request["cost"], "reqnum" : request["reqnum"]}
             message = json.dumps(original_dict, indent=4)
+            print(f"message: {message}")
             auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
         else:
             auth_dict = None

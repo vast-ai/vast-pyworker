@@ -27,10 +27,10 @@ class Backend(GenericBackend):
                     yield "\n"
                 self.metrics.finish_req(model_request)
                 success = True
-        
+
         except requests.exceptions.RequestException as e:
             print(f"[TGI-backend] Request error: {e}")
-        
+
         if not success:
             self.metrics.error_req(model_request)
 
@@ -45,7 +45,7 @@ class Backend(GenericBackend):
 
     def metrics_handler(self):
         return super().get(None, self.model_server_addr, "metrics", lambda r: r.text)
-    
+
 ######################################### FLASK HANDLER METHODS ###############################################################
 
 # Can move these functions into the TGIBackend class I think
@@ -55,6 +55,7 @@ def generate_handler(backend, request):
     auth_dict, model_dict = backend.format_request(request.json)
     if auth_dict:
         if not backend.check_signature(**auth_dict):
+            print("Signature check FAILED!!!")
             abort(401)
     else:
         print("WARNING: support for /generate requests without a signed signature will soon be deprecated")
@@ -70,7 +71,7 @@ def generate_handler(backend, request):
     else:
         print(f"generate failed with code {code}")
         abort(code)
-    
+
 def generate_stream_handler(backend, request):
 
     auth_dict, model_dict = backend.format_request(request.json)
@@ -79,7 +80,7 @@ def generate_stream_handler(backend, request):
             abort(401)
     else:
         print("WARNING: support for /generate_stream requests without a signed signature will soon be deprecated")
- 
+
     if model_dict is None:
         print(f"client request: {request.json} doesn't include model inputs and parameters")
         abort(400)
