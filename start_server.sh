@@ -4,6 +4,7 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
+export REPORT_ADDR="https://unlimited-gloves-placing-activation.trycloudflare.com"
 
 if [ -z "$BACKEND" ]; then
   echo "BACKEND must be set!"
@@ -13,12 +14,12 @@ fi
 echo "$BACKEND" | tee -a /root/debug.log
 
 if [ ! -f /root/hasbooted2 ]
-then 
+then
     echo "booting" | tee -a /root/debug.log
     mkdir /home/workspace
     cd /home/workspace
-    git clone https://github.com/vast-ai/vast-pyworker
-    
+    git clone -b autoscaler-test https://github.com/vast-ai/vast-pyworker
+
     python3 -m venv /home/workspace/worker-env
     source /home/workspace/worker-env/bin/activate
 

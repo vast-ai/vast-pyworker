@@ -6,7 +6,7 @@ SERVER_DIR="/home/workspace/vast-pyworker"
 start_server() {
     if [ ! -d "$1" ]
     then
-        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/start_server.sh | bash -s "$2"
+        wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/autoscaler-test/start_server.sh | bash -s "$2"
     else
         $1/start_server.sh "$2"
     fi
@@ -18,7 +18,7 @@ if [ -z "$MODEL_ARGS" ]
 then
     if [ ! -z "$MODEL_CMD" ]
     then
-        MODEL_ARGS="$MODEL_CMD"  
+        MODEL_ARGS="$MODEL_CMD"
     else
         MODEL_ARGS="--model-id TheBloke/Llama-2-7B-chat-GPTQ --quantize gptq"
     fi
