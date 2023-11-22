@@ -41,8 +41,10 @@ class GenericBackend():
 
     def check_signature(self, reqnum, message, signature):
         if reqnum < (self.reqnum - MSG_HISTORY_LEN):
+            print("reqnum too small")
             return False
         elif message in self.msg_history:
+            print("reqnum seen before")
             return False
         elif verify_signature(self.public_key, message, signature):
             self.reqnum = max(reqnum, self.reqnum)
@@ -51,6 +53,7 @@ class GenericBackend():
                 self.msg_history = self.msg_history[len(self.msg_history) - MSG_HISTORY_LEN: ]
             return True
         else:
+            print("verify signature FAILED")
             return False
 
     def generate(self, model_request, model_server_addr, endpoint, response_func, metrics=False):
