@@ -3,9 +3,10 @@ from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
 import base64
 import subprocess
+import os
 
 def fetch_public_key():
-    command = ["curl", "-X", "GET", "https://run.vast.ai/pubkey/"]
+    command = ["curl", "-X", "GET", f"{os.environ['REPORT_ADDR']}/pubkey/"]
     result = subprocess.check_output(command, universal_newlines=True)
     print("public key:")
     print(result)
