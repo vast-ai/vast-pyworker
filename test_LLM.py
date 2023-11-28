@@ -10,13 +10,13 @@ MAX_WORKERS = 500
 def decode_line(line):
     payload = line.decode("utf-8")
     if payload.startswith("data:"):
-        try: 
+        try:
             json_payload = json.loads(payload.lstrip("data:").rstrip("/n"))
             if "token" in json_payload.keys():
                 return json_payload["token"]["text"]
         except json.JSONDecodeError as e:
             print(f"JSON decoding error: {e}")
-    
+
     return None
 
 def worker(args, server_address, api_key, prompt_input):
@@ -46,7 +46,7 @@ def worker(args, server_address, api_key, prompt_input):
             print(f"got reponse: {response.text}")
             return
 
-        
+
 
     # Call /generate endpoint
 
@@ -98,7 +98,7 @@ def auth_worker(args, server_address, api_key, prompt_input):
         "api_key": api_key,
         "cost": 256
     }
-    print(f"calling {route_url}")
+    # print(f"calling {route_url}")
     response = requests.post(route_url, headers={"Content-Type": "application/json"}, data=json.dumps(route_payload), timeout=4)
 
     if response.status_code != 200:
@@ -132,25 +132,27 @@ def auth_worker(args, server_address, api_key, prompt_input):
         print(f"unsupported backend: {args.backend}")
         return
 
-    print(f"calling worker: {worker_address}, using payload: {generate_payload}")
+    # print(f"calling worker: {worker_address}, using payload: {generate_payload}")
     generate_response = requests.post(generate_url, headers={"Content-Type": "application/json"}, json=generate_payload, stream=args.generate_stream)
 
     if generate_response.status_code != 200:
         print(f"Failed to call /generate endpoint for {generate_url}, got status code: {generate_response.status_code}")
-        return
+        return False
 
     if args.generate_stream:
-        print(f"Starting streaming response from {generate_url}")
+        # print(f"Starting streaming response from {generate_url}")
         for line in generate_response.iter_lines():
             if line == b"\n":
                 continue
 
             line_token = decode_line(line)
             if line_token:
-                print(line_token)
+                pass
+                # print(line_token)
 
-    else:
-        print(f"Response from {generate_url}:", generate_response.text)
+    # else:
+    #     print(f"Response from {generate_url}:", generate_response.text)
+    return True
 
 def main():
     parser = argparse.ArgumentParser(description="Test inference endpoint")
@@ -174,11 +176,16 @@ def main():
                 future = e.submit(worker, args, args.server_address, args.api_key, args.prompt_input)
 
             futures.append(future)
-        
+
         time.sleep(0.20)
 
+    success_count = 0
     for future in futures:
-        future.result()
+        if future.result():
+            success_count += 1
+            # print(f"success_count: {success_count}")
+
+    print(f"returning, {success_count} / {args.N} requests succeeded")
 
 if __name__ == "__main__":
     main()

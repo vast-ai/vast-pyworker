@@ -4,7 +4,7 @@ date;
 env | grep _ >> /etc/environment;
 
 export BACKEND=$1
-export REPORT_ADDR="https://collapse-requirement-nepal-preparation.trycloudflare.com"
+export REPORT_ADDR="https://mostly-contractor-genres-eval.trycloudflare.com"
 
 if [ -z "$BACKEND" ]; then
   echo "BACKEND must be set!"
