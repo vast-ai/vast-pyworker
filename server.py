@@ -2,7 +2,9 @@ from flask import Flask, request, abort
 import os
 import logging
 import importlib
+import sys
 
+sys.path.insert(0, '.')
 backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
 backend_class = getattr(backend_lib, "Backend")
 flask_dict = getattr(backend_lib, "flask_dict")
@@ -27,9 +29,9 @@ def handler(endpoint):
     global backend
     if (request.method not in flask_dict.keys()) or (endpoint not in flask_dict[request.method].keys()):
         abort(404)
-    
+
     return flask_dict[request.method][endpoint](backend, request)
-    
+
 #################################################### INTERNAL ENDPOINTS CALLED BY LOGWATCH #################################################################################################
 @app.route('/report_capacity', methods=['POST'])
 def report_capacity():
