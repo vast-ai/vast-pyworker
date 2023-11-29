@@ -7,12 +7,12 @@ start_server() {
     fi
 }
 
-export MODEL_NAME="mistralai/Mistral-7B-v0.1"
-
-start_server "/home/workspace/vast-pyworker" "vllm"
-
 if [ ! -f "/home/workspace/init_launch" ]
 then
     pip install vllm
     touch "/home/workspace/init_launch"
 fi
+
+export MODEL_NAME="mistralai/Mistral-7B-v0.1"
+
+start_server "/home/workspace/vast-pyworker" "vllm"
