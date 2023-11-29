@@ -9,7 +9,10 @@ start_server() {
 
 if [ ! -f "/home/workspace/init_launch" ]
 then
+    python3 -m venv /home/workspace/worker-env
+    source /home/workspace/worker-env/bin/activate
     pip install vllm
+    deactivate
     touch "/home/workspace/init_launch"
 fi
 

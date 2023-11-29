@@ -20,7 +20,11 @@ then
     cd /home/workspace
     git clone -b autoscaler-test-2 https://github.com/vast-ai/vast-pyworker
 
-    python3 -m venv /home/workspace/worker-env
+    if [ ! -d "/home/workspace/worker-env" ]
+    then
+        python3 -m venv /home/workspace/worker-env
+    fi
+
     source /home/workspace/worker-env/bin/activate
 
     pip install requests
