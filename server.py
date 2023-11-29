@@ -2,9 +2,7 @@ from flask import Flask, request, abort
 import os
 import logging
 import importlib
-import sys
 
-sys.path.insert(0, '.')
 backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
 backend_class = getattr(backend_lib, "Backend")
 flask_dict = getattr(backend_lib, "flask_dict")

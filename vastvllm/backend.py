@@ -5,7 +5,7 @@ import os
 import time
 from threading import Thread, Event
 from vllm import EngineArgs, SamplingParams
-from vllm_engine import VLLMEngine
+from vastvllm.vllm_engine import VLLMEngine
 from flask import abort
 
 TIMEOUT = 100
@@ -23,8 +23,16 @@ class Backend(GenericBackend):
     def generate(self, model_request, metrics=True):
         if metrics:
             self.metrics.start_req(model_request)
+        if "inputs" not in model_request.keys() or "parameters" not in model_request.keys(): #will want more sophisticated error checking
+            return 400, None
+
         prompt = model_request["inputs"]
-        params = SamplingParams(temperature=0.8, top_p=0.95, frequency_penalty=0.1, max_tokens=model_request["paramaters"]["max_new_tokens"])
+        parameters = model_request["parameters"]
+        if "max_new_tokens" in parameters.keys():
+            max_new_tokens = parameters["max_new_tokens"]
+        else:
+            max_new_tokens = 250
+        params = SamplingParams(temperature=0.8, top_p=0.95, frequency_penalty=0.1, max_tokens=max_new_tokens)
         event = Event()
         ret_list = []
         t1 = time.time()
@@ -37,11 +45,11 @@ class Backend(GenericBackend):
                 self.metrics.finish_req(model_request)
 
             out = ret_list.pop().pop()
-            return {"response" : out.text}
+            return 200, {"response" : out.text}
         else:
             if metrics:
                 self.metrics.error_req(model_request)
-            return {"response" : "ERROR: TIMEOUT"}
+            return 500, None
 
 def generate_handler(backend, request):
 
@@ -56,7 +64,7 @@ def generate_handler(backend, request):
         print(f"client request: {request.json} doesn't include model inputs and parameters")
         abort(400)
 
-    code, content, _ = backend.generate(model_dict)
+    code, content = backend.generate(model_dict)
 
     if code == 200:
         return content

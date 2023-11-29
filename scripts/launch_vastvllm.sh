@@ -18,4 +18,4 @@ fi
 
 export MODEL_NAME="mistralai/Mistral-7B-v0.1"
 
-start_server "/home/workspace/vast-pyworker" "vllm"
+start_server "/home/workspace/vast-pyworker" "vastvllm"
