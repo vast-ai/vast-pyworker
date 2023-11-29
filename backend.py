@@ -53,7 +53,7 @@ class GenericBackend():
             return False
 
     def generate(self, model_request, model_server_addr, endpoint, response_func, metrics=False):
-        if metrics:
+        if metrics and self.metrics is not None:
             self.metrics.start_req(model_request)
         try:
             t1 = time.time()
@@ -61,7 +61,7 @@ class GenericBackend():
             t2 = time.time()
 
             if response.status_code == 200:
-                if metrics:
+                if metrics and self.metrics is not None:
                     model_request["time_elapsed"] = t2 - t1
                     self.metrics.finish_req(model_request)
 
@@ -73,7 +73,7 @@ class GenericBackend():
             ret_code = 500
             print(f"[backend] Request error: {e}")
 
-        if metrics:
+        if metrics and self.metrics is not None:
             self.metrics.error_req(model_request)
 
         return ret_code, None, None

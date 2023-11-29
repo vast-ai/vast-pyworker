@@ -103,7 +103,9 @@ def auth_worker(args, server_address, api_key, prompt_input):
 
     if response.status_code != 200:
         print(f"Failed to get worker address for {route_url} response.status_code: {response.status_code}")
-        return
+        return False
+
+    # return True
 
     try:
         message = response.json()
