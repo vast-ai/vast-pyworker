@@ -33,7 +33,7 @@ class GenericLogWatch(ABC):
         for k,v in update_params.items():
             data[k] = v
         send_data(data, self.auth_server_url, "/report_done", "logwatch-internal")
-    
+
     def metrics_sanity_check(self, throughput, avg_latency):
         if os.path.exists(self.sanity_file):
             with open(self.sanity_file, "r") as f:
@@ -42,9 +42,9 @@ class GenericLogWatch(ABC):
                 return True
         else:
             print(f"Couldn't find sanity file: {self.sanity_file}")
-        
+
         return False
-    
+
     def load_perf_results(self, data):
         with open(self.perf_file, "r") as f:
             sys.stdout.flush()
@@ -59,7 +59,7 @@ class GenericLogWatch(ABC):
         if self.perf_test is None:
             print(f"{datetime.datetime.now()} [logwatch] perf test hasn't been set up")
             return
-        
+
         print(f"{datetime.datetime.now()} [logwatch] starting model perf test")
         sys.stdout.flush()
         sanity_check = self.perf_test.first_run()
@@ -86,7 +86,7 @@ class GenericLogWatch(ABC):
             print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest initial performance test failed: {sanity_check}")
             sys.stdout.flush()
             data["error_msg"] = f"initial performance test failed: {sanity_check}"
-                
+
     def check_loading(self, line):
         if re.search(self.loading_line, line):
             self.loading = True
@@ -97,7 +97,7 @@ class GenericLogWatch(ABC):
     def model_loaded(self):
         print("[logwatch] starting model_loaded")
         sys.stdout.flush()
-        
+
         end_time = time.time()
         data = {"id" : self.id, "mtoken" : self.master_token}
         data["loaded"] = True
@@ -110,14 +110,14 @@ class GenericLogWatch(ABC):
                 self.load_perf_results(data)
             else:
                 self.run_perf_test(data)
-            
+
             del self.perf_test
 
         print("[logwatch] sending data for model_loaded")
-        sys.stdout.flush()     
+        sys.stdout.flush()
         send_data(data, self.auth_server_url, "/report_loaded", "logwatch-internal") #to give model performance update
         send_data(data, self.control_server_url, "/worker_status/", "logwatch")
-        
+
 
     @abstractmethod
     def handle_line(self, line):
@@ -138,7 +138,7 @@ def main():
                 continue
 
         lw.handle_line(line)
-        
-        
+
+
 if __name__ == "__main__":
     main()
