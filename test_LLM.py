@@ -5,7 +5,6 @@ import json
 import time
 import random
 
-MAX_WORKERS = 500
 
 def decode_line(line):
     payload = line.decode("utf-8")
@@ -99,13 +98,11 @@ def auth_worker(args, server_address, api_key, prompt_input):
         "cost": 256
     }
     # print(f"calling {route_url}")
-    response = requests.post(route_url, headers={"Content-Type": "application/json"}, data=json.dumps(route_payload), timeout=4)
+    response = requests.post(route_url, headers={"Content-Type": "application/json"}, data=json.dumps(route_payload), timeout=None)
 
     if response.status_code != 200:
         print(f"Failed to get worker address for {route_url} response.status_code: {response.status_code}")
         return False
-
-    # return True
 
     try:
         message = response.json()
@@ -156,6 +153,7 @@ def auth_worker(args, server_address, api_key, prompt_input):
     #     print(f"Response from {generate_url}:", generate_response.text)
     return True
 
+
 def main():
     parser = argparse.ArgumentParser(description="Test inference endpoint")
     parser.add_argument("server_address", help="Main server address")
@@ -170,24 +168,29 @@ def main():
     args = parser.parse_args()
 
     futures = []
-    with ThreadPoolExecutor(max_workers=MAX_WORKERS) as e:
+    t1 = time.time()
+    with ThreadPoolExecutor() as e:
         for _ in range(args.N):
             if args.use_auth:
                 future = e.submit(auth_worker, args, args.server_address, args.api_key, args.prompt_input)
             else:
                 future = e.submit(worker, args, args.server_address, args.api_key, args.prompt_input)
-
             futures.append(future)
 
-        time.sleep(0.20)
+        # time.sleep(0.20)
 
     success_count = 0
+    exception_count = 0
     for future in futures:
-        if future.result():
-            success_count += 1
-            # print(f"success_count: {success_count}")
+        try:
+            if future.result():
+                success_count += 1
+        except Exception as e:
+            print(e)
+            exception_count += 1
+    t2 = time.time()
 
-    print(f"returning, {success_count} / {args.N} requests succeeded")
+    print(f"returning, {success_count} / {args.N} requests succeeded, {exception_count} exceptions encountered, took: {t2 - t1}")
 
 if __name__ == "__main__":
     main()
