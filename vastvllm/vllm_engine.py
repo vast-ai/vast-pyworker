@@ -6,6 +6,7 @@ class VLLMEngine:
     def __init__(self, engine_args):
         self.prompt_queue = Queue()
         self.engine = LLMEngine.from_engine_args(engine_args)
+        print("engine loaded")
         self.wait_map = {}
 
     def run(self):
