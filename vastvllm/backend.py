@@ -7,6 +7,7 @@ from threading import Thread, Event
 from vllm import EngineArgs, SamplingParams
 from vastvllm.vllm_engine import VLLMEngine
 from flask import abort
+from notify import loaded
 
 TIMEOUT = 100
 
@@ -16,7 +17,11 @@ class Backend(GenericBackend):
         metrics = TGIMetrics(id=container_id, master_token=master_token, control_server_url=control_server_url, send_server_data=send_data)
         super().__init__(master_token=master_token, metrics=metrics)
         engine_args = EngineArgs(model=os.environ["MODEL_NAME"])
+        t1 = time.time()
         self.engine = VLLMEngine(engine_args=engine_args)
+        t2 = time.time()
+        data = {"id" : container_id, "mtoken" : master_token}
+        loaded(data, control_server_url, t2 - t1, 500) #might want to run an actual perf test
         engine_thread = Thread(target=self.engine.run)
         engine_thread.start()
 
