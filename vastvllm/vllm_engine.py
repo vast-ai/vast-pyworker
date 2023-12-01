@@ -1,22 +1,30 @@
 import time
+import sys
+from contextlib import contextmanager
 from queue import Queue
 from vllm import LLMEngine
-import sys
+
+@contextmanager
+def redirect_stdout(output_file_path):
+    original_stdout = sys.stdout
+    
+    try:
+        with open(output_file_path, 'w') as file:
+            sys.stdout = file
+            yield
+    finally:
+        sys.stdout = original_stdout
 
 class VLLMEngine:
     def __init__(self, engine_args):
         self.prompt_queue = Queue()
-        with open("infer.log", "w") as f:
-            f.write("engine start")
-            sys.stdout = f
-        self.engine = LLMEngine.from_engine_args(engine_args)
+        with redirect_stdout("auth.log"):
+            self.engine = LLMEngine.from_engine_args(engine_args)
         self.wait_map = {}
 
     def run(self):
         request_id = 0
-        with open("infer.log", "w") as f:
-            f.write("run start")
-            sys.stdout = f
+        with redirect_stdout("auth.log"):
             while True:
                 while not (self.prompt_queue.empty()):
                     (prompt, sampling_params, event, ret_list) = self.prompt_queue.get()
