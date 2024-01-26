@@ -27,4 +27,4 @@ Different options are shown here: https://github.com/AUTOMATIC1111/stable-diffus
 
 Full "launch_args" example for Autogroup (note that --disk with depend on your model size):
 
-"--image runpod/stable-diffusion:web-ui-10.1.1 --env '-p 3000:3000 -e HF_MODEL_REPO="stable-diffusion-xl-base-0.9" -e HF_MODEL_USER="stabilityai" -e HF_MODEL_FILE="sd_xl_base_0.9.safetensors" -e HF_USERNAME="[INSERT_USERNAME_HERE]" -e HUGGING_FACE_HUB_TOKEN="[INSERT_TOKEN_HERE]"' --onstart wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/scripts/launch_sdauto.sh | bash --disk 8.0 --ssh"
+"--image runpod/stable-diffusion:web-ui-10.1.1 --env '-p 3000:3000 -e HF_MODEL_REPO=stable-diffusion-xl-base-0.9 -e HF_MODEL_USER=stabilityai -e HF_MODEL_FILE=sd_xl_base_0.9.safetensors -e HF_USERNAME=INSERT_USERNAME_HERE -e HUGGING_FACE_HUB_TOKEN=INSERT_TOKEN_HERE' --onstart-cmd 'wget -O - https://raw.githubusercontent.com/vast-ai/vast-pyworker/main/scripts/launch_sdauto.sh | bash' --disk 8.0 --ssh"
