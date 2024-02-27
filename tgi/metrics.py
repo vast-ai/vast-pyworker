@@ -8,15 +8,17 @@ class Metrics(GenericMetrics):
         self.batch_capacity = None
         self.total_prompt_tokens = 0.0
         
-        self.num_tokens_working = 0
+        self.num_tokens_working = 0.0
         self.num_tokens_finished = 0.0 # is periodically reset every interval
+        
         self.curr_queue_time = 0.0
         self.curr_tokens_per_second = 0.0 # this is on a request by request basis, and doesn't take into account concurrent requests because of batching
 
         self.request_ltime = time.time()
         self.elapsed_avg = 1.0
         self.tokens_per_req_avg = 1024.0
-        self.num_tokens_incoming = 0.0
+        self.num_tokens_incoming = 0
+        self.num_tokens_errored = 0
 
         super().__init__(id, master_token, control_server_url, send_server_data)
     
@@ -37,10 +39,11 @@ class Metrics(GenericMetrics):
         elapsed = ntime - self.fill_data_lut
         if (self.fill_data_lut == 0.0):
             elapsed = 1.0
-        self.cur_load = self.num_tokens_incoming / elapsed
+        self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored) / elapsed
         data["cur_load"] = self.cur_load
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
+        self.num_tokens_errored = 0
         
     def _start_req(self, text_prompt, parameters):
         self.num_requests_recieved += 1
@@ -68,8 +71,10 @@ class Metrics(GenericMetrics):
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working -= num_req_tokens_started
         self.num_tokens_incoming -= num_req_tokens_started
+        self.num_tokens_errored += num_req_tokens_started
         self.total_prompt_tokens -= num_prompt_tokens
         self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
+
 
     def error_req(self, request):
         if request is None:
