@@ -44,6 +44,7 @@ class Metrics(GenericMetrics):
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
         self.num_tokens_errored = 0
+        self.num_requests_finished = 0
         
     def _start_req(self, text_prompt, parameters):
         self.num_requests_recieved += 1
@@ -54,7 +55,7 @@ class Metrics(GenericMetrics):
         self.num_tokens_working += num_req_tokens_started
         self.num_tokens_incoming += num_req_tokens_started
         self.total_prompt_tokens += num_prompt_tokens
-        self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
+        # self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
     
     def start_req(self, request):
         if request is None:
@@ -73,7 +74,7 @@ class Metrics(GenericMetrics):
         self.num_tokens_incoming -= num_req_tokens_started
         self.num_tokens_errored += num_req_tokens_started
         self.total_prompt_tokens -= num_prompt_tokens
-        self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
+        # self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
 
 
     def error_req(self, request):
@@ -93,7 +94,8 @@ class Metrics(GenericMetrics):
         self.num_tokens_finished += num_req_tokens_finished
         
         
-        self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
+        # self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
+        self.cur_perf = self.num_requests_finished * self.curr_tokens_per_second  
 
         elapsed = time.time() - self.request_ltime
         self.request_ltime = time.time()
