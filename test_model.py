@@ -80,7 +80,7 @@ payload_dict = {
 }
 
 def num_tokens_to_num_words(num_tokens):
-    return num_tokens // TOKENS_PER_WORD
+    return int(num_tokens // TOKENS_PER_WORD)
 
 def calc_sdauto_load(worker_payload): #note that "load" metrics just have to be self-consitant within a usecase (such as stable-diffusion, LLMs, etc.) and not across them
     height = get_param(worker_payload, "height", 512)
