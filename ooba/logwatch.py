@@ -5,7 +5,7 @@ from test_model import ModelPerfTest
 
 class LogWatch(GenericLogWatch):
     def __init__(self, id, control_server_url, master_token):
-       perf_test = ModelPerfTest(backend_name="OOBA")
+       perf_test = ModelPerfTest(backend_name="ooba")
        super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, perf_test=perf_test)
        self.max_total_tokens = 1500
        self.max_batch_total_tokens = 25000 #have to estimate for now

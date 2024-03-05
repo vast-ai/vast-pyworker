@@ -25,7 +25,7 @@ def parse_config(config):
 
 class LogWatch(GenericLogWatch):
     def __init__(self, id, control_server_url, master_token):
-        perf_test = ModelPerfTest(backend_name="TGI")
+        perf_test = ModelPerfTest(backend_name="tgi")
         super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, perf_test=perf_test)
 
         self.metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]

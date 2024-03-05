@@ -93,7 +93,7 @@ def calc_sdauto_load(worker_payload): #note that "load" metrics just have to be 
     return height * width * batch_size * steps + alpha * input_tokens
 
 class ModelPerfTest:
-    def __init__(self, backend_name="TGI"):
+    def __init__(self, backend_name="tgi"):
         self.backend_name = backend_name
         self.backend = backend_class( #needs to be called with the model already running
             container_id=os.environ['CONTAINER_ID'],
@@ -101,8 +101,8 @@ class ModelPerfTest:
             control_server_url=os.environ['REPORT_ADDR'],
             send_data=False
         )
-        self.avg_load = None
-        self.avg_batch_load = None
+        self.avg_load = None #load per requests
+        self.avg_batch_load = None #load across all requests in a concurrent batch
         print(f'ModelPerfTest: init complete')
 
     def update_params(self, max_load, max_batch_load):

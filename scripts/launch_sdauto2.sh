@@ -15,5 +15,5 @@ start_server() {
 start_server "$SERVER_DIR" "sdauto"
 deactivate #deactivates the vast-pyworker venv, in preperation for activating the backend specific venv
 
-/opt/ai-dock/bin/init.sh;
+/opt/ai-dock/bin/init.sh >> $SERVER_DIR/infer.log 2>&1 &
 echo "launched model"
