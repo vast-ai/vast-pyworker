@@ -3,7 +3,7 @@ from flask import abort
 from backend import GenericBackend
 from sdauto.metrics import Metrics
 
-MODEL_SERVER = '127.0.0.1:5000'
+MODEL_SERVER = '127.0.0.1:17860'
 
 class Backend(GenericBackend):
     def __init__(self, container_id, control_server_url, master_token, send_data):
