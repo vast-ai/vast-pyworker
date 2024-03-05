@@ -110,7 +110,7 @@ class ModelPerfTest:
         self.avg_batch_load = (max_batch_load * 3) // 4
     
     def prompt_model(self, input_load, output_load):
-        prompt = self.make_random_prompt(input_load)
+        prompt = make_random_prompt(input_load)
         model_request = {}
         payload_dict[self.backend_name](model_request, prompt, output_load)
 
