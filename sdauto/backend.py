@@ -11,8 +11,11 @@ class Backend(GenericBackend):
         super().__init__(master_token=master_token, metrics=metrics)
         self.model_server_addr = MODEL_SERVER
 
-    def txt2img(self, model_request):
-        return super().generate(model_request, self.model_server_addr, "sdapi/v1/txt2img", lambda r: r.content, metrics=True)
+    def txt2img(self, model_request, metrics=True):
+        return super().generate(model_request, self.model_server_addr, "sdapi/v1/txt2img", lambda r: r.content, metrics=metrics)
+    
+    def generate(self, model_request, metrics=True):
+        return self.txt2img(model_request, metrics=metrics)
 
 ######################################### FLASK HANDLER METHODS ###############################################################
 
