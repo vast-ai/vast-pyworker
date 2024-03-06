@@ -18,13 +18,15 @@ def decode_line(line):
 
     return None
 
-def get_worker(server_address, endpoint_name, cost, api_key):
+def get_worker(server_address, endpoint_name, cost, api_key, latency=None):
     route_url = f"{server_address}/route/"
     route_payload = {
         "endpoint": endpoint_name,
         "api_key": api_key,
-        "cost": cost
+        "cost": cost,
     }
+    if latency:
+        route_payload["latency"] = latency
     # print(f"calling {route_url}")
     response = requests.post(route_url, headers={"Content-Type": "application/json"}, data=json.dumps(route_payload), timeout=None)
 
@@ -58,9 +60,14 @@ addr_dict = {
     "sdauto" : sdauto_addr
 }
 
+latency_dict = {
+    "tgi" : None,
+    "sdauto" : 40.0
+}
+
 def auth_worker(endpoint_name, backend, worker_metric_map, api_key, input_load, output_load, server_address="https://run.vast.ai", worker_address=None, generate_stream=False):
     if worker_address is None:
-        worker_payload = get_worker(server_address, endpoint_name, input_load + output_load, api_key)
+        worker_payload = get_worker(server_address, endpoint_name, input_load + output_load, api_key, latency=latency_dict[backend])
         if worker_payload is None:
             return
         worker_address = worker_payload['url']

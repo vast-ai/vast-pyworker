@@ -10,8 +10,9 @@ import datetime
 import importlib
 import math
 
-backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
-backend_class = getattr(backend_lib, "Backend")
+if 'BACKEND' in os.environ:
+    backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
+    backend_class = getattr(backend_lib, "Backend")
 
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
