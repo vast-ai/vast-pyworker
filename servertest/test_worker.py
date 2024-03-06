@@ -92,7 +92,7 @@ def auth_worker(endpoint_name, backend, worker_metric_map, api_key, input_cost, 
         return
 
     if generate_response.status_code != 200:
-        print(f"Failed to call /generate endpoint for {generate_url}, got status code: {generate_response.status_code}")
+        print(f"Failed to call {endpoint_name} endpoint for {generate_url}, got status code: {generate_response.status_code}")
         worker_metric_map[worker_address]["reqs_failed"] += 1
         return False
 

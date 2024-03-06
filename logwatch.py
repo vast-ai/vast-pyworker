@@ -105,13 +105,11 @@ class GenericLogWatch(ABC):
         data["cur_perf"] = 0.0
 
         send_data(data, self.auth_server_url, "/report_loaded", "logwatch-internal") #so that it stops sending loading update messages
-        if self.perf_test:
-            if os.path.exists(self.perf_file):
-                self.load_perf_results(data)
-            else:
-                self.run_perf_test(data)
-            
-            del self.perf_test
+        if os.path.exists(self.perf_file):
+            self.load_perf_results(data)
+        elif self.perf_test:
+            self.run_perf_test(data)
+            # del self.perf_test
 
         print("[logwatch] sending data for model_loaded")
         sys.stdout.flush()     
