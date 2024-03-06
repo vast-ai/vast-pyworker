@@ -27,6 +27,8 @@ def txt2img_handler(backend, request):
             abort(401)
         else:
             print("passed auth check")
+    else:
+        print("WARNING: support for /generate requests without a signed signature will soon be deprecated")
 
     code, content, _ = backend.txt2img(model_dict)
 
