@@ -71,9 +71,6 @@ def make_sdauto_payload(worker_payload, prompt_input, height=512, width=512, bat
     }
     worker_payload.update(sdauto_payload)
 
-def get_param(worker_payload, key, default):
-    return worker_payload[key] if key in worker_payload.keys() else default
-
 payload_dict = {
     "tgi" :   format_tgi_payload,
     "ooba":   format_ooba_payload,
@@ -82,16 +79,6 @@ payload_dict = {
 
 def num_tokens_to_num_words(num_tokens):
     return int(num_tokens // TOKENS_PER_WORD)
-
-def calc_sdauto_load(worker_payload): #note that "load" metrics just have to be self-consitant within a usecase (such as stable-diffusion, LLMs, etc.) and not across them
-    height = get_param(worker_payload, "height", 512)
-    width = get_param(worker_payload, "width", 512)
-    batch_size = get_param(worker_payload, "batch_size", 1)
-    steps = get_param(worker_payload, "steps", 50)
-    input_prompt = get_param(worker_payload, "prompt", "")
-    input_tokens = len(input_prompt.split()) * TOKENS_PER_WORD
-    alpha = 1
-    return height * width * batch_size * steps + alpha * input_tokens
 
 class ModelPerfTest:
     def __init__(self, backend_name="tgi"):

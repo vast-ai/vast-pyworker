@@ -2,7 +2,7 @@ import random
 import time
 
 from metrics import GenericMetrics
-from test_model import TOKENS_PER_WORD
+TOKENS_PER_WORD = 1.33
 
 def get_param(worker_payload, key, default):
     return worker_payload[key] if key in worker_payload.keys() else default
