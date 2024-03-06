@@ -106,7 +106,7 @@ class ModelPerfTest:
         print(f'ModelPerfTest: init complete')
 
     def update_params(self, max_load, max_batch_load):
-        self.avg_load = max_load // 2
+        self.avg_load = max_load // 4
         self.avg_batch_load = (max_batch_load * 3) // 4
     
     def prompt_model(self, input_load, output_load):
