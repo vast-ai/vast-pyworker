@@ -88,7 +88,7 @@ class SimpleSim: #want to work in terms of autoscaler units, want to keep track 
                 self.requests_started += 1
                 self.load_requested += self.request_load
                 self.new_load_requested += self.request_load
-                future = e.submit(auth_worker, self.args.endpoint_name, self.args.backend, self.worker_metric_map, self.api_key, input_load=int(self.request_load * self.input_load_percent), output_load=int(self.request_load * (1 - self.input_load_percent)), server_address=self.server_address)
+                future = e.submit(auth_worker, self.args.endpoint_name, self.args.backend, self.worker_metric_map, self.api_key, input_cost=int(self.request_load * self.input_load_percent), output_cost=int(self.request_load * (1 - self.input_load_percent)), server_address=self.server_address)
                 futures.append(future)
 
             while len(futures) > 0:
@@ -179,6 +179,7 @@ def main():
     parser.add_argument("api_key", help="API Key")
     parser.add_argument("--generate_stream", action="store_true", help="Whether to generate a streaming request or not")
     parser.add_argument("--backend", help="Name of backend in use on worker server, supported options are 'tgi' and 'sdauto'", default="tgi") 
+    parser.add_argument("--latency", help="The expected latency of a request, don't need to specificy if negligble such as for some LLMs")
     args = parser.parse_args()
 
     sim = SimpleSim(args, args.server_address, args.endpoint_name, args.trial_t, args.concurrent_load, args.request_load, args.api_key)

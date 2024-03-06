@@ -65,9 +65,9 @@ latency_dict = {
     "sdauto" : 40.0
 }
 
-def auth_worker(endpoint_name, backend, worker_metric_map, api_key, input_load, output_load, server_address="https://run.vast.ai", worker_address=None, generate_stream=False):
+def auth_worker(endpoint_name, backend, worker_metric_map, api_key, input_cost, output_cost, server_address="https://run.vast.ai", worker_address=None, generate_stream=False):
     if worker_address is None:
-        worker_payload = get_worker(server_address, endpoint_name, input_load + output_load, api_key, latency=latency_dict[backend])
+        worker_payload = get_worker(server_address, endpoint_name, input_cost + output_cost, api_key, latency=latency_dict[backend])
         if worker_payload is None:
             return
         worker_address = worker_payload['url']
@@ -75,9 +75,9 @@ def auth_worker(endpoint_name, backend, worker_metric_map, api_key, input_load, 
         worker_payload = {}
     
     # Call /generate endpoint
-    prompt_input = make_random_prompt(input_load)
+    prompt_input = make_random_prompt(input_cost)
     generate_url = addr_dict[backend](worker_address, generate_stream)
-    payload_dict[backend](worker_payload, prompt_input, output_load)
+    payload_dict[backend](worker_payload, prompt_input, output_cost)
    
     if worker_address not in worker_metric_map.keys():
         worker_metric_map[worker_address] = defaultdict(int)
@@ -85,7 +85,7 @@ def auth_worker(endpoint_name, backend, worker_metric_map, api_key, input_load, 
     worker_metric_map[worker_address]["reqs_sent"] += 1
 
     try:
-        print(f"calling worker: {worker_address}, using payload: {worker_payload}")
+        # print(f"calling worker: {worker_address}, using payload: {worker_payload}")
         generate_response = requests.post(generate_url, headers={"Content-Type": "application/json"}, json=worker_payload, stream=generate_stream)
     except Exception as e:
         print(f"requests error: {e}")

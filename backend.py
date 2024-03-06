@@ -21,7 +21,7 @@ class GenericBackend():
     def format_request(self, request):
         model_dict = {}
         model_dict.update(request)
-        auth_names = ["signature", "endpoint", "reqnum", "url", "message"]
+        auth_names = ["signature", "endpoint", "url", "load", "reqnum"]
         has_auth = True
         for key in auth_names:
             if key not in request.keys():

@@ -25,6 +25,8 @@ def txt2img_handler(backend, request):
     if auth_dict:
         if not backend.check_signature(**auth_dict):
             abort(401)
+        else:
+            print("passed auth check")
 
     code, content, _ = backend.txt2img(model_dict)
 
