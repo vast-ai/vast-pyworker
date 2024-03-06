@@ -30,6 +30,7 @@ class LogWatch(GenericLogWatch):
 
         self.metric_names = ["time_per_token", "inference_time", "queue_time", "max_new_tokens"]
         self.batch_pattern = re.compile(r'Setting max batch total tokens to (\d+)')
+        self.loading_line = "starting model download"
 
         self.max_batch_prefill_tokens = None
         

@@ -23,8 +23,7 @@ class GenericLogWatch(ABC):
         self.max_total_tokens = None
         self.max_batch_total_tokens = None
         self.loading = False
-        self.loading_line = "starting model download"
-
+        
         self.perf_file = "perf_results.json"
         self.sanity_file = "perf_sanity.json"
 

@@ -11,6 +11,7 @@ class LogWatch(GenericLogWatch):
         self.perf_test.update_params(max_load, max_load * 2)
         self.ready_pattern = re.compile("Model loaded in (\d+\.\d+)s") # self.ready_pattern = re.compile("Uvicorn running on http://127.0.0.1:5000")
         self.update_pattern = re.compile("127.0.0.1 (\d+\.\d+)") # self.update_pattern = re.compile("200 http/1.1 POST /sdapi/v1/txt2img 127.0.0.1 (\d+\.\d+)")
+        self.loading_line = "Loading weights"
     
     def check_model_ready(self, line):
         if self.ready_pattern.search(line):
