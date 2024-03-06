@@ -83,4 +83,4 @@ class Metrics(GenericMetrics):
             self.overloaded = False
 
     def send_data_condition(self):
-        return (((random.randint(0, 9) == 3) or (self.work_finished != self.cur_capacity_lastreport)) and self.model_loaded)
+        return (((random.randint(0, 9) == 3) or (self.work_finished != self.cur_capacity_lastreport)) and self.model_loaded and not self.model_loading)
