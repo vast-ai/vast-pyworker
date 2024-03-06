@@ -116,7 +116,7 @@ class ModelPerfTest:
 
         rcode, _, time = self.backend.generate(model_request, metrics=False)
         if (rcode != 200):
-            print(f"{datetime.datetime.now()} prompt_model returned {rcode}!")
+            print(f"{datetime.datetime.now()} prompt_model with payload: {model_request} returned {rcode}!")
         genload = 0
         if (rcode == 200):
             genload = input_load + output_load
