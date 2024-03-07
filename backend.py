@@ -53,6 +53,7 @@ class GenericBackend():
             return False
 
     def generate(self, model_request, model_server_addr, endpoint, response_func, metrics=False):
+        ret_code = None
         if metrics:
             self.metrics.start_req(model_request)
         try:
@@ -74,7 +75,7 @@ class GenericBackend():
             print(f"[backend] Request error: {e}")
 
         if metrics:
-            self.metrics.error_req(model_request)
+            self.metrics.error_req(model_request, ret_code)
         
         return ret_code, None, None
 

@@ -63,7 +63,7 @@ class Metrics(GenericMetrics):
 
         self.work_finished += request_work
 
-    def error_req(self, request):
+    def error_req(self, request, code=None):
         self.num_requests_recieved -= 1
         self.num_requests_working -= 1
         self.work_incoming -= calc_sdauto_work(request)

@@ -16,7 +16,7 @@ class Metrics(TGIMetrics):
             return
         super()._finish_req(request["prompt"], request)
 
-    def error_req(self, request):
+    def error_req(self, request, code=None):
         if request is None:
             print("metrics error null request")
             return

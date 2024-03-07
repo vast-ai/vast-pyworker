@@ -84,7 +84,7 @@ class GenericMetrics(ABC):
         pass
         
     @abstractmethod
-    def error_req(self, request):
+    def error_req(self, request, code=None):
         pass
 
     @abstractmethod

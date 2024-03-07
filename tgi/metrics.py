@@ -64,24 +64,24 @@ class Metrics(GenericMetrics):
         self._start_req(request["inputs"], request["parameters"])
 
     #undos what __start_req does
-    def _error_req(self, text_prompt, parameters):
+    def _error_req(self, text_prompt, parameters, code=None):
         self.num_requests_recieved -= 1
         self.num_requests_working -= 1
+        if code is None or code != 422: #this means client side issue, so don't fault server
+            num_prompt_tokens = len(text_prompt.split())
+            num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
+            self.num_tokens_working -= num_req_tokens_started
+            self.num_tokens_incoming -= num_req_tokens_started
+            self.num_tokens_errored += num_req_tokens_started
+            self.total_prompt_tokens -= num_prompt_tokens
+            # self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
 
-        num_prompt_tokens = len(text_prompt.split())
-        num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
-        self.num_tokens_working -= num_req_tokens_started
-        self.num_tokens_incoming -= num_req_tokens_started
-        self.num_tokens_errored += num_req_tokens_started
-        self.total_prompt_tokens -= num_prompt_tokens
-        # self.cur_perf = self.num_requests_working * self.curr_tokens_per_second
 
-
-    def error_req(self, request):
+    def error_req(self, request, code=None):
         if request is None:
             print("metrics error null request")
             return
-        self._error_req(request["inputs"], request["parameters"])
+        self._error_req(request["inputs"], request["parameters"], code)
 
     #confirms a successful request
     def _finish_req(self, text_prompt, parameters):
