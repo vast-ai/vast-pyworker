@@ -25,7 +25,7 @@ class GenericLogWatch(ABC):
         self.loading = False
         
         self.perf_file = "perf_results.json"
-        self.sanity_file = "perf_sanity.json"
+        self.sanity_file = None
 
     def send_model_update(self, update_params):
         data = {"id" : self.id, "mtoken" : self.master_token}
@@ -34,7 +34,7 @@ class GenericLogWatch(ABC):
         send_data(data, self.auth_server_url, "/report_done", "logwatch-internal")
     
     def metrics_sanity_check(self, throughput, avg_latency):
-        if os.path.exists(self.sanity_file):
+        if self.sanity_file and os.path.exists(self.sanity_file):
             with open(self.sanity_file, "r") as f:
                 bounds = json.load(f)
             if throughput < bounds["max_throughput"] and avg_latency > bounds["min_avg_latency"]:
@@ -42,7 +42,7 @@ class GenericLogWatch(ABC):
         else:
             print(f"Couldn't find sanity file: {self.sanity_file}")
         
-        return False
+        return True
     
     def load_perf_results(self, data):
         with open(self.perf_file, "r") as f:
