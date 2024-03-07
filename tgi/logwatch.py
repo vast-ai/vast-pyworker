@@ -88,6 +88,8 @@ class LogWatch(GenericLogWatch):
                 invalid_req_error = "`inputs` tokens + `max_new_tokens` must be <= 2048."
                 if invalid_req_error not in line_json["message"]:
                     self.send_error(line_json["fields"]["message"])
+                else:
+                    print(f"invalid input error: {line_json["message"]}")
             elif line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
                 config = parse_config(tgi_args)
