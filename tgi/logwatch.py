@@ -85,7 +85,9 @@ class LogWatch(GenericLogWatch):
     def __handle_line(self, line_json):
         if "fields" in line_json.keys():
             if line_json["level"] == "ERROR":
-                self.send_error(line_json["fields"]["message"])
+                invalid_req_error = "`inputs` tokens + `max_new_tokens` must be <= 2048."
+                if invalid_req_error not in line_json["message"]:
+                    self.send_error(line_json["fields"]["message"])
             elif line_json["fields"]["message"][:4] == "Args":               
                 tgi_args = line_json["fields"]["message"][4:]
                 config = parse_config(tgi_args)
