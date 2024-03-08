@@ -21,6 +21,10 @@ def fetch_public_key():
     return key
 
 def verify_signature(public_key, message, signature):
+    if public_key is None:
+        print(f"No Public Key!")
+        return False
+    
     h = SHA256.new(message.encode())
     try:
         pkcs1_15.new(public_key).verify(h, base64.b64decode(signature))
