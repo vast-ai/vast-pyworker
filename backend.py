@@ -21,7 +21,7 @@ class GenericBackend():
     def format_request(self, request):
         model_dict = {}
         model_dict.update(request)
-        auth_names = ["signature", "endpoint", "url", "load", "reqnum"]
+        auth_names = ["signature", "cost", "endpoint", "reqnum", "url"]
         has_auth = True
         for key in auth_names:
             if key not in request.keys():
@@ -30,7 +30,7 @@ class GenericBackend():
                 del model_dict[key]
 
         if has_auth:
-            original_dict = {"endpoint" : request["endpoint"], "load" : request["load"], "reqnum" : request["reqnum"], "url" : request["url"]}
+            original_dict = {"cost" : request["cost"], "endpoint" : request["endpoint"], "reqnum" : request["reqnum"], "url" : request["url"]}
             message = json.dumps(original_dict, indent=4)
             auth_dict = {"signature" : request["signature"], "message": message, "reqnum" : request["reqnum"]}
         else:
