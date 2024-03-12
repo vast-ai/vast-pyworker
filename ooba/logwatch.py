@@ -9,7 +9,7 @@ class LogWatch(GenericLogWatch):
        super().__init__(id=id, control_server_url=control_server_url, master_token=master_token, perf_test=perf_test)
        self.max_total_tokens = 1500
        self.max_batch_total_tokens = 25000 #have to estimate for now
-       self.perf_test.update_params(int(self.max_total_tokens * 0.75), int(self.max_batch_total_tokens * 0.75))
+       self.perf_test.update_params(int(self.max_total_tokens * 0.75), self.max_total_tokens, int(self.max_batch_total_tokens * 0.75))
        self.ready_pattern = re.compile(r'Loaded the model')
        self.update_pattern = re.compile(r'(\d+\.\d+) tokens/s, (\d+) tokens')
 

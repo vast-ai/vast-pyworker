@@ -93,8 +93,9 @@ class ModelPerfTest:
         self.avg_batch_load = None #load across all requests in a concurrent batch
         print(f'ModelPerfTest: init complete')
 
-    def update_params(self, avg_req_load, avg_batch_load):
-        self.avg_req_load = avg_req_load 
+    def update_params(self, avg_req_load, max_req_load, avg_batch_load):
+        self.avg_req_load = avg_req_load
+        self.max_req_load = max_req_load 
         self.avg_batch_load = avg_batch_load #(max_batch_load * 3) // 4
     
     def prompt_model(self, input_load, output_load):
@@ -115,6 +116,10 @@ class ModelPerfTest:
         t1 = time.time()
         with ThreadPoolExecutor(MAX_CONCURRENCY) as e:
             for (input_load, output_load) in req_load:
+                if (input_load + output_load) > self.max_req_load:
+                    excess_load = input_load + output_load - self.max_req_load
+                    input_load -= math.ceil(excess_load / 2)
+                    output_load -= math.ceil(excess_load / 2)
                 future = e.submit(self.prompt_model, input_load, output_load)
                 futures.append(future)
 
