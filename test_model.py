@@ -89,13 +89,13 @@ class ModelPerfTest:
             control_server_url=os.environ['REPORT_ADDR'],
             send_data=False
         )
-        self.avg_load = None #load per requests
+        self.avg_req_load = None #load per requests
         self.avg_batch_load = None #load across all requests in a concurrent batch
         print(f'ModelPerfTest: init complete')
 
-    def update_params(self, max_load, max_batch_load):
-        self.avg_load = max_load // 4
-        self.avg_batch_load = (max_batch_load * 3) // 4
+    def update_params(self, avg_req_load, avg_batch_load):
+        self.avg_req_load = avg_req_load 
+        self.avg_batch_load = avg_batch_load #(max_batch_load * 3) // 4
     
     def prompt_model(self, input_load, output_load):
         prompt = make_random_prompt(input_load)
@@ -161,9 +161,9 @@ class ModelPerfTest:
         success = True
         for batch_num in range(num_batches):
             batch_load = int(np.random.normal(loc=self.avg_batch_load, scale=5.0, size=1))
-            num_reqs = batch_load // self.avg_load
-            req_load = [(int(3 * (tt // 4)), int(tt // 4)) for tt in np.random.normal(loc=self.avg_load, scale=5.0, size=num_reqs)]
-            print(f"{datetime.datetime.now()} starting test batch: {batch_num} with {num_reqs} concurrent reqs of average load: {self.avg_load}")
+            num_reqs = batch_load // self.avg_req_load
+            req_load = [(int(3 * (tt // 4)), int(tt // 4)) for tt in np.random.normal(loc=self.avg_req_load, scale=5.0, size=num_reqs)]
+            print(f"{datetime.datetime.now()} starting test batch: {batch_num} with {num_reqs} concurrent reqs of average load: {self.avg_req_load}")
             sys.stdout.flush()
             
             time_elapsed, total_latency, total_genload, num_reqs_completed = self.send_batch(req_load)

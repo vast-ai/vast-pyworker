@@ -60,7 +60,7 @@ class LogWatch(GenericLogWatch):
         send_data(data, self.control_server_url, "/worker_status/", "logwatch-tgi")
         send_data(data, self.auth_server_url, "/report_capacity", "logwatch-internal")
         
-        self.perf_test.update_params(self.max_total_tokens, self.max_batch_total_tokens)
+        self.perf_test.update_params(int(self.max_total_tokens * 0.75), int(self.max_batch_total_tokens * 0.75))
 
     
     def forward_server_data(self, line_metrics, generate_params):
