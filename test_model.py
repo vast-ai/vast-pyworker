@@ -28,12 +28,6 @@ def make_random_prompt(input_cost, special=False):
     else:
         return " ".join(random.choices(WORD_LIST, k=num_tokens_to_num_words(input_cost)))
     
-def get_tgi_output_cost(response):
-    if "generated_text" in response.keys():
-        return num_words_to_num_tokens(len(response["generated_text"].split()))
-    else:
-        return 0
-
 def format_tgi_payload(worker_payload, prompt_input, output_cost):
     worker_payload["inputs"] = prompt_input
     worker_payload["parameters"] = {"max_new_tokens" : output_cost}
@@ -87,7 +81,15 @@ def num_tokens_to_num_words(num_tokens):
     return int(num_tokens // TOKENS_PER_WORD)
 
 def num_words_to_num_tokens(num_words):
-    return int(num_words * TOKENS_PER_WORD) 
+    return int(num_words * TOKENS_PER_WORD)
+
+def get_tgi_output_cost(response):
+    if "generated_text" in response.keys():
+        length = len(response["generated_text"].split())
+        print(f"len: {length}")
+        return num_words_to_num_tokens(length)
+    else:
+        return 0
 
 class ModelPerfTest:
     def __init__(self, backend_name="tgi"):
@@ -114,11 +116,11 @@ class ModelPerfTest:
         payload_dict[self.backend_name](model_request, prompt, output_cost)
 
         rcode, response, time = self.backend.generate(model_request, metrics=False)
-        # print(f"recieved rcode {rcode}")
+        print(f"recieved rcode {rcode}")
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model with payload: {model_request} returned {rcode}!")
         
-        print(f"returned response: {response} of cost {get_tgi_output_cost(response)}")
+        # print(f"returned response: {response} of cost {get_tgi_output_cost(response)}")
         
         genload = 0
         if (rcode == 200):
