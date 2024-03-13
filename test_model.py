@@ -29,8 +29,9 @@ def make_random_prompt(input_cost, special=False):
         return " ".join(random.choices(WORD_LIST, k=num_tokens_to_num_words(input_cost)))
     
 def get_tgi_output_cost(response):
+    print("get cost")
     if "generated_text" in response.keys():
-        return num_words_to_num_tokens(response["generated_text"].split())
+        return num_words_to_num_tokens(len(response["generated_text"].split()))
     else:
         return 0
 
