@@ -114,6 +114,7 @@ class ModelPerfTest:
         payload_dict[self.backend_name](model_request, prompt, output_cost)
 
         rcode, response, time = self.backend.generate(model_request, metrics=False)
+        print(f"recieved rcode {rcode}")
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model with payload: {model_request} returned {rcode}!")
         
