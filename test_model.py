@@ -160,7 +160,7 @@ class ModelPerfTest:
          
     def make_batch_tgi(self, batch_num):
         num_reqs = 56
-        input_load = 1024
+        input_load = 768
         output_load = 256
         req_load = [(input_load,output_load) for _ in range(num_reqs)]
         print(f"{datetime.datetime.now()} starting test batch: {batch_num} consisting of {num_reqs} concurrent reqs of input load: {input_load} output load: {output_load}")
