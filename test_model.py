@@ -16,7 +16,7 @@ if 'BACKEND' in os.environ:
 
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
-TOKENS_PER_WORD = 1.33
+TOKENS_PER_WORD = 3.0 #right for these random words
 
 nltk.download("words")
 WORD_LIST = words.words()
@@ -160,7 +160,7 @@ class ModelPerfTest:
          
     def make_batch_tgi(self, batch_num):
         num_reqs = 56
-        input_load = 512
+        input_load = 800
         output_load = 256
         req_load = [(input_load,output_load) for _ in range(num_reqs)]
         print(f"{datetime.datetime.now()} starting test batch: {batch_num} consisting of {num_reqs} concurrent reqs of input load: {input_load} output load: {output_load}")
