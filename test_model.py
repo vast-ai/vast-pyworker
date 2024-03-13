@@ -9,6 +9,7 @@ import sys
 import datetime
 import importlib
 import math
+import json
 
 if 'BACKEND' in os.environ:
     backend_lib = importlib.import_module(f"{os.environ['BACKEND']}.backend")
@@ -84,14 +85,13 @@ def num_words_to_num_tokens(num_words):
     return int(num_words * TOKENS_PER_WORD)
 
 def get_tgi_output_cost(response):
-    print(f"response: {response}, type: {type(response)}")
-    print(f"keys: {response.keys()}")
-    if "generated_text" in response.keys():
-        print("in")
-        text = response["generated_text"]
-        print(f"text: {text}")
-        print(f"split: {text.split()}")
-        length = len(response["generated_text"].split())
+    resp_json = json.loads(response)
+    print(f"response: {resp_json}, type: {type(resp_json)}")
+    if "generated_text" in resp_json.keys():
+        # text = resp_json["generated_text"]
+        # print(f"text: {text}")
+        # print(f"split: {text.split()}")
+        length = len(resp_json["generated_text"].split())
         print(f"len: {length}")
         return num_words_to_num_tokens(length)
     else:
