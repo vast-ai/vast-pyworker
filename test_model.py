@@ -16,28 +16,31 @@ if 'BACKEND' in os.environ:
 
 HF_SERVER = '127.0.0.1:5001'
 MAX_CONCURRENCY = 100
-TOKENS_PER_WORD = 3.0 #right for these random words
+TOKENS_PER_WORD = 2.75 #right for these random words
 
 nltk.download("words")
 WORD_LIST = words.words()
 PROMPT_START = "please generate a response as long as you can about"
 
-def make_random_prompt(input_load, special=False):
+def make_random_prompt(input_cost, special=False):
     if special:
         return f"{PROMPT_START} {random.choice(WORD_LIST)}"
     else:
-        return " ".join(random.choices(WORD_LIST, k=num_tokens_to_num_words(input_load)))
+        return " ".join(random.choices(WORD_LIST, k=num_tokens_to_num_words(input_cost)))
+    
+def get_tgi_output_cost(response):
+    return num_words_to_num_tokens(response["generated_text"].split())
 
-def format_tgi_payload(worker_payload, prompt_input, num_output_load):
+def format_tgi_payload(worker_payload, prompt_input, output_cost):
     worker_payload["inputs"] = prompt_input
-    worker_payload["parameters"] = {"max_new_tokens" : num_output_load}
+    worker_payload["parameters"] = {"max_new_tokens" : output_cost}
 
-def format_ooba_payload(worker_payload, prompt_input, num_output_load):
+def format_ooba_payload(worker_payload, prompt_input, output_cost):
     worker_payload["prompt"] = prompt_input
-    worker_payload["max_new_tokens"] = num_output_load
+    worker_payload["max_new_tokens"] = output_cost
 
-def format_sdauto_payload(worker_payload, prompt_input, num_output_load):
-    side_length = int(math.sqrt(num_output_load))
+def format_sdauto_payload(worker_payload, prompt_input, output_cost):
+    side_length = int(math.sqrt(output_cost))
     make_sdauto_payload(worker_payload, prompt_input, height=side_length, width=side_length)
 
 def make_sdauto_payload(worker_payload, prompt_input, height=512, width=512, batch_size=1, steps=3):
@@ -80,6 +83,9 @@ payload_dict = {
 def num_tokens_to_num_words(num_tokens):
     return int(num_tokens // TOKENS_PER_WORD)
 
+def num_words_to_num_tokens(num_words):
+    return int(num_words * TOKENS_PER_WORD) 
+
 class ModelPerfTest:
     def __init__(self, backend_name="tgi"):
         self.backend_name = backend_name
@@ -98,33 +104,37 @@ class ModelPerfTest:
         self.max_req_load = max_req_load 
         self.avg_batch_load = avg_batch_load #(max_batch_load * 3) // 4
     
-    def prompt_model(self, input_load, output_load):
-        prompt = make_random_prompt(input_load)
-        print(f"using prompt: {prompt} of load {input_load}")
+    def prompt_model(self, input_cost, output_cost):
+        prompt = make_random_prompt(input_cost)
+        print(f"using prompt: {prompt} of cost {input_cost}")
         model_request = {}
-        payload_dict[self.backend_name](model_request, prompt, output_load)
+        payload_dict[self.backend_name](model_request, prompt, output_cost)
 
         rcode, response, time = self.backend.generate(model_request, metrics=False)
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model with payload: {model_request} returned {rcode}!")
         
-        print(f"returned response: {response}")
-        
         genload = 0
         if (rcode == 200):
-            genload = input_load + output_load
+            if self.backend_name == "tgi":
+                genload = input_cost + get_tgi_output_cost(response)
+            else:
+                genload = input_cost + output_cost
+
+        print(f"returned response: {response} of cost {get_tgi_output_cost(response)}")
+
         return rcode, time, genload
 
     def send_batch(self, req_load):
         futures = []
         t1 = time.time()
         with ThreadPoolExecutor(MAX_CONCURRENCY) as e:
-            for (input_load, output_load) in req_load:
-                # if (input_load + output_load) > self.max_req_load:
-                #     excess_load = input_load + output_load - self.max_req_load
-                #     input_load -= math.ceil(excess_load / 2)
-                #     output_load -= math.ceil(excess_load / 2)
-                future = e.submit(self.prompt_model, input_load, output_load)
+            for (input_cost, output_cost) in req_load:
+                # if (input_cost + output_cost) > self.max_req_load:
+                #     excess_load = input_cost + output_cost - self.max_req_load
+                #     input_cost -= math.ceil(excess_load / 2)
+                #     output_cost -= math.ceil(excess_load / 2)
+                future = e.submit(self.prompt_model, input_cost, output_cost)
                 futures.append(future)
 
         print("sent batch and waiting")
@@ -164,10 +174,10 @@ class ModelPerfTest:
          
     def make_batch_tgi(self, batch_num):
         num_reqs = 56
-        input_load = 800
-        output_load = 256
-        req_load = [(input_load,output_load) for _ in range(num_reqs)]
-        print(f"{datetime.datetime.now()} starting test batch: {batch_num} consisting of {num_reqs} concurrent reqs of input load: {input_load} output load: {output_load}")
+        input_cost = 800
+        output_cost = 256
+        req_load = [(input_cost,output_cost) for _ in range(num_reqs)]
+        print(f"{datetime.datetime.now()} starting test batch: {batch_num} consisting of {num_reqs} concurrent reqs of input load: {input_cost} output load: {output_cost}")
         sys.stdout.flush()
         return req_load
     
