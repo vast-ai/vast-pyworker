@@ -29,7 +29,6 @@ def make_random_prompt(input_cost, special=False):
         return " ".join(random.choices(WORD_LIST, k=num_tokens_to_num_words(input_cost)))
     
 def get_tgi_output_cost(response):
-    print("get cost")
     if "generated_text" in response.keys():
         return num_words_to_num_tokens(len(response["generated_text"].split()))
     else:
@@ -115,7 +114,7 @@ class ModelPerfTest:
         payload_dict[self.backend_name](model_request, prompt, output_cost)
 
         rcode, response, time = self.backend.generate(model_request, metrics=False)
-        print(f"recieved rcode {rcode}")
+        # print(f"recieved rcode {rcode}")
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model with payload: {model_request} returned {rcode}!")
         
@@ -124,10 +123,13 @@ class ModelPerfTest:
         genload = 0
         if (rcode == 200):
             if self.backend_name == "tgi":
+                print("get cost")
                 genload = input_cost + get_tgi_output_cost(response)
+                print("got cost")
             else:
                 genload = input_cost + output_cost
 
+        print(f"req took time {time}")
         return rcode, time, genload
 
     def send_batch(self, req_load):
