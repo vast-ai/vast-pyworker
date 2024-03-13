@@ -157,28 +157,43 @@ class ModelPerfTest:
             return f"throughput: {throughput}<50.0 or ({num_reqs_completed} != {num_reqs})"
         else:
             return "success"
-        
+         
+    def make_batch_tgi(self, batch_num):
+        num_reqs = 56
+        input_load = 1024
+        output_load = 256
+        req_load = [(input_load,output_load) for _ in range(num_reqs)]
+        print(f"{datetime.datetime.now()} starting test batch: {batch_num} consisting of {num_reqs} concurrent reqs of input load: {input_load} output load: {output_load}")
+        sys.stdout.flush()
+        return req_load
+    
+    def make_batch(self, batch_num):
+        batch_load = int(np.random.normal(loc=self.avg_batch_load, scale=5.0, size=1))
+        num_reqs = batch_load // self.avg_req_load
+        req_load = [(int(3 * (tt // 4)), int(tt // 4)) for tt in np.random.normal(loc=self.avg_req_load, scale=5.0, size=num_reqs)]
+        print(f"{datetime.datetime.now()} starting test batch: {batch_num} with total_load: {batch_load} consisting of {num_reqs} concurrent reqs of average load: {self.avg_req_load} max load: {self.max_req_load}")
+        sys.stdout.flush()
+        return req_load
+    
+    def track_batch(self, req_load, batch_num, batches):
+        time_elapsed, total_latency, total_genload, num_reqs_completed = self.send_batch(req_load)
+        throughput = total_genload / time_elapsed
+        avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
+
+        print(f"{datetime.datetime.now()} batch: {batch_num} took: {time_elapsed} ... throughput: {throughput} (load / s), avg_latency: {avg_latency} (seconds), num_reqs: {len(req_load)}, num_reqs_completed: {num_reqs_completed}")
+        sys.stdout.flush()
+        batches.append((throughput, avg_latency, len(req_load), num_reqs_completed))
+    
     def run(self, num_batches):
         if num_batches < 1:
             raise ValueError("can't run with less than one perf benchmark iteration!")
-
+        
         batches = []
         success = True
         for batch_num in range(num_batches):
-            batch_load = int(np.random.normal(loc=self.avg_batch_load, scale=5.0, size=1))
-            num_reqs = batch_load // self.avg_req_load
-            req_load = [(int(3 * (tt // 4)), int(tt // 4)) for tt in np.random.normal(loc=self.avg_req_load, scale=5.0, size=num_reqs)]
-            print(f"{datetime.datetime.now()} starting test batch: {batch_num} with total_load: {batch_load} consisting of {num_reqs} concurrent reqs of average load: {self.avg_req_load} max load: {self.max_req_load}")
-            sys.stdout.flush()
+            req_load = self.make_batch_tgi(batch_num) if self.backend_name == "tgi" else self.make_batch(batch_num)
+            self.track_batch(req_load, batch_num, batches)
             
-            time_elapsed, total_latency, total_genload, num_reqs_completed = self.send_batch(req_load)
-            throughput = total_genload / time_elapsed
-            avg_latency = total_latency / num_reqs_completed if num_reqs_completed != 0 else 0.0
-
-            print(f"{datetime.datetime.now()} batch: {batch_num} took: {time_elapsed} ... throughput: {throughput} (load / s), avg_latency: {avg_latency} (seconds), num_reqs: {num_reqs}, num_reqs_completed: {num_reqs_completed}")
-            sys.stdout.flush()
-            batches.append((throughput, avg_latency, num_reqs, num_reqs_completed))
-
         throughput, avg_latency, num_reqs, num_reqs_completed =  tuple((sum(series) / num_batches) for series in zip(*batches))
         if num_reqs != num_reqs_completed:
             print(f"{datetime.datetime.now()} only {num_reqs_completed} reqs completed out of {num_reqs} reqs started")
@@ -186,3 +201,4 @@ class ModelPerfTest:
         success = ((num_reqs_completed / num_reqs) > 0.75)
 
         return success, throughput, avg_latency
+        
