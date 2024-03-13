@@ -84,6 +84,7 @@ def num_words_to_num_tokens(num_words):
     return int(num_words * TOKENS_PER_WORD)
 
 def get_tgi_output_cost(response):
+    print(f"response: {response}")
     if "generated_text" in response.keys():
         text = response["generated_text"]
         print(f"text: {text}")
