@@ -100,6 +100,7 @@ class ModelPerfTest:
     
     def prompt_model(self, input_load, output_load):
         prompt = make_random_prompt(input_load)
+        print(f"using prompt: {prompt} of load {input_load}")
         model_request = {}
         payload_dict[self.backend_name](model_request, prompt, output_load)
 
