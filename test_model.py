@@ -86,13 +86,9 @@ def num_words_to_num_tokens(num_words):
 
 def get_tgi_output_cost(response):
     resp_json = json.loads(response)
-    print(f"response: {resp_json}, type: {type(resp_json)}")
     if "generated_text" in resp_json.keys():
-        # text = resp_json["generated_text"]
-        # print(f"text: {text}")
-        # print(f"split: {text.split()}")
         length = len(resp_json["generated_text"].split())
-        print(f"len: {length}")
+        # print(f"len: {length}")
         return num_words_to_num_tokens(length)
     else:
         return 0
@@ -131,13 +127,11 @@ class ModelPerfTest:
         genload = 0
         if (rcode == 200):
             if self.backend_name == "tgi":
-                print("get cost")
                 genload = input_cost + get_tgi_output_cost(response)
-                print("got cost")
             else:
                 genload = input_cost + output_cost
 
-        print(f"req took time {time}")
+        # print(f"req took time {time}")
         return rcode, time, genload
 
     def send_batch(self, req_load):
