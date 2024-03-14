@@ -113,12 +113,12 @@ class ModelPerfTest:
     
     def prompt_model(self, input_cost, output_cost):
         prompt = make_random_prompt(input_cost)
-        print(f"using prompt of cost {input_cost}")
+        # print(f"using prompt of cost {input_cost}")
         model_request = {}
         payload_dict[self.backend_name](model_request, prompt, output_cost)
 
         rcode, response, time = self.backend.generate(model_request, metrics=False)
-        print(f"recieved rcode {rcode}")
+        # print(f"recieved rcode {rcode}")
         if (rcode != 200):
             print(f"{datetime.datetime.now()} prompt_model with payload: {model_request} returned {rcode}!")
         
