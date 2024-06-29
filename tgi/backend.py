@@ -1,4 +1,6 @@
 import requests
+import datetime
+
 from flask import Response, abort
 import sys
 
@@ -51,7 +53,7 @@ class Backend(GenericBackend):
 # Can move these functions into the TGIBackend class I think
 
 def generate_handler(backend, request):
-
+    print(f'{datetime.datetime.now()} [tgi/backend.py] generate_handler(..)')
     auth_dict, model_dict = backend.format_request(request.json)
     if auth_dict:
         if not backend.check_signature(**auth_dict):

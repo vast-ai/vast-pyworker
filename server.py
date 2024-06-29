@@ -24,6 +24,8 @@ backend = backend_class(container_id=container_id, master_token=master_token, co
 
 @app.route('/<path:endpoint>', methods=['GET', 'POST', 'PUT', 'DELETE'])
 def handler(endpoint):
+    print(f'{datetime.datetime.now()} [server.py] handler({endpoint})')
+
     global backend
     if (request.method not in flask_dict.keys()) or (endpoint not in flask_dict[request.method].keys()):
         abort(404)
