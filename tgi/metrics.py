@@ -39,7 +39,8 @@ class Metrics(GenericMetrics):
         elapsed = ntime - self.fill_data_lut
         if (self.fill_data_lut == 0.0):
             elapsed = 1.0
-        self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored) / elapsed
+        #self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored) / elapsed
+        self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored)
         data["cur_load"] = self.cur_load
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
@@ -50,7 +51,8 @@ class Metrics(GenericMetrics):
         self.num_requests_recieved += 1
         self.num_requests_working += 1
         
-        num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
+        #num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
+        num_prompt_tokens = len(text_prompt) / 4.0
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working += num_req_tokens_started
         self.num_tokens_incoming += num_req_tokens_started
@@ -68,7 +70,8 @@ class Metrics(GenericMetrics):
         self.num_requests_recieved -= 1
         self.num_requests_working -= 1
         if code is None or code != 422: #this means client side issue, so don't fault server
-            num_prompt_tokens = len(text_prompt.split())
+            #num_prompt_tokens = len(text_prompt.split())
+            num_prompt_tokens = len(text_prompt) / 4.0
             num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
             self.num_tokens_working -= num_req_tokens_started
             self.num_tokens_incoming -= num_req_tokens_started
@@ -88,7 +91,8 @@ class Metrics(GenericMetrics):
         self.num_requests_finished += 1
         self.num_requests_working -= 1
 
-        num_prompt_tokens = len(text_prompt.split())
+        #num_prompt_tokens = len(text_prompt.split())
+        num_prompt_tokens = len(text_prompt) / 4.0
         num_req_tokens_finished = num_prompt_tokens + parameters["max_new_tokens"]
         self.num_tokens_working -= num_req_tokens_finished
         self.num_tokens_finished += num_req_tokens_finished
