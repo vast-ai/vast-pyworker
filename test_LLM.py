@@ -5,7 +5,7 @@ import json
 import time
 import random
 
-MAX_WORKERS = 500
+MAX_WORKERS = 256
 
 def decode_line(line):
     payload = line.decode("utf-8")
@@ -154,14 +154,15 @@ def auth_worker(args, server_address, api_key, prompt_input):
 
 def main():
     parser = argparse.ArgumentParser(description="Test inference endpoint")
-    parser.add_argument("server_address", help="Main server address")
     parser.add_argument("api_key", help="API Key")
     parser.add_argument("endpoint_name", type=str, help="The name of the autoscaling group endpoint")
     parser.add_argument("prompt_input", help="Prompt input for /generate endpoint")
     parser.add_argument("N", type=int, help="Number of tasks")
+    parser.add_argument("--server_address", help="Main server address", default="https://run.vast.ai")
     parser.add_argument("--use_auth", action="store_true", help="Whether to provide crypto message and signature to worker endpoint")
     parser.add_argument("--generate_stream", action="store_true", help="Whether to generate a streaming request or not")
     parser.add_argument("--worker_addr", help="worker address override", default=None)
+    parser.add_argument("--rps", help="requests per second", default=1)
     parser.add_argument("--backend", help="Name of backend in use on worker server", default="TGI")
     args = parser.parse_args()
 
@@ -175,7 +176,7 @@ def main():
 
             futures.append(future)
         
-        time.sleep(0.20)
+            time.sleep(1.0 / args.rps)
 
     for future in futures:
         future.result()

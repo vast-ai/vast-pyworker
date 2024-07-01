@@ -40,8 +40,9 @@ class Metrics(GenericMetrics):
         if (self.fill_data_lut == 0.0):
             elapsed = 1.0
         #self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored) / elapsed
-        self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored)
+        #self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored)
         data["cur_load"] = self.cur_load
+        self.cur_load = 0
         self.fill_data_lut = ntime
         self.num_tokens_incoming = 0
         self.num_tokens_errored = 0
@@ -54,6 +55,7 @@ class Metrics(GenericMetrics):
         #num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         num_prompt_tokens = len(text_prompt) / 4.0
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
+        self.cur_load += num_req_tokens_started
         self.num_tokens_working += num_req_tokens_started
         self.num_tokens_incoming += num_req_tokens_started
         self.total_prompt_tokens += num_prompt_tokens
