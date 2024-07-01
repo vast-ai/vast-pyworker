@@ -1,5 +1,6 @@
 import time
 import random
+import datetime
 
 from metrics import GenericMetrics
 
@@ -41,6 +42,9 @@ class Metrics(GenericMetrics):
             elapsed = 1.0
         #self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored) / elapsed
         #self.cur_load = (self.num_tokens_incoming + self.num_tokens_errored)
+
+        print(f"{datetime.datetime.now()} tgi/metrics.py fill_data cur_load: {self.cur_load} -> 0")
+
         data["cur_load"] = self.cur_load
         self.cur_load = 0
         self.fill_data_lut = ntime
@@ -55,12 +59,15 @@ class Metrics(GenericMetrics):
         #num_prompt_tokens = len(text_prompt.split()) #estimate, and could switch to faster option if necessary
         num_prompt_tokens = len(text_prompt) / 4.0
         num_req_tokens_started = num_prompt_tokens + parameters["max_new_tokens"]
+        cur_load = self.cur_load
         self.cur_load += num_req_tokens_started
         self.num_tokens_working += num_req_tokens_started
         self.num_tokens_incoming += num_req_tokens_started
         self.total_prompt_tokens += num_prompt_tokens
         # self.cur_perf = self.num_requests_working * self.curr_tokens_per_second 
-    
+
+        print(f"{datetime.datetime.now()} tgi/metrics.py _start_req cur_load: {self.cur_load} = {cur_load} + {num_req_tokens_started}")
+
     def start_req(self, request):
         if request is None:
             print("metrics starting null request")

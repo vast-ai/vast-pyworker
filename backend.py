@@ -69,6 +69,7 @@ class GenericBackend():
                 return 200, response_func(response), t2 - t1
             else:
                 ret_code = response.status_code
+                print(f"[backend] Request ret_code: {ret_code}")
         
         except requests.exceptions.RequestException as e:
             ret_code = 500
