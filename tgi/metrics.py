@@ -1,6 +1,7 @@
 import time
 import random
 import datetime
+import os
 
 from metrics import GenericMetrics
 
@@ -28,6 +29,9 @@ class Metrics(GenericMetrics):
     
     def fill_data(self, data):
         self.fill_data_generic(data)
+        public_ippadr = os.environ.get("PUBLIC_IPADDR","")
+        api_port = os.environ.get("VAST_TCP_PORT_3000",0) # port 3000 specific to TGI?
+        data["url"] = f"http://{public_ippadr}:{api_port}"
 
         data["cur_capacity"] = self.num_tokens_working
         data["max_capacity"] = self.batch_capacity
