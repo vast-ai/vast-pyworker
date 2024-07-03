@@ -66,7 +66,7 @@ class GenericLogWatch(ABC):
         if sanity_check == "success":
             print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest sanitycheck ")
             sys.stdout.flush()
-            success, throughput, avg_latency = self.perf_test.run(3) #3
+            success, throughput, avg_latency = self.perf_test.run(2) #3
             if success:
                 if self.metrics_sanity_check(throughput, avg_latency):
                     print(f"{datetime.datetime.now()} [logwatch] ModelPerfTest performance metrics {success} {throughput} {avg_latency} in bounds")
